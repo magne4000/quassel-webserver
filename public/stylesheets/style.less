@@ -1,0 +1,396 @@
+@import "globals";
+@import "bootstrap-overrides";
+
+body {
+    background-color: #EAEAF8;
+    font-size: 16px;
+    font-family: "Roboto";
+    font-weight: 200;
+}
+
+html,body,.container {
+    height:100%;
+}
+
+.container-fluid.table {
+    display:table;
+    width: 100%;
+    padding: 0;
+    height: ~"calc(100% - 48px)";
+    .box-sizing(border-box);
+    margin-bottom: 0;
+    
+    &:before {
+    	content: none;
+    }
+    
+    &:after {
+    	content: none;
+    }
+}
+
+.table .row {
+    height: 100%;
+    display: table-row;
+    
+    &:before {
+    	content: none;
+    }
+    
+    &:after {
+    	content: none;
+    }
+}
+
+.table .col-md-1, .table .col-md-2, .table .col-md-3, .table .col-md-4, .table .col-md-5, .table .col-md-6,
+.table .col-md-7, .table .col-md-8, .table .col-md-9, .table .col-md-10, .table .col-md-11, .table .col-md-12, .table .col-md-0 {
+	padding-left: 0;
+	padding-right: 0;
+    display: table-cell;
+    float: none;
+}
+
+.table .col-md-0 {
+	min-width: 32px;
+	width: 1%;
+}
+
+#container {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.logged {
+	position: absolute;
+	top: @header-height;
+	bottom: 0;
+	.wide;
+}
+
+#buffer-pane {
+    background-color: #39383E;
+    color: @text-color;
+    position: relative;
+}
+
+.buffer-container {
+	overflow: auto;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	bottom: @box-height;
+}
+
+.animation, .animation .network, .animation .network-channels {
+    .transition(all 0.5s ease-in-out);
+}
+
+.buffer-container  {
+    .transition(opacity 0.5s linear);
+}
+
+#nick-pane {
+    background-color: #39383E;
+    color: @text-color;overflow: auto;
+    position: relative;
+}
+
+#center {
+    font-size: 15px;
+    height: 100%;
+	position: relative;
+}
+
+#topic {
+    height: 32px;
+    line-height: 32px;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+    padding-left: 4px;
+    padding-right: 4px;
+    background-color: white;
+}
+
+#header {
+    background-color: @brand-primary;
+    height: @header-height;
+    line-height: @header-height;
+    color: @text-color;
+    position: absolute;
+	top: 0;
+	.wide;
+    .transition(background-color 0.5s linear);
+}
+
+.network, .channel, .user, .user-group {
+    height: 32px;
+    display: block;
+    cursor: default;
+
+    &:hover {
+        background-color: darken(@pane-color, 5);
+    }
+}
+
+.network-name, .group-name {
+    height: 32px;
+    display: inline-block;
+    line-height: 32px;
+    opacity: 0.75;
+    font-family: "Roboto Condensed";
+    text-transform: uppercase;
+    float: left;
+}
+
+.collapsed, .expanded {
+    .icon;
+    display: inline-block;
+    float: left;
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.expanded {
+	background-image: url(/images/expander-expanded.png);
+}
+
+.collapsed {
+    background-image: url(/images/expander-collapsed.png);
+}
+
+.user-icon {
+    .icon;
+    display: inline-block;
+    float: left;
+}
+
+.active {
+    background-color: black;
+    font-weight: normal;
+}
+
+.active .channel-name {
+    opacity: 1;
+}
+
+.user-icon-active {
+    background-image: url(/images/icon-active.png)
+}
+
+.user-icon-away {
+    background-image: url(/images/icon-away.png)
+}
+
+.user-name {
+    height: 32px;
+    display: inline-block;
+    line-height: 32px;
+    opacity: 0.75;
+}
+
+.channel-icon {
+    .icon;
+    display: inline-block;
+    float: left;
+}
+
+.channel-name {
+    height: 32px;
+    display: inline-block;
+    line-height: 32px;
+    opacity: 0.75;
+}
+
+.buffer-bottom-bar {
+    min-height: 32px;
+    background-color: darken(@pane-color, 5);
+    display: inline-block;
+    bottom: 0;
+	position: absolute;
+    width: 100%;
+}
+
+.showhide {
+    width: 32px;
+    height: 32px;
+    display: block;
+    position: absolute;
+    cursor: pointer;
+    opacity: 0.5;
+
+    &:hover {
+        opacity: 1;
+        background-color: darken(@pane-color, 8);
+    }
+}
+
+.showhide.left {
+	left: 0;
+}
+
+.showhide.right {
+	right: 0;
+}
+
+#hide-nicks, #show-buffers {
+	background-image: url(/images/hide-pane-right.png);
+}
+
+#show-nicks, #hide-buffers {
+    background-image: url(/images/hide-pane-left.png);
+}
+
+.network-channels, .group-users {
+    display: block;
+    overflow: hidden;
+}
+
+.quassel-logo {
+    width: 24px;
+    height: 24px;
+    margin-left: 12px;
+    margin-right: 8px;
+    vertical-align: text-bottom;
+    display: inline-block;
+    background-image: url(/images/quassel-logo.png);
+}
+
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
+.connecting .quassel-logo {
+	.animation(spin 1s linear infinite);
+}
+
+.add-channel {
+    .icon;
+    opacity: 0.5;
+    display: inline-block;
+    background-image: url(/images/add-channel.png);
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.input {
+	overflow-y: hidden;
+	position: absolute;
+	bottom: 0;
+	.wide;
+}
+
+.input input {
+    width: 100%;
+    border: 0;
+    height: @box-height;
+    padding-left: 8px;
+    outline: none;
+}
+
+#backlog-container {
+    overflow: auto;
+    top: @box-height;
+	bottom: 0;
+	.wide;
+	position: absolute;
+}
+
+ul.backlog {
+    margin: 0;
+    padding: 4px;
+    border-spacing: 0;
+    position: absolute;
+	top: 0;
+	overflow: auto;
+	.wide;
+	bottom: @box-height;
+}
+
+.backlog li {
+    display: table-row;
+}
+
+.backlog .timestamp {
+    padding-right: 8px;
+    font-family: "Droid Sans Mono", monospace;
+    font-size: 14px;
+    display: table-cell;
+    opacity: 0.5;
+}
+
+.backlog .nick {
+    padding-right: 8px;
+    font-weight: 400;
+    display: table-cell;
+}
+
+.backlog .message {
+    display: table-cell;
+}
+
+.login-page {
+    background-color: @pane-color;
+}
+
+.login-container {
+    background-color: white;
+    padding: 16px;
+    margin: 16px;
+    margin-top: 64px;
+    .border-radius;
+
+    h1 {
+        font-size: 20px;
+        margin-top: 0;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+.connecting #header {
+	background-color: @brand-warning;
+}
+
+.disconnected #header {
+	background-color: @brand-danger;
+}
+
+.connecting #header:after {
+	content: 'Connecting';
+	background-color: @state-warning-bg;
+	border-color: @state-warning-border;
+	color: @state-warning-text;
+	.status;
+}
+
+.disconnected #header:after {
+	content: 'Disconnected';
+	background-color: @state-danger-bg;
+	border-color: @state-danger-border;
+	color: @state-danger-text;
+	.status;
+}
+
+.logout, .reconnect {
+	float: right;
+	margin: 8px;
+}
+
+
+
+.reconnect, .login-page .logout {
+	display: none;
+}
+
+.connecting .reconnect, .disconnected .logout {
+	display: none;
+}
+
+.disconnected .reconnect {
+	display: block;
+}

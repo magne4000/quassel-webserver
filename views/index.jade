@@ -1,0 +1,92 @@
+extends layout
+
+block body
+    body.login-page
+      #container
+        #header
+          span.quassel-logo
+          | Quassel Web App
+          button.btn.btn-default.logout(type="button") Logout
+          button.btn.btn-default.reconnect(type="button") Reconnect
+        .container.login
+          .row
+            .col-md-3
+            .col-md-6.row.login-container
+                .alert.alert-warning.alert-dismissible.hidden(role="alert")
+                  button.close(type="button", data-dismiss="alert")
+                    span(aria-hidden="true") &times;
+                    span.sr-only Close
+                  span.alert-text
+                form#logonform(role='form', action='/interface')
+                  h1 Connect to Quassel Core
+                  .form-group
+                    label(for='host') Server address
+                    input#host.form-control(type='text')
+                  .form-group
+                    label(for='server') Server port
+                    input#port.form-control(type='text', value='4242')
+                  .form-group
+                    label(for='user') User name
+                    input#user.form-control(type='text')
+                  .form-group
+                    label(for='password') Password
+                    input#password.form-control(type='password')
+                  button.btn.btn-primary(type='submit') Connect
+            .col-md-3
+        
+        .logged.hidden.container-fluid.table
+          .row
+            #buffer-pane.animation.col-md-2
+              .buffer-container
+              .buffer-bottom-bar
+                a#hide-buffers.showhide.right
+                a#show-buffers.showhide.right(style='display: none;')
+            #center.animation
+              #topic
+              #backlog-container
+                ul.backlog
+                .input
+                  form#messageform
+                    input#messagebox(type='text', placeholder='Enter your message here')
+            #nick-pane.animation.col-md-2
+              .buffer-container
+                .user-group
+                  span.expanded(data-target='users-operator')
+                  span.group-name operators
+                #users-operator.group-users.clearfix
+                .user-group
+                  span.expanded(data-target='users-voiced')
+                  span.group-name voiced
+                #users-voiced.group-users.clearfix
+                .user-group
+                  span.expanded(data-target='users-user')
+                  span.group-name users
+                #users-user.group-users.clearfix
+              .buffer-bottom-bar
+                a#hide-nicks.showhide.left
+                a#show-nicks.showhide.left(style='display: none;')
+            // Modal 
+            #modal-join-channel.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
+              .modal-dialog
+                .modal-content
+                  .modal-header
+                    button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                    h4#myModalLabel.modal-title
+                      | Join a channel on
+                      span#join-network-name {network name}
+                  .modal-body
+                    form
+                      .form-group
+                        input#modal-join-channel-name.form-control(type='text', placeholder='Enter channel name')
+                  .modal-footer
+                    button.btn.btn-default(type='button', data-dismiss='modal') Cancel
+                    button.btn.btn-primary(type='button') Join channel
+
+      script(src='/javascripts/jquery-1.11.1.min.js')
+      script(src='/javascripts/bootstrap.min.js')
+      script(src='/socket.io/socket.io.js')
+      script(src='/javascripts/libquassel.js')
+      script(src='/javascripts/json-patch.js')
+      script(src='/javascripts/events.js')
+      script(src='/javascripts/views.js')
+      script(src='/javascripts/script.js')
