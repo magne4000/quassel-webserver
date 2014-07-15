@@ -1,5 +1,56 @@
-var Views = {};
-Views.utils = {};
+var MT = require('messagetype');
+var Views = {utils: {}};
+
+Views._decorator = {sender: {}, content: {}};
+//Views._decorator.sender[MT.Notice] = '';
+//Views._decorator.sender[MT.Action] = '';
+Views._decorator.sender[MT.Nick] = '<->';
+Views._decorator.sender[MT.Mode] = '***';
+Views._decorator.sender[MT.Join] = '-->';
+Views._decorator.sender[MT.Part] = '<--';
+Views._decorator.sender[MT.Quit] = '<--';
+Views._decorator.sender[MT.Kick] = '<-*';
+//Views._decorator.sender[MT.Kill] = '';
+//Views._decorator.sender[MT.Server] = '';
+//Views._decorator.sender[MT.Info] = '';
+//Views._decorator.sender[MT.Error] = '';
+//Views._decorator.sender[MT.DayChange] = '-';
+Views._decorator.sender[MT.Topic] = '*';
+Views._decorator.sender[MT.NetsplitJoin] = '=>';
+Views._decorator.sender[MT.NetsplitQuit] = '<=';
+//Views._decorator.sender[MT.Invite] = '';
+
+//Views._decorator.content[MT.Notice] = '';
+//Views._decorator.content[MT.Action] = '';
+Views._decorator.content[MT.Nick] = function(nick, content) {
+	// TODO old nick
+	return Views.utils.stripnick(nick) + " is now known as " + content;
+};
+Views._decorator.content[MT.Mode] = function(nick, content) {
+	return "Mode " + content + " by " + Views.utils.stripnick(nick);
+};
+Views._decorator.content[MT.Join] = function(nick, content) {
+	return Views.utils.stripnick(nick) + " has joined";
+};
+Views._decorator.content[MT.Part] = function(nick, content) {
+	return Views.utils.stripnick(nick) + " has left";
+};
+Views._decorator.content[MT.Quit] = function(nick, content) {
+	return Views.utils.stripnick(nick) + " has quit";
+};
+Views._decorator.content[MT.Kick] = function(nick, content) {
+	var ind = content.indexOf(" ");
+	return Views.utils.stripnick(nick) + " has kicked " + content.slice(0, ind) + " (" + content.slice(ind+1) + ")";
+};
+//Views._decorator.content[MT.Kill] = '';
+//Views._decorator.content[MT.Server] = '';
+//Views._decorator.content[MT.Info] = '';
+//Views._decorator.content[MT.Error] = '';
+//Views._decorator.content[MT.DayChange] = '-';
+//Views._decorator.content[MT.Topic] = ''; // as is
+//Views._decorator.content[MT.NetsplitJoin] = ''; // as is
+//Views._decorator.content[MT.NetsplitQuit] = '<='; // as is
+//Views._decorator.content[MT.Invite] = '';
 
 var tagsToReplace = {
 	'&': '&amp;',
@@ -69,17 +120,30 @@ Views._buffer = function(bufferId, name) {
 	'</div>';
 };
 
-Views._bufferline = function(datetime, sender, content) {
-	return '<li class="irc-message">'+
+Views._bufferline = function(type, datetime, sender, content) {
+	return '<li class="irc-message type-'+type+'">'+
 	'<span class="timestamp"> '+Views.utils.HHmmss(datetime)+'</span>'+
 	'<span class="nick">'+Views.utils.escapetags(Views.utils.stripnick(sender))+'</span>'+
 	'<span class="message">'+Views.utils.escapetags(content)+'</span></li>';
 };
 
 Views._userline = function(nick) {
-	return '<div class="user">'+
+	return '<div class="user" data-nick="'+nick+'">'+
 	'<span class="user-icon user-icon-active"></span>'+
 	'<span class="user-name">'+Views.utils.escapetags(nick)+'</span></div>';
+};
+
+Views.decorateSender = function(type, sender) {
+	var dec = Views._decorator.sender[type];
+	if (typeof dec === 'string') return dec;
+	return sender;
+};
+
+Views.decorateContent = function(type, sender, content) {
+	var dec = Views._decorator.content[type];
+	if (typeof dec === 'string') return dec;
+	if (typeof dec === 'function') return dec(sender, content);
+	return content;
 };
 
 Views.clearUsers = function() {
@@ -97,6 +161,10 @@ Views.addUser = function(buffer, user) {
 	}
 };
 
+Views.removeUser = function(buffer, nick) {
+	$('.group-users [data-nick="'+nick+'"]').remove();
+};
+
 Views.addNetwork = function(name) {
 	$('#buffer-pane .buffer-container').append(Views._network(name));
 };
@@ -109,14 +177,24 @@ Views.setStatusBuffer = function(networkname, bufferId) {
 	$('#network-'+networkname+' .network-name').data("bufferId", bufferId);
 };
 
-Views.addMessage = function(datetime, sender, content) {
-	$(".backlog").append(Views._bufferline(datetime, sender, content));
+Views.getMessage = function(message) {
+	var sender = Views.decorateSender(message.type, message.sender);
+	var content = Views.decorateContent(message.type, message.sender, message.content);
+	return Views._bufferline(message.type, message.datetime, sender, content);
+};
+
+Views.addMessage = function(message) {
+	$(".backlog").append(Views.getMessage(message));
+};
+
+Views.isBufferShown = function(bufferId) {
+	return $(".backlog").data('currentBufferId') == bufferId;
 };
 
 Views.showBuffer = function(buffer) {
 	var backlogs = [];
 	buffer.messages.forEach(function(val, key) {
-		backlogs.push(Views._bufferline(val.datetime, val.sender, val.content));
+		backlogs.push(Views.getMessage(val));
 	}, function(a, b) {
 		return a.id - b.id;
 	});

@@ -325,6 +325,7 @@ ul.backlog {
     padding-right: 8px;
     font-weight: 400;
     display: table-cell;
+    text-align: right;
 }
 
 .backlog .message {
@@ -381,8 +382,6 @@ ul.backlog {
 	margin: 8px;
 }
 
-
-
 .reconnect, .login-page .logout {
 	display: none;
 }
@@ -394,3 +393,41 @@ ul.backlog {
 .disconnected .reconnect {
 	display: block;
 }
+
+// Message styles
+// Plain
+.type-1 {}
+// Notice
+.type-2 { .nick,.message {color: #916409;}}
+// Action
+.type-4 { .nick,.message {color: #0000ff;}}
+// Nick
+.type-8 { .nick,.message {color: #000088;}}
+// Mode
+.type-16 { .nick,.message {color: #ff7700;}}
+// Join
+.type-32 { .nick,.message {color: #009600;}}
+// Part
+.type-64 { .nick,.message {color: #990000;}}
+// Quit
+.type-128 { .nick,.message {color: #990000;}}
+// Kick
+.type-256 { .nick,.message {color: #990000;}}
+// Kill
+.type-512 { .nick,.message {color: #990000;}}
+// Server
+.type-1024 { .nick,.message {color: #916409;}}
+// Info
+.type-2048 { .nick,.message {color: #916409;}}
+// Error
+.type-4096 { .nick,.message {color: #916409;}}
+// DayChange
+.type-8192 { .nick,.message {color: #ff0000;}}
+// Topic
+.type-16384 { .nick,.message {color: #ff7700;}}
+// NetsplitJoin
+.type-32768 { .nick,.message {color: #960096;}}
+// NetsplitQuit
+.type-65536 { .nick,.message {color: #960096;}}
+// Invite
+.type-131072 { .nick,.message {color: #960096;}}

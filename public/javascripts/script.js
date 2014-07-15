@@ -15,10 +15,11 @@ var er = null;
 var changesTimeout;
 
 function addMessage(bufferId, messageId) {
-	if ($(".backlog").data('currentBufferId') == bufferId) {
+	if (Views.isBufferShown(bufferId)) {
 		var buffer = networks.findBuffer(bufferId);
 		var message = buffer.messages.get(parseInt(messageId, 10));
-		Views.addMessage(message.datetime, message.sender, message.content);
+		console.log(message);
+		Views.addMessage(message);
 	}
 }
 
@@ -148,6 +149,26 @@ er.on('buffer.hidden', function(next, bufferId, type) {
 	Views.hideBuffer(bufferId);
 	next();
 }).after('network.addbuffer');
+
+er.on('channel.join', function(next, bufferId, nick) {
+	if (Views.isBufferShown(bufferId)) {
+		var buffer = networks.findBuffer(bufferId);
+		var user = networks.get(buffer.network).getUserByNick(nick);
+		Views.addUser(buffer, user);
+	}
+	next();
+});
+
+er.on('user.part', function(next, networkId, nick, bufferName) {
+	var network = networks.get(networkId);
+	var buffer = network.getBuffer(bufferName);
+	if (Views.isBufferShown(buffer.id)) {
+		Views.removeUser(buffer, nick);
+	}
+	next();
+});
+
+//Socket.io events
 
 socket.on('disconnect', function() {
 	console.log('DISCONNECT');
