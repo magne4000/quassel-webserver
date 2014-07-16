@@ -31,7 +31,7 @@ block body
                   .form-group
                     label(for='password') Password
                     input#password.form-control(type='password')
-                  button.btn.btn-primary(type='submit') Connect
+                  button.btn.btn-primary.btn-connect(type='submit', disabled='disabled') Connect
             .col-md-3
         
         .logged.hidden.container-fluid.table
@@ -85,6 +85,7 @@ block body
       script(src='/javascripts/jquery-1.11.1.min.js')
       script(src='/javascripts/bootstrap.min.js')
       script(src='/socket.io/socket.io.js')
+      script(src='/javascripts/autolinker.min.js')
       script(src='/javascripts/libquassel.js')
       script(src='/javascripts/json-patch.js')
       script(src='/javascripts/events.js')

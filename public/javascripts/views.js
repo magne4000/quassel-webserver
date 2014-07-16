@@ -1,5 +1,6 @@
-var MT = require('messagetype');
+var MT = require('message').Type;
 var Views = {utils: {}};
+var bufferOrders = [];
 
 Views._decorator = {sender: {}, content: {}};
 //Views._decorator.sender[MT.Notice] = '';
@@ -11,7 +12,9 @@ Views._decorator.sender[MT.Part] = '<--';
 Views._decorator.sender[MT.Quit] = '<--';
 Views._decorator.sender[MT.Kick] = '<-*';
 //Views._decorator.sender[MT.Kill] = '';
-//Views._decorator.sender[MT.Server] = '';
+Views._decorator.sender[MT.Server] = function(nick) {
+	return nick || "*";
+};
 //Views._decorator.sender[MT.Info] = '';
 //Views._decorator.sender[MT.Error] = '';
 //Views._decorator.sender[MT.DayChange] = '-';
@@ -23,7 +26,6 @@ Views._decorator.sender[MT.NetsplitQuit] = '<=';
 //Views._decorator.content[MT.Notice] = '';
 //Views._decorator.content[MT.Action] = '';
 Views._decorator.content[MT.Nick] = function(nick, content) {
-	// TODO old nick
 	return Views.utils.stripnick(nick) + " is now known as " + content;
 };
 Views._decorator.content[MT.Mode] = function(nick, content) {
@@ -60,6 +62,13 @@ var tagsToReplace = {
 	'\'': '&#x27;',
 	'/': '&#x2F;'
 }, re = /[&<>]/g;
+
+Views.utils.makeLinks = function(str) {
+	if (!str) return null;
+	return str.replace(re, function (tag) {
+		return tagsToReplace[tag] || tag;
+	});
+};
 
 Views.utils.escapetags = function(str) {
 	if (!str) return null;
@@ -121,10 +130,14 @@ Views._buffer = function(bufferId, name) {
 };
 
 Views._bufferline = function(type, datetime, sender, content) {
+	var htmlcontent = Views.utils.escapetags(content);
+	if (type == MT.Plain) {
+		htmlcontent = Autolinker.link(htmlcontent, {stripPrefix: false, email: false, twitter: false});
+	}
 	return '<li class="irc-message type-'+type+'">'+
 	'<span class="timestamp"> '+Views.utils.HHmmss(datetime)+'</span>'+
 	'<span class="nick">'+Views.utils.escapetags(Views.utils.stripnick(sender))+'</span>'+
-	'<span class="message">'+Views.utils.escapetags(content)+'</span></li>';
+	'<span class="message">'+htmlcontent+'</span></li>';
 };
 
 Views._userline = function(nick) {
@@ -136,6 +149,7 @@ Views._userline = function(nick) {
 Views.decorateSender = function(type, sender) {
 	var dec = Views._decorator.sender[type];
 	if (typeof dec === 'string') return dec;
+	if (typeof dec === 'function') return dec(sender);
 	return sender;
 };
 
@@ -173,8 +187,25 @@ Views.addBuffer = function(networkname, bufferId, name) {
 	$('#'+networkname+'-channels').append(Views._buffer(bufferId, name));
 };
 
+Views.setBufferOrder = function(bufferId, order) {
+	$('.channel[data-buffer-id="'+bufferId+'"]').data('order', parseInt(order, 10));
+};
+
+Views.sortBuffers = function() {
+	// Sort channels
+	$(".network-channels").each(function (){
+		var channels = $(this).children(".channel");
+		channels.sort(function (a, b) {
+			var orderA = $(a).data('order');
+			var orderB = $(b).data('order');
+			return (orderA < orderB) ? -1 : (orderA > orderB) ? 1 : 0;
+		});
+		channels.detach().appendTo($(this));
+	});
+};
+
 Views.setStatusBuffer = function(networkname, bufferId) {
-	$('#network-'+networkname+' .network-name').data("bufferId", bufferId);
+	$('#network-'+networkname+' .network-name').attr("data-buffer-id", bufferId);
 };
 
 Views.getMessage = function(message) {
@@ -261,11 +292,13 @@ Views.connecting = function()  {
 Views.connected = function()  {
 	$("body").removeClass("disconnected connecting");
 	$("#messagebox").removeAttr("disabled");
+	$(".btn-connect").removeAttr("disabled");
 };
 
 Views.disconnected = function() {
 	$("body").removeClass("connecting").addClass("disconnected");
 	$("#messagebox").attr("disabled", "disabled");
+	$(".btn-connect").attr("disabled", "disabled");
 };
 
 Views.clear = function() {

@@ -160,6 +160,7 @@ EventReceiver.definition = {
 	'buffer.message': ["bufferId", "messageId"],
 	'buffer.backlog': ["bufferId"],
 	'buffer.hidden': ["bufferId", "hiddenType"],
+	'buffer.order': ["bufferId", "order"],
 	'user.part': ["networkId", "nick", "bufferName"],
 	'user.quit': ["networkId", "nick"],
 	'user.away': ["networkId", "nick", "isAway"],

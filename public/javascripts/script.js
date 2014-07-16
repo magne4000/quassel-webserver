@@ -5,14 +5,15 @@ var socket = io(undefined, {
 });
 var NetworkCollection = require('network').NetworkCollection;
 var Network = require('network').Network;
+var IRCMessage = require('message').IRCMessage;
 var IRCBufferCollection = require('buffer').IRCBufferCollection;
 var IRCBuffer = require('buffer').IRCBuffer;
 var IRCUser = require('user');
 var HashMap = require('serialized-hashmap');
 var Reviver = require('serializer').Reviver;
-var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap);
+var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap, IRCMessage);
 var er = null;
-var changesTimeout;
+var changesTimeout, buffersOrderTimeout;
 
 function addMessage(bufferId, messageId) {
 	if (Views.isBufferShown(bufferId)) {
@@ -105,6 +106,15 @@ er.on('network.addbuffer', function(next, networkId, bufferId) {
 	}
 	next();
 }).after('network.init');
+
+er.on('buffer.order', function(next, bufferId, order) {
+	console.log('buffer.order : '+bufferId+' : ' + order);
+	clearTimeout(buffersOrderTimeout);
+	Views.setBufferOrder(bufferId, order);
+	next();
+	
+	buffersOrderTimeout = setTimeout(Views.sortBuffers, 500);
+}).after('network.addbuffer');
 
 er.on('change', function(next, networkId, change) {
 	if (!jsonpatch.apply(networks.get(networkId), change)) {
