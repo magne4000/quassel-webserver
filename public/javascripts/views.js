@@ -181,28 +181,44 @@ Views.removeUser = function(buffer, nick) {
 };
 
 Views.addNetwork = function(name) {
-	$('#buffer-pane .buffer-container').append(Views._network(name));
+	var networkNames = $('.network'), names = [], networkIds = [], i = 0;
+	var html = Views._network(name);
+	var lowercaseName = name.toLowerCase(), spot = null;
+	networkNames.each(function(){
+		names.push($(this).children(".network-name").text().toLowerCase());
+		networkIds.push($(this).attr("id"));
+	});
+	for (; i<names.length && spot === null; i++) {
+		if (lowercaseName.localeCompare(names[i]) < 0) {
+			spot = i;
+		}
+	}
+	if (spot === null) {
+		$('#buffer-pane .buffer-container').append(html);
+	} else {
+		$("#"+networkIds[spot]).before(html);
+	}
 };
 
 Views.addBuffer = function(networkname, bufferId, name) {
-	$('#'+networkname+'-channels').append(Views._buffer(bufferId, name));
-};
-
-Views.setBufferOrder = function(bufferId, order) {
-	$('.channel[data-buffer-id="'+bufferId+'"]').data('order', parseInt(order, 10));
-};
-
-Views.sortBuffers = function() {
-	// Sort channels
-	$(".network-channels").each(function (){
-		var channels = $(this).children(".channel");
-		channels.sort(function (a, b) {
-			var orderA = $(a).data('order');
-			var orderB = $(b).data('order');
-			return (orderA < orderB) ? -1 : (orderA > orderB) ? 1 : 0;
-		});
-		channels.detach().appendTo($(this));
+	// Keep buffer ordered alphabetically
+	var channels = $('#'+networkname+'-channels .channel'), names = [], bufferIds = [], i = 0;
+	var html = Views._buffer(bufferId, name);
+	var lowercaseName = name.toLowerCase(), spot = null;
+	channels.each(function(){
+		names.push($(this).text().toLowerCase());
+		bufferIds.push(parseInt($(this).attr("data-buffer-id"), 10));
 	});
+	for (; i<names.length && spot === null; i++) {
+		if (lowercaseName.localeCompare(names[i]) < 0) {
+			spot = i;
+		}
+	}
+	if (spot === null) {
+		$('#'+networkname+'-channels').append(html);
+	} else {
+		$(".channel[data-buffer-id="+bufferIds[spot]+"]").before(html);
+	}
 };
 
 Views.setStatusBuffer = function(networkname, bufferId) {
@@ -212,7 +228,6 @@ Views.setStatusBuffer = function(networkname, bufferId) {
 Views.getMessage = function(message) {
 	var sender = Views.decorateSender(message.type, message.sender);
 	var content = Views.decorateContent(message.type, message.sender, message.content);
-	console.log(message);
 	return Views._bufferline(message.type, message.datetime, sender, content, message.isHighlighted());
 };
 

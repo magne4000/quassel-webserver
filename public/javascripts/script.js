@@ -107,14 +107,6 @@ er.on('network.addbuffer', function(next, networkId, bufferId) {
 	next();
 }).after('network.init');
 
-er.on('buffer.order', function(next, bufferId, order) {
-	clearTimeout(buffersOrderTimeout);
-	Views.setBufferOrder(bufferId, order);
-	next();
-	
-	buffersOrderTimeout = setTimeout(Views.sortBuffers, 500);
-}).after('network.addbuffer');
-
 er.on('change', function(next, networkId, change) {
 	if (!jsonpatch.apply(networks.get(networkId), change)) {
 		console.log('Patch failed!');
