@@ -13,7 +13,7 @@ var HashMap = require('serialized-hashmap');
 var Reviver = require('serializer').Reviver;
 var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap, IRCMessage);
 var er = null;
-var changesTimeout, buffersOrderTimeout;
+var changesTimeout = [], buffersOrderTimeout;
 
 function addMessage(bufferId, messageId) {
 	if (Views.isBufferShown(bufferId)) {
@@ -108,7 +108,6 @@ er.on('network.addbuffer', function(next, networkId, bufferId) {
 }).after('network.init');
 
 er.on('buffer.order', function(next, bufferId, order) {
-	console.log('buffer.order : '+bufferId+' : ' + order);
 	clearTimeout(buffersOrderTimeout);
 	Views.setBufferOrder(bufferId, order);
 	next();
@@ -121,24 +120,10 @@ er.on('change', function(next, networkId, change) {
 		console.log('Patch failed!');
 	}
 	else {
-		var hasObject = false;
-		if (change.length > 50) {
-			hasObject = true;
-		}
-		else {
-			for (var i = 0; i < change.length; i++) {
-				if (typeof change[i].value === "object" && change[i].value !== null) {
-					hasObject = true;
-					break;
-				}
-			}
-		}
-		if (hasObject) {
-			clearTimeout(changesTimeout);
-			changesTimeout = setTimeout(function() {
-				reviver.reviveAll(networks.get(networkId));
-			}, 100);
-		}
+		clearTimeout(changesTimeout[networkId]);
+		changesTimeout[networkId] = setTimeout(function() {
+			reviver.reviveAll(networks.get(networkId));
+		}, 100);
 	}
 	next();
 }).after('network.init');

@@ -129,12 +129,13 @@ Views._buffer = function(bufferId, name) {
 	'</div>';
 };
 
-Views._bufferline = function(type, datetime, sender, content) {
-	var htmlcontent = Views.utils.escapetags(content);
+Views._bufferline = function(type, datetime, sender, content, highlight) {
+	var htmlcontent = Views.utils.escapetags(content), classes = ["irc-message", "type-"+type];
 	if (type == MT.Plain) {
 		htmlcontent = Autolinker.link(htmlcontent, {stripPrefix: false, email: false, twitter: false});
 	}
-	return '<li class="irc-message type-'+type+'">'+
+	if (highlight) classes.push("highlighted");
+	return '<li class="'+classes.join(" ")+'">'+
 	'<span class="timestamp"> '+Views.utils.HHmmss(datetime)+'</span>'+
 	'<span class="nick">'+Views.utils.escapetags(Views.utils.stripnick(sender))+'</span>'+
 	'<span class="message">'+htmlcontent+'</span></li>';
@@ -211,7 +212,8 @@ Views.setStatusBuffer = function(networkname, bufferId) {
 Views.getMessage = function(message) {
 	var sender = Views.decorateSender(message.type, message.sender);
 	var content = Views.decorateContent(message.type, message.sender, message.content);
-	return Views._bufferline(message.type, message.datetime, sender, content);
+	console.log(message);
+	return Views._bufferline(message.type, message.datetime, sender, content, message.isHighlighted());
 };
 
 Views.addMessage = function(message) {

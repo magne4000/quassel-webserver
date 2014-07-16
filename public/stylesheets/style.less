@@ -307,6 +307,7 @@ ul.backlog {
 	overflow: auto;
 	.wide;
 	bottom: @box-height;
+	display: table;
 }
 
 .backlog li {
@@ -330,6 +331,11 @@ ul.backlog {
 
 .backlog .message {
     display: table-cell;
+    width: 100%;
+}
+
+.backlog .irc-message.highlighted {
+	background-color: @brand-warning;
 }
 
 .login-page {
