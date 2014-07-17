@@ -232,7 +232,9 @@ Views.getMessage = function(message) {
 };
 
 Views.addMessage = function(message) {
-	$(".backlog").append(Views.getMessage(message));
+	reviver.afterReviving(message, function(obj) {
+		$(".backlog").append(Views.getMessage(obj));
+	});
 };
 
 Views.isBufferShown = function(bufferId) {

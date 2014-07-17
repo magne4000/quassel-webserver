@@ -42,6 +42,6 @@
     "morgan": "~1.0.0",
     "observed": "^1.0.0",
     "serve-favicon": "~2.0.0",
-    "socket.io": "^1.0.0"
+    "socket.io": "<=1.0.5"
   }
 }

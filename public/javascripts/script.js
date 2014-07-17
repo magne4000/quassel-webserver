@@ -19,7 +19,6 @@ function addMessage(bufferId, messageId) {
 	if (Views.isBufferShown(bufferId)) {
 		var buffer = networks.findBuffer(bufferId);
 		var message = buffer.messages.get(parseInt(messageId, 10));
-		console.log(message);
 		Views.addMessage(message);
 	}
 }

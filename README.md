@@ -15,7 +15,7 @@ git clone https://github.com/magne4000/quassel-webserver.git
 cd quassel-webserver
 npm install --production
 ```
-or to update `npm update`
+or to update `git pull && npm update`
 
 and run the following command: `PORT=64004 node app.js`
 
