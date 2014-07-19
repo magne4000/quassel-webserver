@@ -243,4 +243,24 @@ $(document).ready(function() {
 		socket.emit('logout');
 		window.location.reload();
 	});
+	
+	$(".topic li").on("click", function(evt) {
+		evt.stopPropagation();
+	});
+	
+	$(".topic li a").on("click", function(evt) {
+		if (!$(evt.target).is("input")) {
+			var checked = $(this).children("input").is(':checked');
+			$(this).children("input").prop('checked', !checked).trigger("change");
+		}
+	});
+	
+	$(".topic li input").on("change", function(evt) {
+		var type = $(this).data("messageType");
+		if (!$(this).is(':checked')) {
+			Views.showMessageTypes(type);
+		} else {
+			Views.hideMessageTypes(type);
+		}
+	});
 });

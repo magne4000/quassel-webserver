@@ -42,7 +42,41 @@ block body
                 a#hide-buffers.showhide.right
                 a#show-buffers.showhide.right(style='display: none;')
             #center.animation
-              #topic
+              .topic
+                #topic
+                .btn-group.prefs
+                  button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown")
+                    span.glyphicon.glyphicon-th-list
+                  ul.dropdown-menu(role="menu")
+                    li.dropdown-header Hide events
+                    li
+                      a(href="#")
+                        input(type="checkbox", data-message-type="32")
+                        label Join
+                    li
+                      a(href="#")
+                        input(type="checkbox", data-message-type="64")
+                        label Part
+                    li
+                      a(href="#")
+                        input(type="checkbox", data-message-type="128")
+                        label Quit
+                    li
+                      a(href="#")
+                        input(type="checkbox", data-message-type="256")
+                        label Nick
+                    li
+                      a(href="#")
+                        input(type="checkbox", data-message-type="16")
+                        label Mode
+                    li
+                      a(href="#")
+                        input(type="checkbox", data-message-type="16384")
+                        label Topic
+                    li
+                      a(href="#")
+                        input(type="checkbox", data-message-type="8192")
+                        label DayChange
               #backlog-container
                 ul.backlog
                 .input

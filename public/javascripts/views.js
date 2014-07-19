@@ -1,6 +1,13 @@
 var MT = require('message').Type;
 var Views = {utils: {}};
-var bufferOrders = [];
+var hideClasses = (function(){
+	var nbpow = 17, i = 1, max = i << nbpow, classes = [];
+	while (i <= max) {
+		classes.push("hide-" + i);
+		i = i << 1;
+	}
+	return classes.join(" ");
+})();
 
 Views._decorator = {sender: {}, content: {}};
 //Views._decorator.sender[MT.Notice] = '';
@@ -248,7 +255,8 @@ Views.showBuffer = function(buffer) {
 	}, function(a, b) {
 		return a.id - b.id;
 	});
-	$(".backlog").html(backlogs.join("\n")).data('currentBufferId', buffer.id);
+	$(".backlog").html(backlogs.join("\n")).data('currentBufferId', buffer.id).removeClass(hideClasses);
+	$(".prefs input").prop("checked", false);
 	if (buffer.topic) {
 		$("#topic").text(buffer.topic);
 	} else {
@@ -345,4 +353,14 @@ Views.scrollOnNewMessage = function() {
 	if (scrollBottom <= height) {
 		$(".backlog").scrollTop(backlogDom.scrollHeight);
 	}
+};
+
+Views.showMessageTypes = function(type) {
+	//var bufferId = $(".backlog").data('currentBufferId');
+	$(".backlog").removeClass("hide-"+type)
+};
+
+Views.hideMessageTypes = function(type) {
+	//var bufferId = $(".backlog").data('currentBufferId');
+	$(".backlog").addClass("hide-"+type)
 };

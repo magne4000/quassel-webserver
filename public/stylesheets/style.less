@@ -102,7 +102,7 @@ html,body,.container {
 	position: relative;
 }
 
-#topic {
+.topic {
     height: 32px;
     line-height: 32px;
     overflow-y: hidden;
@@ -303,11 +303,10 @@ ul.backlog {
     padding: 4px;
     border-spacing: 0;
     position: absolute;
-	top: 0;
 	overflow: auto;
+	top: 0;
 	.wide;
 	bottom: @box-height;
-	display: table;
 }
 
 .backlog li {
@@ -331,6 +330,7 @@ ul.backlog {
 
 .backlog .message {
     display: table-cell;
+    word-break: break-all;
     width: 100%;
 }
 
@@ -400,40 +400,89 @@ ul.backlog {
 	display: block;
 }
 
+.prefs .dropdown-toggle {
+	position: absolute;
+	right: 0;
+	opacity: 0.4;
+	z-index: 10;
+	padding: 3px 7px;
+	font-size: 1em;
+	cursor: pointer;
+	
+	&:hover {
+		opacity: 0.8;
+	}
+}
+
+.prefs .dropdown-menu {
+	position: relative;
+	top: 30px;
+}
+
+.prefs {
+	right: 3px;
+	top: 2px;
+	position: absolute;
+}
+
+.prefs .dropdown-menu > li label {
+	font-weight: inherit;
+	text-transform: inherit;
+	padding: 0 5px;
+}
+
 // Message styles
 // Plain
 .type-1 {}
+.hide-1 .type-1 {display: none;}
 // Notice
 .type-2 { .nick,.message {color: #916409;}}
+.hide-2 .type-2 {display: none;}
 // Action
 .type-4 { .nick,.message {color: #0000ff;}}
+.hide-4 .type-4 {display: none;}
 // Nick
 .type-8 { .nick,.message {color: #000088;}}
+.hide-8 .type-8 {display: none;}
 // Mode
 .type-16 { .nick,.message {color: #ff7700;}}
+.hide-16 .type-16 {display: none;}
 // Join
 .type-32 { .nick,.message {color: #009600;}}
+.hide-32 .type-32 {display: none;}
 // Part
 .type-64 { .nick,.message {color: #990000;}}
+.hide-64 .type-64 {display: none;}
 // Quit
 .type-128 { .nick,.message {color: #990000;}}
+.hide-128 .type-128 {display: none;}
 // Kick
 .type-256 { .nick,.message {color: #990000;}}
+.hide-256 .type-256 {display: none;}
 // Kill
 .type-512 { .nick,.message {color: #990000;}}
+.hide-512 .type-512 {display: none;}
 // Server
 .type-1024 { .nick,.message {color: #916409;}}
+.hide-1024 .type-1024 {display: none;}
 // Info
 .type-2048 { .nick,.message {color: #916409;}}
+.hide-2048 .type-2048 {display: none;}
 // Error
 .type-4096 { .nick,.message {color: #916409;}}
+.hide-4096 .type-4096 {display: none;}
 // DayChange
 .type-8192 { .nick,.message {color: #ff0000;}}
+.hide-8192 .type-8192 {display: none;}
 // Topic
 .type-16384 { .nick,.message {color: #ff7700;}}
+.hide-16384 .type-16384 {display: none;}
 // NetsplitJoin
 .type-32768 { .nick,.message {color: #960096;}}
+.hide-32768 .type-32768 {display: none;}
 // NetsplitQuit
 .type-65536 { .nick,.message {color: #960096;}}
+.hide-65536 .type-65536 {display: none;}
 // Invite
 .type-131072 { .nick,.message {color: #960096;}}
+.hide-131072 .type-131072 {display: none;}
