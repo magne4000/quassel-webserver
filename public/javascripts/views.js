@@ -143,7 +143,7 @@ Views._bufferline = function(type, datetime, sender, content, highlight) {
 	}
 	if (highlight) classes.push("highlighted");
 	return '<li class="'+classes.join(" ")+'">'+
-	'<span class="timestamp"> '+Views.utils.HHmmss(datetime)+'</span>'+
+	'<span class="timestamp"><span>'+Views.utils.HHmmss(datetime)+'</span></span>'+
 	'<span class="nick">'+Views.utils.escapetags(Views.utils.stripnick(sender))+'</span>'+
 	'<span class="message">'+htmlcontent+'</span></li>';
 };
@@ -228,6 +228,18 @@ Views.addBuffer = function(networkname, bufferId, name) {
 	}
 };
 
+Views.bufferNewMessage = function(bufferId) {
+	$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-newmessage");
+};
+
+Views.bufferHighlight = function(bufferId) {
+	$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-highlight");
+};
+
+Views.bufferMarkAsRead = function(bufferId) {
+	$(".channel[data-buffer-id="+bufferId+"]").removeClass("buffer-newmessage buffer-highlight");
+};
+
 Views.setStatusBuffer = function(networkname, bufferId) {
 	$('#network-'+networkname+' .network-name').attr("data-buffer-id", bufferId);
 };
@@ -247,14 +259,25 @@ Views.addMessage = function(message, callback) {
 	});
 };
 
+Views.setMarkerLine = function(messageId) {
+	$(".irc-message[data-message-id="+messageId+"]").addClass("markerline");
+};
+
+Views.clearMarkerLine = function(bufferId) {
+	if (Views.isBufferShown(bufferId)) {
+		$(".irc-message.markerline").removeClass("markerline");
+	}
+};
+
 Views.isBufferShown = function(bufferId) {
 	return $(".backlog").data('currentBufferId') == bufferId;
 };
 
 Views.showBuffer = function(buffer) {
-	var backlogs = [];
+	var backlogs = [], lastMessageId;
 	buffer.messages.forEach(function(val, key) {
 		backlogs.push(Views.getMessage(val));
+		lastMessageId = val.id;
 	}, function(a, b) {
 		return a.id - b.id;
 	});
@@ -267,6 +290,7 @@ Views.showBuffer = function(buffer) {
 	}
 	Views.clearUsers();
 	Views.showUsers(buffer);
+	return lastMessageId;
 };
 
 Views.showUsers = function(buffer) {

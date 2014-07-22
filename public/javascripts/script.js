@@ -15,14 +15,6 @@ var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBu
 var er = null;
 var changesTimeout = [], buffersOrderTimeout;
 
-function addMessage(bufferId, messageId, callback) {
-	if (Views.isBufferShown(bufferId)) {
-		var buffer = networks.findBuffer(bufferId);
-		var message = buffer.messages.get(parseInt(messageId, 10));
-		Views.addMessage(message, callback);
-	}
-}
-
 function connect(sock) {
 	var host = $("#host").val();
 	var port = $("#port").val();
@@ -124,11 +116,35 @@ er.on('buffer.backlog', function(next, bufferId) {
 	next();
 }).after('network.addbuffer');
 
+er.on('buffer.markerline', function(next, bufferId, messageId) {
+	console.log('buffer.markerline : ' + bufferId + ", " + messageId);
+	// TODO
+	next();
+}).after('network.addbuffer');
+
 er.on('buffer.message', function(next, bufferId, messageId) {
 	console.log('buffer.message : ' + bufferId + ", " + messageId);
-	addMessage(bufferId, messageId, Views.scrollOnNewMessage);
+	var buffer = networks.findBuffer(bufferId);
+	var message = buffer.messages.get(parseInt(messageId, 10));
+	if (Views.isBufferShown(bufferId)) {
+		Views.addMessage(message, Views.scrollOnNewMessage);
+		socket.emit('markBufferAsRead', bufferId, messageId);
+	} else {
+		Views.bufferNewMessage(bufferId);
+		reviver.afterReviving(message, function(obj) {
+			if (obj.isHighlighted()) {
+				Views.bufferHighlight(bufferId);
+			}
+		});
+	}
 	next();
 }).after('buffer.backlog');
+
+er.on('buffer.read', function(next, bufferId) {
+	console.log('buffer.read : ' + bufferId);
+	Views.bufferMarkAsRead(bufferId);
+	next();
+}).after('network.addbuffer');
 
 er.on('buffer.hidden', function(next, bufferId, type) {
 	Views.hideBuffer(bufferId);
@@ -200,7 +216,8 @@ $(document).ready(function() {
 	$(document).on("click", ".channel, .network .network-name", function() {
 		var bufferId = parseInt($(this).data("bufferId"), 10);
 		var buffer = networks.findBuffer(bufferId);
-		Views.showBuffer(buffer);
+		var lastMessageId = Views.showBuffer(buffer);
+		socket.emit('markBufferAsRead', buffer.id, lastMessageId);
 	});
 
 	$(document).on("click", ".add-channel", function() {

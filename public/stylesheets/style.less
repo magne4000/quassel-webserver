@@ -202,6 +202,14 @@ html,body,.container {
     opacity: 0.75;
 }
 
+.buffer-newmessage {
+	background: linear-gradient(to right, @brand-success 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+}
+
+.buffer-highlight {
+	background: linear-gradient(to right, @brand-warning 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+}
+
 .buffer-bottom-bar {
     min-height: 32px;
     background-color: darken(@pane-color, 5);
@@ -313,8 +321,9 @@ ul.backlog {
     display: table-row;
 }
 
-.backlog .timestamp {
+.backlog .timestamp > span {
     padding-right: 8px;
+    padding-left: 4px;
     font-family: "Droid Sans Mono", monospace;
     font-size: 14px;
     display: table-cell;
@@ -336,6 +345,10 @@ ul.backlog {
 
 .backlog .irc-message.highlighted {
 	background-color: @brand-warning;
+}
+
+.backlog .irc-message.markerline > span {
+	border-top: 1px solid @brand-success;
 }
 
 .login-page {

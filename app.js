@@ -122,6 +122,12 @@ io.on('connection', function(socket) {
 		socket.on('sendMessage', function(bufferId, message) {
 			quassel.sendMessage(bufferId, message);
 		});
+		
+		socket.on('markBufferAsRead', function(bufferId, lastMessageId) {
+			quassel.requestSetLastMsgRead(bufferId, lastMessageId);
+			quassel.requestMarkBufferAsRead(bufferId);
+			quassel.requestSetMarkerLine(bufferId, lastMessageId);
+		});
 
 		quassel.on('init', function() {
 			// Internal lib use, send NetworkCollection (empty) object
