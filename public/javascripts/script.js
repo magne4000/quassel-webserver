@@ -15,11 +15,11 @@ var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBu
 var er = null;
 var changesTimeout = [], buffersOrderTimeout;
 
-function addMessage(bufferId, messageId) {
+function addMessage(bufferId, messageId, callback) {
 	if (Views.isBufferShown(bufferId)) {
 		var buffer = networks.findBuffer(bufferId);
 		var message = buffer.messages.get(parseInt(messageId, 10));
-		Views.addMessage(message);
+		Views.addMessage(message, callback);
 	}
 }
 
@@ -126,8 +126,7 @@ er.on('buffer.backlog', function(next, bufferId) {
 
 er.on('buffer.message', function(next, bufferId, messageId) {
 	console.log('buffer.message : ' + bufferId + ", " + messageId);
-	addMessage(bufferId, messageId);
-	Views.scrollOnNewMessage();
+	addMessage(bufferId, messageId, Views.scrollOnNewMessage);
 	next();
 }).after('buffer.backlog');
 

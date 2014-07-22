@@ -238,9 +238,12 @@ Views.getMessage = function(message) {
 	return Views._bufferline(message.type, message.datetime, sender, content, message.isHighlighted());
 };
 
-Views.addMessage = function(message) {
+Views.addMessage = function(message, callback) {
 	reviver.afterReviving(message, function(obj) {
 		$(".backlog").append(Views.getMessage(obj));
+		if (typeof callback === "function") {
+			callback();
+		}
 	});
 };
 
@@ -357,10 +360,10 @@ Views.scrollOnNewMessage = function() {
 
 Views.showMessageTypes = function(type) {
 	//var bufferId = $(".backlog").data('currentBufferId');
-	$(".backlog").removeClass("hide-"+type)
+	$(".backlog").removeClass("hide-"+type);
 };
 
 Views.hideMessageTypes = function(type) {
 	//var bufferId = $(".backlog").data('currentBufferId');
-	$(".backlog").addClass("hide-"+type)
+	$(".backlog").addClass("hide-"+type);
 };
