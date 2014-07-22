@@ -228,12 +228,15 @@ Views.addBuffer = function(networkname, bufferId, name) {
 	}
 };
 
-Views.bufferNewMessage = function(bufferId) {
+Views.bufferHighlight = function(bufferId, message) {
 	$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-newmessage");
-};
-
-Views.bufferHighlight = function(bufferId) {
-	$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-highlight");
+	if (typeof message !== "undefined") {
+		reviver.afterReviving(message, function(obj) {
+			if (obj.isHighlighted()) {
+				$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-highlight");
+			}
+		});
+	}
 };
 
 Views.bufferMarkAsRead = function(bufferId) {

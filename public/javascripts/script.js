@@ -120,7 +120,18 @@ er.on('buffer.markerline', function(next, bufferId, messageId) {
 	console.log('buffer.markerline : ' + bufferId + ", " + messageId);
 	// TODO
 	next();
-}).after('network.addbuffer');
+}).after('buffer.backlog');
+
+er.on('buffer.lastseen', function(next, bufferId, messageId) {
+	messageId = parseInt(messageId, 10);
+	console.log('buffer.lastseen : ' + bufferId + ", " + messageId);
+	var buffer = networks.findBuffer(bufferId);
+	console.log(bufferId, messageId);
+	if (!buffer.isLast(messageId) && buffer.messages.has(messageId)) {
+		Views.bufferHighlight(bufferId);
+	}
+	next();
+}).after('buffer.backlog');
 
 er.on('buffer.message', function(next, bufferId, messageId) {
 	console.log('buffer.message : ' + bufferId + ", " + messageId);
@@ -130,12 +141,7 @@ er.on('buffer.message', function(next, bufferId, messageId) {
 		Views.addMessage(message, Views.scrollOnNewMessage);
 		socket.emit('markBufferAsRead', bufferId, messageId);
 	} else {
-		Views.bufferNewMessage(bufferId);
-		reviver.afterReviving(message, function(obj) {
-			if (obj.isHighlighted()) {
-				Views.bufferHighlight(bufferId);
-			}
-		});
+		Views.bufferHighlight(bufferId, message);
 	}
 	next();
 }).after('buffer.backlog');
