@@ -278,14 +278,14 @@ Views.isBufferShown = function(bufferId) {
 
 Views.showBuffer = function(buffer) {
 	var backlogs = [], lastMessageId;
+	Views.updateMessageTypes(buffer.id);
 	buffer.messages.forEach(function(val, key) {
 		backlogs.push(Views.getMessage(val));
 		lastMessageId = val.id;
 	}, function(a, b) {
 		return a.id - b.id;
 	});
-	$(".backlog").html(backlogs.join("\n")).data('currentBufferId', buffer.id).removeClass(hideClasses);
-	$(".prefs input").prop("checked", false);
+	$(".backlog").html(backlogs.join("\n")).data('currentBufferId', buffer.id);
 	if (buffer.topic) {
 		$("#topic").text(buffer.topic);
 	} else {
@@ -385,12 +385,44 @@ Views.scrollOnNewMessage = function() {
 	}
 };
 
+Views.updateMessageTypes = function(bufferId) {
+	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId);
+	$(".prefs input").prop("checked", false);
+	$(".backlog").removeClass(hideClasses);
+	if (filter !== null) {
+		filter = JSON.parse(filter);
+		for (var i=0; i<filter.length; i++) {
+			$(".backlog").addClass("hide-"+filter[i]);
+			$('.prefs input[data-message-type="'+filter[i]+'"]').prop("checked", true);
+		}
+	}
+};
+
 Views.showMessageTypes = function(type) {
-	//var bufferId = $(".backlog").data('currentBufferId');
+	var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
+	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId);
+	if (filter !== null) {
+		filter = JSON.parse(filter);
+		var ind = filter.indexOf(type);
+		if (ind !== -1) {
+			filter.splice(ind, 1);
+			localStorage.setItem("filtered-types-buffer-"+bufferId, JSON.stringify(filter));
+		}
+	}
 	$(".backlog").removeClass("hide-"+type);
 };
 
 Views.hideMessageTypes = function(type) {
-	//var bufferId = $(".backlog").data('currentBufferId');
+	var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
+	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId);
+	if (filter === null) {
+		filter = [];
+	} else {
+		filter = JSON.parse(filter);
+	}
+	if (filter.indexOf(type) === -1) {
+		filter.push(type);
+		localStorage.setItem("filtered-types-buffer-"+bufferId, JSON.stringify(filter));
+	}
 	$(".backlog").addClass("hide-"+type);
 };

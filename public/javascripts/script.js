@@ -13,7 +13,7 @@ var HashMap = require('serialized-hashmap');
 var Reviver = require('serializer').Reviver;
 var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap, IRCMessage);
 var er = null;
-var changesTimeout = [], buffersOrderTimeout;
+var changesTimeout = [];
 
 function connect(sock) {
 	var host = $("#host").val();
@@ -123,10 +123,9 @@ er.on('buffer.markerline', function(next, bufferId, messageId) {
 }).after('buffer.backlog');
 
 er.on('buffer.lastseen', function(next, bufferId, messageId) {
-	messageId = parseInt(messageId, 10);
 	console.log('buffer.lastseen : ' + bufferId + ", " + messageId);
+	messageId = parseInt(messageId, 10);
 	var buffer = networks.findBuffer(bufferId);
-	console.log(bufferId, messageId);
 	if (!buffer.isLast(messageId) && buffer.messages.has(messageId)) {
 		Views.bufferHighlight(bufferId);
 	}
