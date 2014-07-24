@@ -151,6 +151,11 @@ er.on('buffer.read', function(next, bufferId) {
 	next();
 }).after('network.addbuffer');
 
+er.on('buffer.unhide', function(next, bufferId, type) {
+	Views.unhideBuffer(bufferId);
+	next();
+}).after('network.addbuffer');
+
 er.on('buffer.hidden', function(next, bufferId, type) {
 	Views.hideBuffer(bufferId);
 	next();

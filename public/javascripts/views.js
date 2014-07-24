@@ -334,6 +334,10 @@ Views.hideBuffer = function(bufferId) {
 	$(".channel[data-buffer-id="+bufferId+"]").addClass("hidden");
 };
 
+Views.unhideBuffer = function(bufferId) {
+	$(".channel[data-buffer-id="+bufferId+"]").removeClass("hidden");
+};
+
 Views.activateBuffer = function(bufferId)  {
 	$(".channel[data-buffer-id="+bufferId+"]").removeClass("off").addClass("on");
 };
