@@ -286,6 +286,7 @@ Views.showBuffer = function(buffer) {
 		return a.id - b.id;
 	});
 	$(".backlog").html(backlogs.join("\n")).data('currentBufferId', buffer.id);
+	Views.scrollToBottom();
 	if (buffer.topic) {
 		$("#topic").text(buffer.topic);
 	} else {
@@ -297,8 +298,15 @@ Views.showBuffer = function(buffer) {
 };
 
 Views.showUsers = function(buffer) {
+	var users = [];
 	for (var nick in buffer.nickUserMap) {
-		Views.addUser(buffer, buffer.nickUserMap[nick]);
+		users.push(buffer.nickUserMap[nick]);
+	}
+	users.sort(function(a, b) {
+		return a.nick.toLowerCase().localeCompare(b.nick.toLowerCase());
+	});
+	for (var i in users) {
+		Views.addUser(buffer, users[i]);
 	}
 };
 
@@ -378,6 +386,10 @@ Views.showQuassel = function() {
 	$('.login-page').removeClass('login-page');
 	$('.container.login').addClass('hidden');
 	$('.logged').removeClass('hidden');
+};
+
+Views.scrollToBottom = function() {
+	$(".backlog").scrollTop($('.backlog').get(0).scrollHeight);
 };
 
 Views.scrollOnNewMessage = function() {
