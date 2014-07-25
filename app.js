@@ -123,6 +123,10 @@ io.on('connection', function(socket) {
 			quassel.sendMessage(bufferId, message);
 		});
 		
+		socket.on('moreBacklogs', function(bufferId, firstMessageId) {
+			quassel.requestBacklog(bufferId, -1, firstMessageId, 20);
+		});
+		
 		socket.on('markBufferAsRead', function(bufferId, lastMessageId) {
 			quassel.requestSetLastMsgRead(bufferId, lastMessageId);
 			quassel.requestMarkBufferAsRead(bufferId);

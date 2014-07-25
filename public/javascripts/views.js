@@ -262,6 +262,12 @@ Views.addMessage = function(message, callback) {
 	});
 };
 
+Views.prependMessage = function(message) {
+	reviver.afterReviving(message, function(obj) {
+		$(".backlog").prepend(Views.getMessage(obj));
+	});
+};
+
 Views.setMarkerLine = function(messageId) {
 	$(".irc-message[data-message-id="+messageId+"]").addClass("markerline");
 };

@@ -158,7 +158,7 @@ EventReceiver.definition = {
 	'buffer.rename': ["bufferId", "bufferName"],
 	'buffer.activate': ["bufferId"],
 	'buffer.message': ["bufferId", "messageId"],
-	'buffer.backlog': ["bufferId"],
+	'buffer.backlog': ["bufferId", "messageIds"],
 	'buffer.unhide': ["bufferId"],
 	'buffer.hidden': ["bufferId", "hiddenType"],
 	'buffer.order': ["bufferId", "order"],

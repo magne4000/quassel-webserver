@@ -14,6 +14,7 @@ var Reviver = require('serializer').Reviver;
 var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap, IRCMessage);
 var er = null;
 var changesTimeout = [];
+var loadingMoreBacklogs = [];
 
 function connect(sock) {
 	var host = $("#host").val();
@@ -111,7 +112,16 @@ er.on('change', function(next, networkId, change) {
 	next();
 }).after('network.init');
 
-er.on('buffer.backlog', function(next, bufferId) {
+er.on('buffer.backlog', function(next, bufferId, messageIds) {
+	loadingMoreBacklogs[''+bufferId] = false;
+	console.log('buffer.backlog : ' + bufferId);
+	if (Views.isBufferShown(bufferId)) {
+		var buffer = networks.findBuffer(bufferId), i = 0;
+		for (; i<messageIds.length; i++) {
+			var message = buffer.messages.get(messageIds[i]);
+			Views.prependMessage(message);
+		}
+	}
 	Views.activateBuffer(bufferId);
 	next();
 }).after('network.addbuffer');
@@ -258,6 +268,20 @@ $(document).ready(function() {
 	
 	$("#hide-nicks").click(Views.hideNicks);
 	$("#show-nicks").click(Views.showNicks);
+	
+	$(".backlog").on('mousewheel', function(event) {
+		if (event.deltaY > 0) { // up
+			var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
+			if (typeof loadingMoreBacklogs[''+bufferId] === 'undefined' || loadingMoreBacklogs[''+bufferId] === false) {
+				var buffer = networks.findBuffer(bufferId);
+				var firstMessage = Math.min.apply(null, buffer.messages.keys());
+				if ($(".backlog").scrollTop() === 0) {
+					loadingMoreBacklogs[''+bufferId] = true;
+					socket.emit('moreBacklogs', bufferId, firstMessage);
+				}
+			}
+		}
+	});
 
 	$("#logonform").on("submit", function(evt) {
 		console.log('SENDING CREDENTIALS');
