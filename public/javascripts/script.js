@@ -1,3 +1,17 @@
+(function($) {
+    $.QueryString = (function(a) {
+        if (a == "") return {};
+        var b = {};
+        for (var i = 0; i < a.length; ++i)
+        {
+            var p=a[i].split('=');
+            if (p.length != 2) continue;
+            b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+        }
+        return b;
+    })(window.location.search.substr(1).split('&'))
+})(jQuery);
+
 var networks = null
 var socket = io(undefined, {
 	timeout: 6000,
@@ -262,13 +276,13 @@ $(document).ready(function() {
 			socket.emit('sendMessage', bufferId, message);
 		}
 	});
-	
+
 	$("#hide-buffers").click(Views.hideBuffers);
 	$("#show-buffers").click(Views.showBuffers);
-	
+
 	$("#hide-nicks").click(Views.hideNicks);
 	$("#show-nicks").click(Views.showNicks);
-	
+
 	$(".backlog").on('mousewheel', function(event) {
 		if (event.deltaY > 0) { // up
 			var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
@@ -293,18 +307,18 @@ $(document).ready(function() {
 		socket.emit('logout');
 		window.location.reload();
 	});
-	
+
 	$(".topic li").on("click", function(evt) {
 		evt.stopPropagation();
 	});
-	
+
 	$(".topic li a").on("click", function(evt) {
 		if (!$(evt.target).is("input")) {
 			var checked = $(this).children("input").is(':checked');
 			$(this).children("input").prop('checked', !checked).trigger("change");
 		}
 	});
-	
+
 	$(".topic li input").on("change", function(evt) {
 		var type = $(this).data("messageType");
 		if (!$(this).is(':checked')) {
@@ -313,4 +327,20 @@ $(document).ready(function() {
 			Views.hideMessageTypes(type);
 		}
 	});
+
+	function setQueryParamOrFocus(queryParamKey, selector) {
+		if ($.QueryString[queryParamKey]) {
+			$(selector).val($.QueryString[queryParamKey]);
+		} else if (!$(selector).val()) {
+			$(selector).focus();
+		}
+	}
+	setQueryParamOrFocus('password', '#password');
+	setQueryParamOrFocus('host', '#host');
+	setQueryParamOrFocus('port', '#port');
+	setQueryParamOrFocus('user', '#user');
+
+	if ($("#host").val() && $("#port").val() && $("#user").val() && $("#password").val()) {
+		$('#logonform').submit();
+	}
 });
