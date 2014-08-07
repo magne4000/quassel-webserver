@@ -29,6 +29,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(lessMiddleware(path.join(__dirname, 'public')));
+app.get('/javascripts/libquassel.js', function(req, res) {
+	res.sendfile('./node_modules/libquassel/client/libquassel.js');
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
