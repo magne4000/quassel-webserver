@@ -104,13 +104,15 @@ er.on('network.addbuffer', function(next, networkId, bufferId) {
 	console.log('addbuffer');
 	var network = networks.get(networkId);
 	var buffer = network.getBufferCollection().getBuffer(bufferId);
-	if (buffer.isStatusBuffer()) {
-		Views.setStatusBuffer(network.networkName, bufferId);
-	}
-	else {
-		Views.addBuffer(network.networkName, bufferId, buffer.name);
-	}
-	next();
+	reviver.afterReviving(buffer, function(obj) {
+		if (obj.isStatusBuffer()) {
+			Views.setStatusBuffer(network.networkName, obj);
+		}
+		else {
+			Views.addBuffer(network.networkName, obj);
+		}
+		next();
+	});
 }).after('network.init');
 
 er.on('change', function(next, networkId, change) {
@@ -136,7 +138,6 @@ er.on('buffer.backlog', function(next, bufferId, messageIds) {
 			Views.prependMessage(message);
 		}
 	}
-	Views.activateBuffer(bufferId);
 	next();
 }).after('network.addbuffer');
 
@@ -144,17 +145,17 @@ er.on('buffer.markerline', function(next, bufferId, messageId) {
 	console.log('buffer.markerline : ' + bufferId + ", " + messageId);
 	// TODO
 	next();
-}).after('buffer.backlog');
+}).after('network.addbuffer');
 
 er.on('buffer.lastseen', function(next, bufferId, messageId) {
 	console.log('buffer.lastseen : ' + bufferId + ", " + messageId);
 	messageId = parseInt(messageId, 10);
 	var buffer = networks.findBuffer(bufferId);
-	if (!buffer.isLast(messageId) && buffer.messages.has(messageId)) {
+	if (buffer !== null && !buffer.isLast(messageId) && buffer.messages.has(messageId)) {
 		Views.bufferHighlight(bufferId);
 	}
 	next();
-}).after('buffer.backlog');
+}).after('network.addbuffer');
 
 er.on('buffer.message', function(next, bufferId, messageId) {
 	console.log('buffer.message : ' + bufferId + ", " + messageId);
@@ -167,7 +168,12 @@ er.on('buffer.message', function(next, bufferId, messageId) {
 		Views.bufferHighlight(bufferId, message);
 	}
 	next();
-}).after('buffer.backlog');
+}).after('network.addbuffer');
+
+er.on('buffer.activate', function(next, bufferId) {
+	Views.activateBuffer(bufferId);
+	next();
+}).after('network.addbuffer');
 
 er.on('buffer.read', function(next, bufferId) {
 	console.log('buffer.read : ' + bufferId);
@@ -185,6 +191,11 @@ er.on('buffer.hidden', function(next, bufferId, type) {
 	next();
 }).after('network.addbuffer');
 
+er.on('buffer.remove', function(next, bufferId) {
+	Views.removeBuffer(bufferId);
+	next();
+}).after('network.addbuffer');
+
 er.on('channel.join', function(next, bufferId, nick) {
 	if (Views.isBufferShown(bufferId)) {
 		var buffer = networks.findBuffer(bufferId);
@@ -195,6 +206,7 @@ er.on('channel.join', function(next, bufferId, nick) {
 });
 
 er.on('user.part', function(next, networkId, nick, bufferName) {
+	console.log(networkId, nick, bufferName);
 	var network = networks.get(networkId);
 	var buffer = network.getBuffer(bufferName);
 	if (Views.isBufferShown(buffer.id)) {

@@ -129,8 +129,9 @@ Views._network = function(name) {
 	'<div class="network-channels clearfix" id="'+name+'-channels"></div>';
 };
 
-Views._buffer = function(bufferId, name) {
-	return '<div class="channel off" data-buffer-id="'+bufferId+'">' + 
+Views._buffer = function(bufferId, name, active) {
+	var activeclass = active?"on":"off";
+	return '<div class="channel '+activeclass+'" data-buffer-id="'+bufferId+'">' + 
 		'<span class="channel-icon"></span>' + 
 		'<span class="channel-name">'+name+'</span>' + 
 	'</div>';
@@ -207,10 +208,10 @@ Views.addNetwork = function(name) {
 	}
 };
 
-Views.addBuffer = function(networkname, bufferId, name) {
+Views.addBuffer = function(networkname, buffer) {
 	// Keep buffer ordered alphabetically
 	var channels = $('#'+networkname+'-channels .channel'), names = [], bufferIds = [], i = 0;
-	var html = Views._buffer(bufferId, name);
+	var html = Views._buffer(buffer.id, buffer.name, buffer.active);
 	var lowercaseName = name.toLowerCase(), spot = null;
 	channels.each(function(){
 		names.push($(this).text().toLowerCase());
@@ -243,8 +244,8 @@ Views.bufferMarkAsRead = function(bufferId) {
 	$(".channel[data-buffer-id="+bufferId+"]").removeClass("buffer-newmessage buffer-highlight");
 };
 
-Views.setStatusBuffer = function(networkname, bufferId) {
-	$('#network-'+networkname+' .network-name').attr("data-buffer-id", bufferId);
+Views.setStatusBuffer = function(networkname, buffer) {
+	$('#network-'+networkname+' .network-name').attr("data-buffer-id", buffer.id);
 };
 
 Views.getMessage = function(message) {
@@ -342,6 +343,10 @@ Views.hideNicks = function() {
     $("#hide-nicks").hide();
     $("#nick-pane").removeClass("col-md-2").addClass("col-md-0");
     $("#nick-pane .buffer-container").css("opacity", "0");
+};
+
+Views.removeBuffer = function(bufferId) {
+	$(".channel[data-buffer-id="+bufferId+"]").remove();
 };
 
 Views.hideBuffer = function(bufferId) {

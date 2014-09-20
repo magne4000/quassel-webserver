@@ -24,7 +24,7 @@ EventReceiver.prototype.on = function(event, callback) {
 		if (condition._check(event, args)) {
 			condition._call(event, args, callback);
 		} else {
-			console.log(event);
+			console.log(event, args);
 			condition._store(event, args, callback);
 		}
 	});
@@ -127,7 +127,9 @@ ConditionedEventReceiver.prototype._check = function(event, args) {
 				if (!thisone) break;
 			}
 		} else { thisone = false; }
-		if (thisone) nb--;
+		if (thisone) {
+			nb--;
+		}
 	}
 	return (nb <= 0);
 };
@@ -157,6 +159,7 @@ EventReceiver.definition = {
 	'buffer.remove': ["bufferId"],
 	'buffer.rename': ["bufferId", "bufferName"],
 	'buffer.activate': ["bufferId"],
+	'buffer.deactivate': ["bufferId"],
 	'buffer.message': ["bufferId", "messageId"],
 	'buffer.backlog': ["bufferId", "messageIds"],
 	'buffer.unhide': ["bufferId"],
