@@ -71,8 +71,9 @@ app.use(function(err, req, res, next) {
 var debug = require('debug')('quassel-webserver');
 
 app.set('port', process.env.PORT || 3000);
+app.set('host', process.env.HOST || '');
 
-var server = app.listen(app.get('port'), function() {
+var server = app.listen(app.get('port'), app.get('host'), function() {
 	debug('Express server listening on port ' + server.address().port);
 });
 
