@@ -24,6 +24,16 @@ The server is now running.
 ### In the browser
 Just go to http://yourserver:64004 and enter your quasselcore informations and credentials
 
+#### Query String Arguments
+You can add arguments onto the url to automatically populate the login form. By filling out all 4 arguments, the client will automatically login.
+
+* `host` QuasselCore host
+* `port` QuasselCore port
+* `user` Your QuasselCore username
+* `password` Your QuasselCore password (Using this argument isn't advised)
+
+**Example:** http://yourserver:64004/?host=localhost&port=4242&user=AdminUser
+
 ## License
 Copyright (c) 2014 Joël Charles  
 Licensed under the MIT license.
