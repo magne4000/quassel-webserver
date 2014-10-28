@@ -331,12 +331,20 @@ $(document).ready(function() {
 		}
 	});
 
-	$(".topic li input").on("change", function(evt) {
+	$(".topic li input[data-message-type]").on("change", function(evt) {
 		var type = $(this).data("messageType");
 		if (!$(this).is(':checked')) {
 			Views.showMessageTypes(type);
 		} else {
 			Views.hideMessageTypes(type);
+		}
+	});
+
+	$(".topic li input[data-default-filter]").on("change", function(evt) {
+		if ($(this).is(':checked')) {
+			Views.useDefaultFilter();
+		} else {
+			Views.doNotUseDefaultFilter();
 		}
 	});
 

@@ -412,10 +412,39 @@ Views.scrollOnNewMessage = function() {
 	}
 };
 
-Views.updateMessageTypes = function(bufferId) {
+Views.useDefaultFilter = function() {
+	var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
 	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId);
+	if (filter !== null) {
+		localStorage.setItem("filtered-types-default", filter);
+		localStorage.removeItem("filtered-types-buffer-"+bufferId);
+	}
+	$('.prefs input[data-default-filter]').prop("checked", true);
+};
+
+Views.doNotUseDefaultFilter = function() {
+	var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
+	var filter = localStorage.getItem("filtered-types-default");
+	if (filter === null) {
+		filter = "[]";
+	}
+	localStorage.setItem("filtered-types-buffer-"+bufferId, filter);
+	$('.prefs input[data-default-filter]').prop("checked", false);
+};
+
+
+Views.updateMessageTypes = function(bufferId) {
 	$(".prefs input").prop("checked", false);
-	$(".backlog").removeClass(hideClasses);
+
+	// Buffer specific filter.
+	var isUsingDefaultFilter = false;
+	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId);
+	if (filter === null) { 
+		// Use Default filter
+		isUsingDefaultFilter = true;
+		filter = localStorage.getItem("filtered-types-default");
+	}
+	
 	if (filter !== null) {
 		filter = JSON.parse(filter);
 		for (var i=0; i<filter.length; i++) {
@@ -423,33 +452,30 @@ Views.updateMessageTypes = function(bufferId) {
 			$('.prefs input[data-message-type="'+filter[i]+'"]').prop("checked", true);
 		}
 	}
+	$('.prefs input[data-default-filter]').prop("checked", isUsingDefaultFilter);
 };
 
 Views.showMessageTypes = function(type) {
 	var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
-	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId);
-	if (filter !== null) {
-		filter = JSON.parse(filter);
-		var ind = filter.indexOf(type);
-		if (ind !== -1) {
-			filter.splice(ind, 1);
-			localStorage.setItem("filtered-types-buffer-"+bufferId, JSON.stringify(filter));
-		}
+	$('.prefs input[data-default-filter]').prop("checked", false);
+	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId) || localStorage.getItem("filtered-types-default") || "[]";
+	filter = JSON.parse(filter);
+	var ind = filter.indexOf(type);
+	if (ind !== -1) {
+		filter.splice(ind, 1);
 	}
+	localStorage.setItem("filtered-types-buffer-"+bufferId, JSON.stringify(filter));
 	$(".backlog").removeClass("hide-"+type);
 };
 
 Views.hideMessageTypes = function(type) {
 	var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
-	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId);
-	if (filter === null) {
-		filter = [];
-	} else {
-		filter = JSON.parse(filter);
-	}
+	$('.prefs input[data-default-filter]').prop("checked", false);
+	var filter = localStorage.getItem("filtered-types-buffer-"+bufferId) || localStorage.getItem("filtered-types-default") || "[]";
+	filter = JSON.parse(filter);
 	if (filter.indexOf(type) === -1) {
 		filter.push(type);
-		localStorage.setItem("filtered-types-buffer-"+bufferId, JSON.stringify(filter));
 	}
+	localStorage.setItem("filtered-types-buffer-"+bufferId, JSON.stringify(filter));
 	$(".backlog").addClass("hide-"+type);
 };
