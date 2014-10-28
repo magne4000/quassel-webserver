@@ -363,12 +363,16 @@ $(document).ready(function() {
 
 			var getTokenCompletion = function(token) {
 				var nick = getMostRecentNick(token);
-				if (nick)
-					return nick;
+				if (!nick)
+					nick = getNickAlphabetically(token);
 
-				nick = getNickAlphabetically(token);
-				if (nick)
-					return nick;
+				if (nick) {
+					if (tokenStart == 0) {
+						return nick + ': ';
+					} else {
+						return nick;
+					}
+				}
 			};
 
 			var newToken = getTokenCompletion(token);
