@@ -279,13 +279,78 @@ $(document).ready(function() {
 		$('#modal-join-channel-name').val("");
 	});
 
-	$("form#messageform").on("submit", function(evt) {
-		evt.preventDefault();
+	var sendMessage = function() {
 		if (socket !== null) {
 			var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
 			var message = $("#messagebox").val();
 			$("#messagebox").val("");
 			socket.emit('sendMessage', bufferId, message);
+		}
+	};
+
+	$("form#messageform").on("submit", function(evt) {
+		evt.preventDefault();
+		sendMessage();
+	});
+
+	$("#messagebox").on("keydown", function(evt) {
+		if (evt.which == 13) { // Enter
+			evt.preventDefault();
+			sendMessage();
+		} else if (evt.which == 9) { // Tab
+			console.log('tab');
+			evt.preventDefault();
+			var tokenEnd = this.selectionEnd;
+				
+			var message = $(this).val();
+			var messageLeft = message.substr(0, tokenEnd);
+			var tokenStart = messageLeft.lastIndexOf(' ');
+			tokenStart += 1; // -1 (not found) => 0 (start)
+			var token = messageLeft.substr(tokenStart);
+
+			// Find the most recent nick who has talked.
+			var getMostRecentNick = function(token) {
+				var bufferId = $(".backlog").data('currentBufferId');
+				if (!bufferId) return;
+				bufferId = parseInt(bufferId, 10);
+				var buffer = networks.findBuffer(bufferId);
+				if (!buffer) return;
+
+				var keys = buffer.messages.keys();
+				keys.sort();
+				keys.reverse();
+
+				for (var i = 0; i < keys.length; i++) {
+					var messageId = keys[i];
+					var message = buffer.messages.get(messageId);
+
+					// Only check Message.Type.Plain=1 and Message.Type.Action=4
+					if (!(message.type == 1 || message.type == 4))
+						continue;
+
+					var nick = message.getNick();
+					if (nick.length <= token.length)
+						continue;
+
+					if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
+						return nick;
+				}
+			};
+
+			var getTokenCompletion = function(token) {
+				var mostRecentNick = getMostRecentNick(token);
+				if (mostRecentNick)
+					return mostRecentNick;
+			};
+
+			var newToken = getTokenCompletion(token);
+
+			if (newToken) {
+				var newMessage = message.substr(0, tokenStart) + newToken + message.substr(tokenEnd);
+				$(this).val(newMessage);
+				var newTokenEnd = tokenEnd + newToken.length - token.length;
+				this.setSelectionRange(newTokenEnd, newTokenEnd);
+			}
 		}
 	});
 
