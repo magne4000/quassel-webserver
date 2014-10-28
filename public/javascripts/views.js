@@ -212,7 +212,7 @@ Views.addBuffer = function(networkname, buffer) {
 	// Keep buffer ordered alphabetically
 	var channels = $('#'+networkname+'-channels .channel'), names = [], bufferIds = [], i = 0;
 	var html = Views._buffer(buffer.id, buffer.name, buffer.active);
-	var lowercaseName = name.toLowerCase(), spot = null;
+	var lowercaseName = buffer.name.toLowerCase(), spot = null;
 	channels.each(function(){
 		names.push($(this).text().toLowerCase());
 		bufferIds.push(parseInt($(this).attr("data-buffer-id"), 10));
