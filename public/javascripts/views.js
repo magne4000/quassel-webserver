@@ -115,6 +115,22 @@ Views.utils.HHmmss = function(d) {
 	return [h, m, s].join(':');
 };
 
+Views.utils.hashCode = function(s) {
+  var hash = 0, i, chr, len;
+  if (s.length == 0) return hash;
+  for (i = 0, len = s.length; i < len; i++) {
+    chr   = s.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+Views.utils.nickHash = function(s) {
+	return Math.abs(Views.utils.hashCode(s)) % 16;
+};
+
+
 Views.alert = function(message) {
 	$(".alert").removeClass("hidden");
 	$(".alert .alert-text").html(message);
@@ -145,7 +161,7 @@ Views._bufferline = function(type, datetime, sender, content, highlight) {
 	if (highlight) classes.push("highlighted");
 	return '<li class="'+classes.join(" ")+'">'+
 	'<span class="timestamp"><span>'+Views.utils.HHmmss(datetime)+'</span></span>'+
-	'<span class="nick">'+Views.utils.escapetags(Views.utils.stripnick(sender))+'</span>'+
+	'<span class="nick" data-nickhash="'+(Views.utils.nickHash(sender) % 16)+'">'+Views.utils.escapetags(Views.utils.stripnick(sender))+'</span>'+
 	'<span class="message">'+htmlcontent+'</span></li>';
 };
 
