@@ -324,8 +324,8 @@ $(document).ready(function() {
 					var messageId = keys[i];
 					var message = buffer.messages.get(messageId);
 
-					// Only check Message.Type.Plain=1 and Message.Type.Action=4
-					if (!(message.type == 1 || message.type == 4))
+					// Only check Plain and Action messages for nicks.
+					if (!(message.type == MT.Plain || message.type == MT.Action))
 						continue;
 
 					var nick = message.getNick();
