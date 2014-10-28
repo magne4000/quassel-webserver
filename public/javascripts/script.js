@@ -324,8 +324,8 @@ $(document).ready(function() {
 					var messageId = keys[i];
 					var message = buffer.messages.get(messageId);
 
-					// Only check Message.Type.Plain=1 and Message.Type.Action=4
-					if (!(message.type == 1 || message.type == 4))
+					// Only check Plain and Action messages for nicks.
+					if (!(message.type == MT.Plain || message.type == MT.Action))
 						continue;
 
 					var nick = message.getNick();
@@ -337,10 +337,42 @@ $(document).ready(function() {
 				}
 			};
 
+			// Find the closet nick alphabetically from the current buffer's nick list.
+      var getNickAlphabetically = function(token) {
+        var bufferId = $(".backlog").data('currentBufferId');
+        if (!bufferId) return;
+        bufferId = parseInt(bufferId, 10);
+        var buffer = networks.findBuffer(bufferId);
+        if (!buffer) return;
+
+        var nicks = Object.keys(buffer.nickUserMap);
+        nicks.sort(function(a, b) {
+          return a.toLowerCase().localeCompare(b.toLowerCase());
+        });
+
+        for (var i = 0; i < nicks.length; i++) {
+          var nick = nicks[i];
+          if (nick.length <= token.length)
+            continue;
+
+          if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
+            return nick;
+        }
+      };
+      
+
 			var getTokenCompletion = function(token) {
-				var mostRecentNick = getMostRecentNick(token);
-				if (mostRecentNick)
-					return mostRecentNick;
+				var nick = getMostRecentNick(token);
+				if (!nick)
+					nick = getNickAlphabetically(token);
+
+				if (nick) {
+					if (tokenStart == 0) {
+						return nick + ': ';
+					} else {
+						return nick;
+					}
+				}
 			};
 
 			var newToken = getTokenCompletion(token);
