@@ -137,7 +137,8 @@ Views.alert = function(message) {
 };
 
 Views._network = function(name, isConnected) {
-	return '<div class="network" id="network-'+name+'">' + 
+	var activeclass = isConnected?"on":"off";
+	return '<div class="network '+activeclass+'" id="network-'+name+'">' + 
 		'<span class="'+(isConnected ? 'expanded' : 'collapsed')+'" data-target="'+name+'-channels" ></span>' +
 		'<span class="network-name">'+name+'</span>' +
 		'<a class="add-channel" data-network="'+name+'" data-toggle="modal" data-target="#modal-join-channel" title="Join channel"></a>' +
