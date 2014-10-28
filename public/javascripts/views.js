@@ -120,13 +120,13 @@ Views.alert = function(message) {
 	$(".alert .alert-text").html(message);
 };
 
-Views._network = function(name) {
+Views._network = function(name, isConnected) {
 	return '<div class="network" id="network-'+name+'">' + 
-		'<span class="expanded" data-target="'+name+'-channels" ></span>' +
+		'<span class="'+(isConnected ? 'expanded' : 'collapsed')+'" data-target="'+name+'-channels" ></span>' +
 		'<span class="network-name">'+name+'</span>' +
 		'<a class="add-channel" data-network="'+name+'" data-toggle="modal" data-target="#modal-join-channel" title="Join channel"></a>' +
 	'</div>' +
-	'<div class="network-channels clearfix" id="'+name+'-channels"></div>';
+	'<div class="network-channels clearfix" id="'+name+'-channels" style="'+(isConnected ? '' : 'max-height:0px;')+'"></div>';
 };
 
 Views._buffer = function(bufferId, name, active) {
@@ -188,10 +188,10 @@ Views.removeUser = function(buffer, nick) {
 	$('.group-users [data-nick="'+nick+'"]').remove();
 };
 
-Views.addNetwork = function(name) {
+Views.addNetwork = function(network) {
 	var networkNames = $('.network'), names = [], networkIds = [], i = 0;
-	var html = Views._network(name);
-	var lowercaseName = name.toLowerCase(), spot = null;
+	var html = Views._network(network.networkName, network.isConnected);
+	var lowercaseName = network.networkName.toLowerCase(), spot = null;
 	networkNames.each(function(){
 		names.push($(this).children(".network-name").text().toLowerCase());
 		networkIds.push($(this).attr("id"));

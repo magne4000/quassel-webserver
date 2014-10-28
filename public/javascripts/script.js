@@ -96,7 +96,7 @@ er.on('network._init', function(next, networkId, data) {
 er.on('network.init', function(next, networkId) {
 	console.log('network.init');
 	var network = networks.get(networkId);
-	Views.addNetwork(network.networkName);
+	Views.addNetwork(network);
 	next();
 }).after('network._init');
 
