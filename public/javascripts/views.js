@@ -247,9 +247,12 @@ Views.addBuffer = function(networkname, buffer) {
 };
 
 Views.bufferHighlight = function(bufferId, message) {
-	$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-newmessage");
+	$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-newevent");
 	if (typeof message !== "undefined") {
 		reviver.afterReviving(message, function(obj) {
+			if (obj.type == MT.Plain || obj.type == MT.Action) {
+				$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-newmessage");
+			}
 			if (obj.isHighlighted()) {
 				$(".channel[data-buffer-id="+bufferId+"]").addClass("buffer-highlight");
 			}
@@ -258,7 +261,7 @@ Views.bufferHighlight = function(bufferId, message) {
 };
 
 Views.bufferMarkAsRead = function(bufferId) {
-	$(".channel[data-buffer-id="+bufferId+"]").removeClass("buffer-newmessage buffer-highlight");
+	$(".channel[data-buffer-id="+bufferId+"]").removeClass("buffer-newevent buffer-newmessage buffer-highlight");
 };
 
 Views.setStatusBuffer = function(networkname, buffer) {
