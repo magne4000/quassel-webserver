@@ -321,6 +321,7 @@ Views.showBuffer = function(buffer) {
 	}
 	Views.clearUsers();
 	Views.showUsers(buffer);
+	Views.selectBuffer(buffer.id);
 	return lastMessageId;
 };
 
@@ -383,6 +384,11 @@ Views.activateBuffer = function(bufferId)  {
 
 Views.deactivateBuffer = function(bufferId)  {
 	$(".channel[data-buffer-id="+bufferId+"]").removeClass("on").addClass("off");
+};
+
+Views.selectBuffer = function(bufferId) {
+	$(".channel[data-buffer-id]").removeClass("selected");
+	$(".channel[data-buffer-id="+bufferId+"]").addClass("selected");
 };
 
 Views.connecting = function()  {
