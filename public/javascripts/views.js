@@ -61,6 +61,13 @@ Views._decorator.content[MT.Kick] = function(nick, content) {
 //Views._decorator.content[MT.NetsplitQuit] = '<='; // as is
 //Views._decorator.content[MT.Invite] = '';
 
+Views.RE = {};
+Views.RE.BOLD = new RegExp(String.fromCharCode(2)+"(.*?)"+String.fromCharCode(2), "g");
+Views.RE.NORMAL = new RegExp(String.fromCharCode(15)+"(.*?)"+String.fromCharCode(15), "g");
+Views.RE.ITALIC = new RegExp(String.fromCharCode(29)+"(.*?)"+String.fromCharCode(29), "g");
+Views.RE.UNDERLINE = new RegExp(String.fromCharCode(31)+"(.*?)"+String.fromCharCode(31), "g");
+Views.RE.COLOR = new RegExp(String.fromCharCode(3)+"([0-9]{0,2}),?([0-9]{0,2})(.*?)"+String.fromCharCode(3),"g");
+
 var tagsToReplace = {
 	'&': '&amp;',
 	'<': '&lt;',
@@ -101,6 +108,8 @@ Views.utils.stripnick = function(s) {
 	return s;
 };
 
+
+
 Views.utils.HHmmss = function(d) {
 	var dateObject = null;
 	if (d instanceof Date) {
@@ -130,6 +139,47 @@ Views.utils.nickHash = function(s) {
 	return Math.abs(Views.utils.hashCode(s)) % 16;
 };
 
+Views.utils.getHtmlStyledMessage = function(message) {
+    
+    message = message.replace(Views.RE.BOLD, function(match, m1) {
+        if (m1.length > 0) {
+            return "<b>"+m1+"</b>";
+        }
+        return '';
+    });
+    
+    message = message.replace(Views.RE.NORMAL, "$1");
+    
+    message = message.replace(Views.RE.ITALIC, function(match, m1) {
+        if (m1.length > 0) {
+            return "<i>"+m1+"</i>";
+        }
+        return '';
+    });
+    
+    message = message.replace(Views.RE.UNDERLINE, function(match, m1) {
+        if (m1.length > 0) {
+            return "<u>"+m1+"</u>";
+        }
+        return '';
+    });
+    
+    message = message.replace(Views.RE.COLOR, function(match, fg, bg, m3) {
+        if (m3.length > 0) {
+            classes = [];
+            if (fg.length > 0) {
+                classes.push("mirc-fg-"+fg);
+            }
+            if (bg.length > 0) {
+                classes.push("mirc-bg-"+bg);
+            }
+            return '<span class="'+classes.join(" ")+'">'+m3+'</span>';
+        }
+        return '';
+    });
+    
+    return message;
+};
 
 Views.alert = function(message) {
 	$(".alert").removeClass("hidden");
@@ -156,6 +206,7 @@ Views._buffer = function(bufferId, name, active) {
 
 Views._bufferline = function(type, datetime, sender, content, highlight) {
 	var htmlcontent = Views.utils.escapetags(content), classes = ["irc-message", "type-"+type];
+        htmlcontent = Views.utils.getHtmlStyledMessage(htmlcontent);
 	if (type == MT.Plain) {
 		htmlcontent = Autolinker.link(htmlcontent, {stripPrefix: false, email: false, twitter: false});
 	}
