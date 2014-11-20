@@ -7,14 +7,51 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var patch = require('./lib/patch');
 var path = require('path');
+var fs = require('fs');
 var O = require('observed');
 var Quassel = require('libquassel');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
+var opts = require("nomnom")
+    .option('port', {
+        abbr: 'p',
+        default: null,
+        help: 'HTTP port to use'
+    })
+    .option('mode', {
+        abbr: 'm',
+        default: 'https',
+        choices: ['http', 'https'],
+        help: 'Use HTTP or HTTPS'
+    })
+    .parse();
+
 var app = express();
-var server = require('http').Server(app);
+var server = null;
+if (opts.mode === 'http'){
+    server = require('http').Server(app);
+    if (opts.port === null) opts.port = 64080;
+} else {
+    var keypath = path.join(__dirname, 'ssl/key.pem');
+    var certpath = path.join(__dirname, 'ssl/cert.pem');
+    if (!fs.existsSync(keypath)) {
+        console.log(' ! ssl/key.pem is mandatory in order to run with SSL');
+        process.exit(1);
+    }
+    if (!fs.existsSync(certpath)) {
+        console.log(' ! ssl/cert.pem is mandatory in order to run with SSL');
+        process.exit(2);
+    }
+    var options = {
+        key: fs.readFileSync(keypath, {encoding: 'utf8'}),
+        cert: fs.readFileSync(certpath, {encoding: 'utf8'})
+    };
+    server = require('https').createServer(options, app);
+    if (opts.port === null) opts.port = 64443;
+}
+console.log(opts.port);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -30,7 +67,7 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(lessMiddleware(path.join(__dirname, 'public')));
 app.get('/javascripts/libquassel.js', function(req, res) {
-	res.sendfile('./node_modules/libquassel/client/libquassel.js');
+	res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.js'));
 });
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -70,17 +107,17 @@ app.use(function(err, req, res, next) {
 
 var debug = require('debug')('quassel-webserver');
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', opts.port);
 app.set('host', process.env.HOST || '');
 
-var server = app.listen(app.get('port'), app.get('host'), function() {
+server.listen(app.get('port'), app.get('host'), function() {
 	debug('Express server listening on port ' + server.address().port);
 });
 
 var io = require('socket.io')(server);
 
 io.on('connection', function(socket) {
-	console.log('CONNECTIOOOOOOOOON');
+	console.log('CONNECTION');
 
 	var registerEvents = [], ee, quassel;
 	
