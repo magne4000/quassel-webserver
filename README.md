@@ -34,6 +34,12 @@ You can generate a new self signed certificate with the following command:
 ```
 openssl req -x509 -newkey rsa:2048 -keyout ssl/key.pem -out ssl/cert.pem -nodes
 ```
+#### Init script
+You can use a startup script to the app at system startup.
+```
+cp scripts/startup /etc/init.d/quasselweb
+```
+and then edit the file /etc/init.d/quasselweb and change `BASEDIR`, `RUNASUSER` and `RUNASGROUP` vars.
 
 #### Query String Arguments
 You can add arguments onto the url to automatically populate the login form. By filling out all 4 arguments, the client will automatically login.
