@@ -62,11 +62,7 @@ Views._decorator.content[MT.Kick] = function(nick, content) {
 //Views._decorator.content[MT.Invite] = '';
 
 Views.RE = {};
-Views.RE.BOLD = new RegExp(String.fromCharCode(2)+"(.*?)"+String.fromCharCode(2), "g");
-Views.RE.NORMAL = new RegExp(String.fromCharCode(15)+"(.*?)"+String.fromCharCode(15), "g");
-Views.RE.ITALIC = new RegExp(String.fromCharCode(29)+"(.*?)"+String.fromCharCode(29), "g");
-Views.RE.UNDERLINE = new RegExp(String.fromCharCode(31)+"(.*?)"+String.fromCharCode(31), "g");
-Views.RE.COLOR = new RegExp(String.fromCharCode(3)+"([0-9]{0,2}),?([0-9]{0,2})(.*?)"+String.fromCharCode(3),"g");
+Views.RE.COLOR = new RegExp("^" + String.fromCharCode(3) + "(([0-9]{1,2})(,([0-9]{1,2}))?)");
 
 var tagsToReplace = {
 	'&': '&amp;',
@@ -139,46 +135,101 @@ Views.utils.nickHash = function(s) {
 	return Math.abs(Views.utils.hashCode(s)) % 16;
 };
 
-Views.utils.getHtmlStyledMessage = function(message) {
-    
-    message = message.replace(Views.RE.BOLD, function(match, m1) {
-        if (m1.length > 0) {
-            return "<b>"+m1+"</b>";
+Views.utils.getHtmlStyledMessage = function(msg) {
+    var out = '',
+        nbSpan = 0,
+        nbSpanColor = 0,
+        spanAttributes = {
+            bold: false,
+            italic: false,
+            underline: false
+        },
+        i = 0,
+        match;
+
+    var openSpan = function (classes) {
+        nbSpan += 1;
+        return '<span class="' + classes + '">';
+    };
+
+    var openColorSpan = function (fgclass, bgclass) {
+        nbSpanColor += 1;
+        var classes = fgclass;
+        if (bgclass) {
+            classes += ' ' + bgclass;
         }
-        return '';
-    });
-    
-    message = message.replace(Views.RE.NORMAL, "$1");
-    
-    message = message.replace(Views.RE.ITALIC, function(match, m1) {
-        if (m1.length > 0) {
-            return "<i>"+m1+"</i>";
+        return openSpan(classes);
+    };
+
+    var closeSpan = function () {
+        nbSpan -= 1;
+        return '</span>';
+    };
+
+    var closeColorSpan = function () {
+        nbSpanColor -= 1;
+        return closeSpan();
+    };
+
+    for (i = 0; i < msg.length; i++) {
+        switch (msg[i]) {
+            case '\x02':
+                if (spanAttributes.bold) {
+                    out += closeSpan();
+                } else {
+                    out += openSpan('mirc-bold');
+                }
+                spanAttributes.bold = !spanAttributes.bold;
+                break;
+            case '\x1D':
+                if (spanAttributes.italic) {
+                    out += closeSpan();
+                } else {
+                    out += openSpan('mirc-italic');
+                }
+                spanAttributes.italic = !spanAttributes.italic;
+                break;
+            case '\x1F':
+                if (spanAttributes.underline) {
+                    out += closeSpan();
+                } else {
+                    out += openSpan('mirc-underline');
+                }
+                spanAttributes.underline = !spanAttributes.underline;
+                break;
+            case '\x03':
+                match = msg.substr(i, 6).match(Views.RE.COLOR);
+                var classfg = false,
+                    classbg = false;
+                if (match) {
+                    i += match[1].length;
+                    // 2 & 4
+                    classfg = "mirc-fg-" + parseInt(match[2], 10);
+                    if (match[4]) {
+                        classbg = "mirc-bg-" + parseInt(match[4], 10);
+                    }
+                    out += openColorSpan(classfg, classbg);
+                } else {
+                    while (nbSpanColor > 0) {
+                        out += closeColorSpan();
+                    }
+                }
+                break;
+            case '\x0F':
+                while (nbSpan > 0) {
+                    out += closeSpan();
+                }
+                spanAttributes.bold = spanAttributes.italic = spanAttributes.underline = spanAttributes.colour = false;
+                break;
+            default:
+                out += msg[i];
+                break;
         }
-        return '';
-    });
-    
-    message = message.replace(Views.RE.UNDERLINE, function(match, m1) {
-        if (m1.length > 0) {
-            return "<u>"+m1+"</u>";
-        }
-        return '';
-    });
-    
-    message = message.replace(Views.RE.COLOR, function(match, fg, bg, m3) {
-        if (m3.length > 0) {
-            classes = [];
-            if (fg.length > 0) {
-                classes.push("mirc-fg-"+fg);
-            }
-            if (bg.length > 0) {
-                classes.push("mirc-bg-"+bg);
-            }
-            return '<span class="'+classes.join(" ")+'">'+m3+'</span>';
-        }
-        return '';
-    });
-    
-    return message;
+    }
+    while (nbSpan > 0) {
+        out += closeSpan();
+    }
+    return out;
 };
 
 Views.alert = function(message) {
