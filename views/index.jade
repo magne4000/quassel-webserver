@@ -19,12 +19,13 @@ block body
                   span.alert-text
                 form#logonform(role='form', action='/interface')
                   h1 Connect to Quassel Core
-                  .form-group
-                    label(for='host') Server address
-                    input#host.form-control(type='text')
-                  .form-group
-                    label(for='server') Server port
-                    input#port.form-control(type='text', value='4242')
+                  unless settings.forcedefault
+                    .form-group
+                      label(for='host') Server address
+                      input#host.form-control(type='text', value='#{settings.default.host}')
+                    .form-group
+                      label(for='server') Server port
+                      input#port.form-control(type='text', value='#{settings.default.port}')
                   .form-group
                     label(for='user') User name
                     input#user.form-control(type='text')

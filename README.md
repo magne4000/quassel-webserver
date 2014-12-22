@@ -21,6 +21,10 @@ and run the following command: `node app.js`
 
 The server is now running.
 
+####
+File `settings.js` can be modified to specify default quasselcore `host` and `port`.
+If `forcedefault` is set to `true`, `host` and `port` will not be editable on client side.
+
 ### Usage
 See the output of the command `node app.js --help`
 
