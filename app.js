@@ -119,7 +119,7 @@ server.listen(app.get('port'), app.get('host'), function() {
 var io = require('socket.io')(server);
 
 io.on('connection', function(socket) {
-    console.log('CONNECTION');
+    console.log('new connection');
 
     var registerEvents = [], ee, quassel;
     
@@ -217,7 +217,7 @@ io.on('connection', function(socket) {
     });
 
     socket.on('disconnect', function() {
-        console.log('DISCONNECTED');
+        console.log('disconnection');
         disconnected();
     });
 
