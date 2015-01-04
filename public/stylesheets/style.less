@@ -21,11 +21,11 @@ html,body,.container {
     margin-bottom: 0;
     
     &:before {
-    	content: none;
+        content: none;
     }
     
     &:after {
-    	content: none;
+        content: none;
     }
 }
 
@@ -34,25 +34,25 @@ html,body,.container {
     display: table-row;
     
     &:before {
-    	content: none;
+        content: none;
     }
     
     &:after {
-    	content: none;
+        content: none;
     }
 }
 
 .table .col-md-1, .table .col-md-2, .table .col-md-3, .table .col-md-4, .table .col-md-5, .table .col-md-6,
 .table .col-md-7, .table .col-md-8, .table .col-md-9, .table .col-md-10, .table .col-md-11, .table .col-md-12, .table .col-md-0 {
-	padding-left: 0;
-	padding-right: 0;
+    padding-left: 0;
+    padding-right: 0;
     display: table-cell;
     float: none;
 }
 
 .table .col-md-0 {
-	min-width: 32px;
-	width: 1%;
+    min-width: 32px;
+    width: 1%;
 }
 
 #container {
@@ -62,10 +62,10 @@ html,body,.container {
 }
 
 .logged {
-	position: absolute;
-	top: @header-height;
-	bottom: 0;
-	.wide;
+    position: absolute;
+    top: @header-height;
+    bottom: 0;
+    .wide;
 }
 
 #buffer-pane {
@@ -75,11 +75,11 @@ html,body,.container {
 }
 
 .buffer-container {
-	overflow: auto;
-	position: absolute;
-	top: 0;
-	width: 100%;
-	bottom: @box-height;
+    overflow: auto;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    bottom: @box-height;
 }
 
 .animation, .animation .network, .animation .network-channels {
@@ -99,7 +99,7 @@ html,body,.container {
 #center {
     font-size: 15px;
     height: 100%;
-	position: relative;
+    position: relative;
 }
 
 .topic {
@@ -118,8 +118,8 @@ html,body,.container {
 }
 
 #topic:hover {
-	position: absolute;
-	z-index: 1;
+    position: absolute;
+    z-index: 1;
 }
 
 #header {
@@ -128,8 +128,8 @@ html,body,.container {
     line-height: @header-height;
     color: @text-color;
     position: absolute;
-	top: 0;
-	.wide;
+    top: 0;
+    .wide;
     .transition(background-color 0.5s linear);
 }
 
@@ -137,6 +137,7 @@ html,body,.container {
     height: 32px;
     display: block;
     cursor: default;
+    white-space: nowrap;
 
     &:hover {
         background-color: darken(@pane-color, 5);
@@ -162,7 +163,7 @@ html,body,.container {
 }
 
 .expanded {
-	background-image: url(/images/expander-expanded.png);
+    background-image: url(/images/expander-expanded.png);
 }
 
 .collapsed {
@@ -213,11 +214,11 @@ html,body,.container {
 }
 
 .buffer-newmessage {
-	background: linear-gradient(to right, @brand-success 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+    background: linear-gradient(to right, @brand-success 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
 }
 
 .buffer-highlight {
-	background: linear-gradient(to right, @brand-warning 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+    background: linear-gradient(to right, @brand-warning 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
 }
 
 .buffer-bottom-bar {
@@ -225,7 +226,7 @@ html,body,.container {
     background-color: darken(@pane-color, 5);
     display: inline-block;
     bottom: 0;
-	position: absolute;
+    position: absolute;
     width: 100%;
 }
 
@@ -244,15 +245,15 @@ html,body,.container {
 }
 
 .showhide.left {
-	left: 0;
+    left: 0;
 }
 
 .showhide.right {
-	right: 0;
+    right: 0;
 }
 
 #hide-nicks, #show-buffers {
-	background-image: url(/images/hide-pane-right.png);
+    background-image: url(/images/hide-pane-right.png);
 }
 
 #show-nicks, #hide-buffers {
@@ -278,7 +279,7 @@ html,body,.container {
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
 .connecting .quassel-logo {
-	.animation(spin 1s linear infinite);
+    .animation(spin 1s linear infinite);
 }
 
 .add-channel {
@@ -294,10 +295,10 @@ html,body,.container {
 }
 
 .input {
-	overflow-y: hidden;
-	position: absolute;
-	bottom: 0;
-	.wide;
+    overflow-y: hidden;
+    position: absolute;
+    bottom: 0;
+    .wide;
 }
 
 .input input {
@@ -311,9 +312,9 @@ html,body,.container {
 #backlog-container {
     overflow: auto;
     top: @box-height;
-	bottom: 0;
-	.wide;
-	position: absolute;
+    bottom: 0;
+    .wide;
+    position: absolute;
 }
 
 ul.backlog {
@@ -321,10 +322,10 @@ ul.backlog {
     padding: 4px;
     border-spacing: 0;
     position: absolute;
-	overflow: auto;
-	top: 0;
-	.wide;
-	bottom: @box-height;
+    overflow: auto;
+    top: 0;
+    .wide;
+    bottom: @box-height;
 }
 
 .backlog li {
@@ -352,15 +353,15 @@ ul.backlog {
 }
 
 .backlog .irc-message > span {
-	display: table-cell;
+    display: table-cell;
 }
 
 .backlog .irc-message.highlighted {
-	background-color: @brand-warning;
+    background-color: @brand-warning;
 }
 
 .backlog .irc-message.markerline > span {
-	border-top: 1px solid @brand-success;
+    border-top: 1px solid @brand-success;
 }
 
 .login-page {
@@ -385,75 +386,75 @@ ul.backlog {
 }
 
 .connecting #header {
-	background-color: @brand-warning;
+    background-color: @brand-warning;
 }
 
 .disconnected #header {
-	background-color: @brand-danger;
+    background-color: @brand-danger;
 }
 
 .connecting #header:after {
-	content: 'Connecting';
-	background-color: @state-warning-bg;
-	border-color: @state-warning-border;
-	color: @state-warning-text;
-	.status;
+    content: 'Connecting';
+    background-color: @state-warning-bg;
+    border-color: @state-warning-border;
+    color: @state-warning-text;
+    .status;
 }
 
 .disconnected #header:after {
-	content: 'Disconnected';
-	background-color: @state-danger-bg;
-	border-color: @state-danger-border;
-	color: @state-danger-text;
-	.status;
+    content: 'Disconnected';
+    background-color: @state-danger-bg;
+    border-color: @state-danger-border;
+    color: @state-danger-text;
+    .status;
 }
 
 .logout, .reconnect {
-	float: right;
-	margin: 8px;
+    float: right;
+    margin: 8px;
 }
 
 .reconnect, .login-page .logout {
-	display: none;
+    display: none;
 }
 
 .connecting .reconnect, .disconnected .logout {
-	display: none;
+    display: none;
 }
 
 .disconnected .reconnect {
-	display: block;
+    display: block;
 }
 
 .prefs .dropdown-toggle {
-	position: absolute;
-	right: 0;
-	opacity: 0.4;
-	z-index: 10;
-	padding: 3px 7px;
-	font-size: 1em;
-	cursor: pointer;
-	
-	&:hover {
-		opacity: 0.8;
-	}
+    position: absolute;
+    right: 0;
+    opacity: 0.4;
+    z-index: 10;
+    padding: 3px 7px;
+    font-size: 1em;
+    cursor: pointer;
+    
+    &:hover {
+        opacity: 0.8;
+    }
 }
 
 .prefs .dropdown-menu {
-	position: relative;
-	top: 30px;
+    position: relative;
+    top: 30px;
 }
 
 .prefs {
-	right: 3px;
-	top: 2px;
-	position: absolute;
+    right: 3px;
+    top: 2px;
+    position: absolute;
 }
 
 .prefs .dropdown-menu > li label {
-	font-weight: inherit;
-	text-transform: inherit;
-	padding: 0 5px;
+    font-weight: inherit;
+    text-transform: inherit;
+    padding: 0 5px;
 }
 
 //MIRC colors
