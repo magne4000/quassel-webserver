@@ -416,6 +416,10 @@ $(document).ready(function() {
         socket.emit('logout');
         window.location.reload();
     });
+    
+    $(".reconnect").on("click", function(evt) {
+        window.location.reload();
+    });
 
     $(".topic li").on("click", function(evt) {
         evt.stopPropagation();
