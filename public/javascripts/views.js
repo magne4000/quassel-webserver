@@ -74,34 +74,42 @@ var tagsToReplace = {
 }, re = /[&<>]/g;
 
 Views.utils.makeLinks = function(str) {
-    if (!str) return null;
-    return str.replace(re, function (tag) {
-        return tagsToReplace[tag] || tag;
-    });
+    if (typeof str === 'string') {
+        return str.replace(re, function (tag) {
+            return tagsToReplace[tag] || tag;
+        });
+    }
+    return '';
 };
 
 Views.utils.escapetags = function(str) {
-    if (!str) return null;
-    return str.replace(re, function (tag) {
-        return tagsToReplace[tag] || tag;
-    });
+    if (typeof str === 'string') {
+        return str.replace(re, function (tag) {
+            return tagsToReplace[tag] || tag;
+        });
+    }
+    return '';
 };
 
-Views.utils.stripname = function(s) {
-    if (!s) return '';
-    if (s[0] === '#') {
-        return s.substring(1);
+Views.utils.stripname = function(str) {
+    if (typeof str === 'string') {
+        if (str[0] === '#') {
+            return str.substring(1);
+        }
+        return str;
     }
-    return s;
+    return '';
 };
 
-Views.utils.stripnick = function(s) {
-    if (!s) return '';
-    var ind = s.indexOf('!');
-    if (ind !== -1) {
-        return s.slice(0, ind);
+Views.utils.stripnick = function(str) {
+    if (typeof str === 'string') {
+        var ind = str.indexOf('!');
+        if (ind !== -1) {
+            return str.slice(0, ind);
+        }
+        return str;
     }
-    return s;
+    return '';
 };
 
 
@@ -122,7 +130,7 @@ Views.utils.HHmmss = function(d) {
 
 Views.utils.hashCode = function(s) {
   var hash = 0, i, chr, len;
-  if (s.length == 0) return hash;
+  if (s.length === 0) return hash;
   for (i = 0, len = s.length; i < len; i++) {
     chr   = s.charCodeAt(i);
     hash  = ((hash << 5) - hash) + chr;
@@ -132,7 +140,8 @@ Views.utils.hashCode = function(s) {
 };
 
 Views.utils.nickHash = function(s) {
-    return Math.abs(Views.utils.hashCode(s)) % 16;
+    if (typeof s === 'string') return Math.abs(Views.utils.hashCode(s)) % 16;
+    return 0;
 };
 
 Views.utils.getHtmlStyledMessage = function(msg) {
