@@ -9,10 +9,81 @@
             b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
         }
         return b;
-    })(window.location.search.substr(1).split('&'))
+    })(window.location.search.substr(1).split('&'));
 })(jQuery);
 
-var networks = null
+var CircularBuffer = function(length){
+    this.wpointer = 0;
+    this.rpointer = 0;
+    this.lrpointer = null;
+    this.buffer = [];
+    this.max = length;
+};
+
+CircularBuffer.prototype.push = function(item){
+    this.buffer[this.wpointer] = item;
+    this.wpointer = (this.max + this.wpointer + 1) % this.max;
+    this.rpointer = this.wpointer;
+};
+
+CircularBuffer.prototype._previous = function(){
+    if (this.buffer.length === this.max) {
+        if (this.wpointer === this.max - 1) {
+            if (this.rpointer === 0) return false;
+        } else if (this.rpointer === this.wpointer && this.lrpointer !== null) {
+            return false;
+        }
+    } else if (this.rpointer === 0) return false;
+    this.lrpointer = this.rpointer;
+    this.rpointer -= 1;
+    if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
+    return true;
+};
+
+CircularBuffer.prototype.previous = function(){
+    if (this.buffer.length === 0) return null;
+    if (this._previous()) {
+        return this.buffer[this.rpointer];
+    }
+    return null;
+};
+
+CircularBuffer.prototype._next = function(key){
+    var ret = true;
+    if (this.buffer.length === this.max) {
+        if (this.lrpointer === null) {
+            ret = false;
+        } else if (this.wpointer === 0) {
+            if (this.rpointer === this.max - 1) ret = false;
+        } else if (this.rpointer + 1 === this.wpointer) {
+            ret = false;
+        }
+    } else if (this.rpointer === this.wpointer || this.rpointer === this.wpointer - 1) ret = false;
+    if (!ret) {
+        this.lrpointer = null;
+        return false;
+    }
+    this.lrpointer = this.rpointer;
+    this.rpointer += 1;
+    if (this.rpointer >= this.buffer.length) this.rpointer = 0;
+    return true;
+};
+
+CircularBuffer.prototype.next = function(){
+    if (this.buffer.length === 0) return null;
+    if (this._next()) {
+        return this.buffer[this.rpointer];
+    }
+    return null;
+};
+
+CircularBuffer.prototype.clearReadPointer = function(){
+    this.rpointer = this.wpointer - 1;
+    if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
+    this.lrpointer = null;
+};
+
+var networks = null;
 var socket = io(undefined, {
     timeout: 6000,
     reconnectionAttempts: 5
@@ -29,6 +100,7 @@ var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBu
 var er = null;
 var changesTimeout = [];
 var loadingMoreBacklogs = [];
+var messagesHistory = {};
 
 function connect(sock) {
     var host = $("#host").val();
@@ -99,6 +171,23 @@ er.on('network.init', function(next, networkId) {
     Views.addNetwork(network);
     next();
 }).after('network._init');
+
+er.on('network.disconnected', function(next, networkId) {
+    console.log('network.disconnected');
+    var network = networks.get(networkId);
+    Views.disconnectNetwork(network);
+    next();
+}).after('network.init');
+
+er.on('network.connected', function(next, networkId) {
+    console.log('network.connected');
+    var network = networks.get(networkId);
+    var buffers = network.getBufferCollection();
+    reviver.afterReviving(buffers, function(obj) {
+        Views.connectNetwork(network, obj);
+    });
+    next();
+}).after('network.init');
 
 er.on('network.addbuffer', function(next, networkId, bufferId) {
     console.log('addbuffer');
@@ -205,8 +294,12 @@ er.on('channel.join', function(next, bufferId, nick) {
     next();
 });
 
+er.on('user.quit', function(next, networkId, nick) {
+    var network = networks.get(networkId);
+    // TODO
+});
+
 er.on('user.part', function(next, networkId, nick, bufferName) {
-    console.log(networkId, nick, bufferName);
     var network = networks.get(networkId);
     var buffer = network.getBuffer(bufferName);
     if (Views.isBufferShown(buffer.id)) {
@@ -279,12 +372,43 @@ $(document).ready(function() {
         $('#modal-join-channel-name').val("");
     });
 
+    var addMessageHistory = function(message, bufferId) {
+        if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
+        messagesHistory[''+bufferId].push(message);
+    };
+
+    var clearMessageHistory = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            messagesHistory[''+bufferId].clearReadPointer();
+        }
+    };
+
     var sendMessage = function() {
         if (socket !== null) {
             var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
+            clearMessageHistory(bufferId);
             var message = $("#messagebox").val();
             $("#messagebox").val("");
             socket.emit('sendMessage', bufferId, message);
+            addMessageHistory(message, bufferId);
+        }
+    };
+
+    var showPreviousMessage = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            var msg = messagesHistory[''+bufferId].previous();
+            if (msg !== null) {
+                $("#messagebox").val(msg);
+            }
+        }
+    };
+
+    var showNextMessage = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            var msg = messagesHistory[''+bufferId].next();
+            if (msg !== null) {
+                $("#messagebox").val(msg);
+            }
         }
     };
 
@@ -297,6 +421,12 @@ $(document).ready(function() {
         if (evt.which == 13) { // Enter
             evt.preventDefault();
             sendMessage();
+        } else if (evt.which == 38) { // Arrow up
+            evt.preventDefault();
+            showPreviousMessage(parseInt($(".backlog").data('currentBufferId'), 10));
+        } else if (evt.which == 40) { // Arrow down
+            evt.preventDefault();
+            showNextMessage(parseInt($(".backlog").data('currentBufferId'), 10));
         } else if (evt.which == 9) { // Tab
             console.log('tab');
             evt.preventDefault();

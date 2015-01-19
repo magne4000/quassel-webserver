@@ -129,14 +129,14 @@ Views.utils.HHmmss = function(d) {
 };
 
 Views.utils.hashCode = function(s) {
-  var hash = 0, i, chr, len;
-  if (s.length === 0) return hash;
-  for (i = 0, len = s.length; i < len; i++) {
-    chr   = s.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
+    var hash = 0, i, chr, len;
+    if (s.length === 0) return hash;
+    for (i = 0, len = s.length; i < len; i++) {
+        chr   = s.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
 };
 
 Views.utils.nickHash = function(s) {
@@ -337,24 +337,46 @@ Views.addNetwork = function(network) {
     }
 };
 
-Views.addBuffer = function(networkname, buffer) {
-    // Keep buffer ordered alphabetically
-    var channels = $('#'+networkname+'-channels .channel'), names = [], bufferIds = [], i = 0;
-    var html = Views._buffer(buffer.id, buffer.name, buffer.active);
-    var lowercaseName = buffer.name.toLowerCase(), spot = null;
-    channels.each(function(){
-        names.push($(this).text().toLowerCase());
-        bufferIds.push(parseInt($(this).attr("data-buffer-id"), 10));
-    });
-    for (; i<names.length && spot === null; i++) {
-        if (lowercaseName.localeCompare(names[i]) < 0) {
-            spot = i;
+Views.connectNetwork = function(network, buffers) {
+    $("#network-" + network.networkName).removeClass('off').addClass('on');
+    $("#" + network.networkName + "-channels .channel").each(function(){
+        var buffer = buffers.getBuffer(parseInt($(this).data("bufferId"), 10));
+        if (buffer.active) {
+            $(this).removeClass('off').addClass('on');
         }
-    }
-    if (spot === null) {
-        $('#'+networkname+'-channels').append(html);
+    });
+};
+
+Views.disconnectNetwork = function(network) {
+    $("#network-" + network.networkName).removeClass('on').addClass('off');
+    $("#" + network.networkName + "-channels .channel").removeClass('on').addClass('off');
+};
+
+Views.addBuffer = function(networkname, buffer) {
+    // If buffer already exists, just activate it
+    if ($(".channel[data-buffer-id="+buffer.id+"]").length > 0) {
+        if (buffer.active) {
+            $(".channel[data-buffer-id="+buffer.id+"]").removeClass('off').addClass('on');
+        }
     } else {
-        $(".channel[data-buffer-id="+bufferIds[spot]+"]").before(html);
+        // Keep buffer ordered alphabetically
+        var channels = $('#'+networkname+'-channels .channel'), names = [], bufferIds = [], i = 0;
+        var html = Views._buffer(buffer.id, buffer.name, buffer.active);
+        var lowercaseName = buffer.name.toLowerCase(), spot = null;
+        channels.each(function(){
+            names.push($(this).text().toLowerCase());
+            bufferIds.push(parseInt($(this).attr("data-buffer-id"), 10));
+        });
+        for (; i<names.length && spot === null; i++) {
+            if (lowercaseName.localeCompare(names[i]) < 0) {
+                spot = i;
+            }
+        }
+        if (spot === null) {
+            $('#'+networkname+'-channels').append(html);
+        } else {
+            $(".channel[data-buffer-id="+bufferIds[spot]+"]").before(html);
+        }
     }
 };
 
