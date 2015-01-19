@@ -135,7 +135,6 @@ html,body,.container {
 
 .network, .channel, .user, .user-group {
     height: 32px;
-    display: block;
     cursor: default;
     white-space: nowrap;
 
@@ -144,20 +143,25 @@ html,body,.container {
     }
 }
 
+.network, .user-group {
+    display: flex;
+}
+
+.channel, .user {
+    display: block;
+}
+
 .network-name, .group-name {
     height: 32px;
-    display: inline-block;
     line-height: 32px;
     opacity: 0.75;
+    flex: 1;
     font-family: "Roboto Condensed";
     text-transform: uppercase;
-    float: left;
 }
 
 .collapsed, .expanded {
     .icon;
-    display: inline-block;
-    float: left;
     opacity: 0.5;
     cursor: pointer;
 }
