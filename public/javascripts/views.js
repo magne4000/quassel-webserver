@@ -112,8 +112,6 @@ Views.utils.stripnick = function(str) {
     return '';
 };
 
-
-
 Views.utils.HHmmss = function(d) {
     var dateObject = null;
     if (d instanceof Date) {
@@ -239,11 +237,6 @@ Views.utils.getHtmlStyledMessage = function(msg) {
         out += closeSpan();
     }
     return out;
-};
-
-Views.alert = function(message) {
-    $(".alert").removeClass("hidden");
-    $(".alert .alert-text").html(message);
 };
 
 Views._network = function(name, isConnected) {
@@ -639,3 +632,4 @@ Views.hideMessageTypes = function(type) {
     localStorage.setItem("filtered-types-buffer-"+bufferId, JSON.stringify(filter));
     $(".backlog").addClass("hide-"+type);
 };
+

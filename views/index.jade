@@ -1,14 +1,25 @@
-extends layout
+doctype html
+html
+    head
+      meta(charset='utf-8')
+      title Quassel Web App
+      meta(http-equiv='X-UA-Compatible', content='IE=edge')
+      meta(name='description', content='Quassel Web App')
+      meta(name='author', content='Joël Charles')
+      meta(name='author', content='Johannes Siipola')
+      link(rel='shortcut icon', href='favicon.ico')
+      link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
+      link(rel='stylesheet', href='/stylesheets/fonts.css')
+      link(rel='stylesheet', href='/stylesheets/style.css')
 
-block body
-    body.login-page
-      #container
+    body.login-page(ng-app="quassel")
+      #container(ng-controller="SocketController")
         #header
           span.quassel-logo
           | Quassel Web App
           button.btn.btn-default.logout(type="button") Logout
           button.btn.btn-default.reconnect(type="button") Reconnect
-        .container.login
+        .container.login(ng-if="!logged")
           .row
             .col-md-3
             .col-md-6.row.login-container
@@ -17,28 +28,36 @@ block body
                     span(aria-hidden="true") &times;
                     span.sr-only Close
                   span.alert-text
-                form#logonform(role='form', action='/interface')
+                form#logonform(role='form', ng-submit="login()")
                   h1 Connect to Quassel Core
                   unless settings.forcedefault
                     .form-group
                       label(for='host') Server address
-                      input#host.form-control(type='text', value='#{settings.default.host}')
+                      input#host.form-control(type='text', value='#{settings.default.host}', ng-model="$parent.host")
                     .form-group
-                      label(for='server') Server port
-                      input#port.form-control(type='text', value='#{settings.default.port}')
+                      label(for='port') Server port
+                      input#port.form-control(type='text', value='#{settings.default.port}', ng-model="$parent.port")
                   .form-group
                     label(for='user') User name
-                    input#user.form-control(type='text')
+                    input#user.form-control(type='text', ng-model="$parent.user")
                   .form-group
                     label(for='password') Password
-                    input#password.form-control(type='password')
-                  button.btn.btn-primary.btn-connect(type='submit', disabled='disabled') Connect
+                    input#password.form-control(type='password', ng-model="$parent.password")
+                  button.btn.btn-primary.btn-connect(type='submit', ng-disabled="{{connected}}") Connect
             .col-md-3
         
-        .logged.hidden.container-fluid.table
+        .logged.ng-hide.container-fluid.table(ng-show="logged", ng-controller="NetworkController")
           .row
             #buffer-pane.animation.col-md-2
               .buffer-container
+                .network(id="network-{{network.networkName}}", class="{{network.isConnected ? 'on' : 'off'}}", ng-repeat-start="network in networks")
+                  span(class="{{network.isConnected ? 'expanded' : 'collapsed'}}", data-target="{{network.networkName}}-channels")
+                  span.network-name {{network.networkName}}
+                  a.add-channel(data-network="{{network.networkName}}", data-toggle="modal", data-target="#modal-join-channel", title="Join channel")
+                .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
+                  .channel(class="{{channel.active ? 'on' : 'off'}}", data-buffer-id="{{channel.id}}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter")
+                    span.channel-icon
+                    span.channel-name {{channel.name}}
               .buffer-bottom-bar
                 a#hide-buffers.showhide.right
                 a#show-buffers.showhide.right(style='display: none;')
@@ -85,6 +104,11 @@ block body
                         label Default
               #backlog-container
                 ul.backlog
+                  li.irc-message(ng-repeat="message in buffer.messages.values()", class="type-{{message.type}}")
+                    span.timestamp
+                      span {{message.datetime | duration}}
+                    span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
+                    span.message(ng-bind-html="message | decoratecontent | color")
                 .input
                   form#messageform
                     input#messagebox(type='text', placeholder='Enter your message here')
@@ -123,12 +147,14 @@ block body
                     button.btn.btn-primary(type='button') Join channel
 
       script(src='/javascripts/jquery-1.11.1.min.js')
-      script(src='/javascripts/jquery.mousewheel.min.js')
-      script(src='/javascripts/bootstrap.min.js')
+      script(src='/javascripts/angular.min.js')
       script(src='/socket.io/socket.io.js')
-      script(src='/javascripts/autolinker.min.js')
+      script(src='/javascripts/ngSocket.js')
+      script(src='/javascripts/Autolinker.min.js')
+      script(src='/javascripts/events.js')
+      script(src='/javascripts/angular-sanitize.min.js')
       script(src='/javascripts/libquassel.js')
       script(src='/javascripts/json-patch.js')
-      script(src='/javascripts/events.js')
+      script(src='/javascripts/controller.js')
       script(src='/javascripts/views.js')
       script(src='/javascripts/script.js')

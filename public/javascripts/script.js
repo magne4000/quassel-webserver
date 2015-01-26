@@ -83,72 +83,13 @@ CircularBuffer.prototype.clearReadPointer = function(){
     this.lrpointer = null;
 };
 
-var networks = null;
-var socket = io(undefined, {
-    timeout: 6000,
-    reconnectionAttempts: 5
-});
-var NetworkCollection = require('network').NetworkCollection;
-var Network = require('network').Network;
-var IRCMessage = require('message').IRCMessage;
-var IRCBufferCollection = require('buffer').IRCBufferCollection;
-var IRCBuffer = require('buffer').IRCBuffer;
-var IRCUser = require('user');
-var HashMap = require('serialized-hashmap');
-var Reviver = require('serializer').Reviver;
-var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap, IRCMessage);
+
 var er = null;
 var changesTimeout = [];
 var loadingMoreBacklogs = [];
 var messagesHistory = {};
 
-function connect(sock) {
-    var host = $("#host").val();
-    var port = $("#port").val();
-    var user = $("#user").val();
-    var password = $("#password").val();
-
-    sock.emit('credentials', {
-        server: host,
-        port: port,
-        user: user,
-        password: password
-    });
-}
-
-socket.on("connected", function() {
-    console.log('CONNECTED');
-    Views.connected();
-});
-
-er = new EventReceiver(socket, function(event) {
-    socket.emit('register', event);
-});
-
-er.on('_error', function(next, e) {
-    console.log('ERROR');
-    console.log(e);
-    switch (e.errno) {
-    case 'ECONNREFUSED':
-        Views.alert("Connection refused.");
-        break;
-    default:
-        console.log('Unknown error.');
-    }
-    next();
-});
-
-er.on('loginfailed', function(next) {
-    Views.alert("Invalid username or password.");
-    next();
-});
-
-er.on('login', function(next) {
-    console.log('Logged in');
-    Views.showQuassel();
-    next();
-});
-
+/*
 // Internal
 er.on('_init', function(next, data) {
     console.log('_init');
@@ -168,7 +109,7 @@ er.on('network._init', function(next, networkId, data) {
 er.on('network.init', function(next, networkId) {
     console.log('network.init');
     var network = networks.get(networkId);
-    Views.addNetwork(network);
+    //Views.addNetwork(network);
     next();
 }).after('network._init');
 
@@ -195,10 +136,10 @@ er.on('network.addbuffer', function(next, networkId, bufferId) {
     var buffer = network.getBufferCollection().getBuffer(bufferId);
     reviver.afterReviving(buffer, function(obj) {
         if (obj.isStatusBuffer()) {
-            Views.setStatusBuffer(network.networkName, obj);
+//            Views.setStatusBuffer(network.networkName, obj);
         }
         else {
-            Views.addBuffer(network.networkName, obj);
+//            Views.addBuffer(network.networkName, obj);
         }
         next();
     });
@@ -307,37 +248,8 @@ er.on('user.part', function(next, networkId, nick, bufferName) {
     }
     next();
 });
+*/
 
-//Socket.io events
-
-socket.on('disconnect', function() {
-    console.log('DISCONNECT');
-    er.clearReceived();
-    Views.disconnected();
-});
-
-socket.on('reconnect_attempt', function() {
-    console.log('RECONNECTING');
-    Views.connecting();
-});
-
-socket.on('reconnect_error', function() {
-    console.log('RECONNECTING_ERROR');
-    Views.disconnected();
-});
-
-socket.on('reconnect_failed', function() {
-    console.log('RECONNECTING_FAILED');
-    Views.disconnected();
-});
-
-socket.on('reconnect', function() {
-    console.log('RECONNECT');
-    er.redoCallbacks();
-    Views.connected();
-    Views.clear();
-    connect(socket);
-});
 
 $(document).ready(function() {
     $(document).on("click", ".expanded", function() {
@@ -534,12 +446,6 @@ $(document).ready(function() {
                 }
             }
         }
-    });
-
-    $("#logonform").on("submit", function(evt) {
-        console.log('SENDING CREDENTIALS');
-        evt.preventDefault();
-        connect(socket);
     });
 
     $(".logout").on("click", function(evt) {

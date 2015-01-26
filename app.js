@@ -121,7 +121,7 @@ var io = require('socket.io')(server);
 io.on('connection', function(socket) {
     console.log('new connection');
 
-    var registerEvents = [], ee, quassel;
+    var registerEvents = ['login', 'loginFailed'], ee, quassel;
     
     var disconnected = function() {
         if (ee) {
@@ -209,7 +209,7 @@ io.on('connection', function(socket) {
             if (this.event !== 'register' && this.event !== 'network.init' && registerEvents.indexOf(this.event) !== -1) {
                 setTimeout(function() {
                     socket.emit.apply(socket, args);
-                }, 100);
+                }, 10);
             }
         });
 
