@@ -79,8 +79,8 @@ html
                     li
                         a.btn(ng-click="setAsDefault()", href="#") Set as default
               #backlog-container
-                ul.backlog
-                  li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'datetime'", class="type-{{message.type}} {{message.isHighlighted()?'highlighted':''}}", ng-if="currentFilter2[''+message.type] != true")
+                ul.backlog(backlog="loadMore", parent-buffer="buffer")
+                  li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}} {{message.isHighlighted()?'highlighted':''}}")
                     span.timestamp
                       span {{message.datetime | duration}}
                     span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
@@ -125,6 +125,7 @@ html
       script(src='/javascripts/jquery-1.11.1.min.js')
       script(src='/javascripts/angular.min.js')
       script(src='/javascripts/ui-bootstrap-0.12.0.min.js')
+      script(src='/javascripts/backlog.js')
       script(src='/socket.io/socket.io.js')
       script(src='/javascripts/ngSocket.js')
       script(src='/javascripts/events.js')

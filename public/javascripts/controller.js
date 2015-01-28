@@ -1,4 +1,4 @@
-var myModule = angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap']);
+var myModule = angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'backlog']);
 
 myModule.directive('input', function ($parse) {
     return {
@@ -418,7 +418,9 @@ myModule.filter('hash', function() {
 myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', function($scope, $networks, $socket, $er, $reviver) {
     $scope.networks = {};
     $scope.buffer = null;
+    
     var changesTimeout = [];
+    var loadingMoreBacklogs = [];
     
     $er.setCallback(function(event) {
         $socket.emit('register', event);
@@ -472,6 +474,13 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
         next();
     }).after('network.init');
     
+    $er.on('buffer.backlog', function(next, bufferId, messageIds) {
+        if ($scope.buffer !== null) {
+            loadingMoreBacklogs[''+$scope.buffer.id] = false;
+        }
+        next();
+    });
+    
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
         var id = 0;
@@ -480,6 +489,16 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
         });
         
         $socket.emit('markBufferAsRead', channel.id, id);
+    };
+    
+    $scope.loadMore = function() {
+        if ($scope.buffer !== null && (typeof loadingMoreBacklogs[''+$scope.buffer.id] === 'undefined' || loadingMoreBacklogs[''+$scope.buffer.id] === false)) {
+            var firstMessage = Math.min.apply(null, $scope.buffer.messages.keys());
+            loadingMoreBacklogs[''+$scope.buffer.id] = true;
+            $socket.emit('moreBacklogs', $scope.buffer.id, firstMessage);
+            return true;
+        }
+        return false;
     };
 }]);
 
