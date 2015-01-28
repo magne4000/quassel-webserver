@@ -1,4 +1,4 @@
-var myModule = angular.module('quassel', ['ngSocket', 'ngSanitize', 'er']);
+var myModule = angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap']);
 
 myModule.directive('input', function ($parse) {
     return {
@@ -8,6 +8,121 @@ myModule.directive('input', function ($parse) {
             if (attrs.ngModel && attrs.value) {
                 $parse(attrs.ngModel).assign(scope, attrs.value);
             }
+        }
+    };
+});
+
+myModule.directive('caret', function() {
+    var MT = require('message').Type;
+    
+    function setCaretPosition(elem, caretPos) {
+        if (elem !== null) {
+            if (elem.createTextRange) {
+                var range = elem.createTextRange();
+                range.move('character', caretPos);
+                range.select();
+            } else {
+                if (elem.selectionStart) {
+                    elem.focus();
+                    elem.setSelectionRange(caretPos, caretPos);
+                } else
+                    elem.focus();
+            }
+        }
+    }
+
+    return {
+        link: function(scope, element, attrs) {
+
+            element.on('keydown', function($event) {
+                if ($event.keyCode == 38) { // Arrow up
+                    $event.preventDefault();
+                    scope.showPreviousMessage(scope.buffer.id);
+                } else if ($event.keyCode == 40) { // Arrow down
+                    $event.preventDefault();
+                    scope.showNextMessage(scope.buffer.id);
+                } else if ($event.keyCode == 9) { // Tab
+                    $event.preventDefault();
+                    var tokenEnd = element[0].selectionEnd;
+                        
+                    var message = scope.message;
+                    var messageLeft = message.substr(0, tokenEnd);
+                    var tokenStart = messageLeft.lastIndexOf(' ');
+                    tokenStart += 1; // -1 (not found) => 0 (start)
+                    var token = messageLeft.substr(tokenStart);
+        
+                    // Find the most recent nick who has talked.
+                    var getMostRecentNick = function(token) {
+                        if (!scope.buffer) return;
+        
+                        var keys = scope.buffer.messages.keys();
+                        keys.sort();
+                        keys.reverse();
+        
+                        for (var i = 0; i < keys.length; i++) {
+                            var messageId = keys[i];
+                            var message = scope.buffer.messages.get(messageId);
+        
+                            // Only check Plain and Action messages for nicks.
+                            if (!(message.type == MT.Plain || message.type == MT.Action))
+                                continue;
+        
+                            var nick = message.getNick();
+                            if (nick.length <= token.length)
+                                continue;
+        
+                            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
+                                return nick;
+                        }
+                    };
+        
+                    // Find the closet nick alphabetically from the current buffer's nick list.
+                    var getNickAlphabetically = function(token) {
+                        if (!scope.buffer) return;
+        
+                        var nicks = Object.keys(scope.buffer.nickUserMap);
+                        nicks.sort(function(a, b) {
+                            return a.toLowerCase().localeCompare(b.toLowerCase());
+                        });
+        
+                        for (var i = 0; i < nicks.length; i++) {
+                            var nick = nicks[i];
+                            if (nick.length <= token.length)
+                                continue;
+        
+                            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
+                                return nick;
+                        }
+                    };
+
+                    var getTokenCompletion = function(token) {
+                        var nick = getMostRecentNick(token);
+                        if (!nick)
+                            nick = getNickAlphabetically(token);
+                        console.log(nick);
+                        if (nick) {
+                            if (tokenStart === 0) {
+                                return nick + ': ';
+                            } else {
+                                return nick;
+                            }
+                        }
+                    };
+        
+                    var newToken = getTokenCompletion(token);
+        
+                    if (newToken) {
+                        var newMessage = message.substr(0, tokenStart) + newToken + message.substr(tokenEnd);
+                        scope.$apply(function(){
+                            scope.message = newMessage;
+                        });
+                        var newTokenEnd = tokenEnd + newToken.length - token.length;
+                        setCaretPosition(element[0], newTokenEnd);
+                    }
+                }
+            });
+            
+            
         }
     };
 });
@@ -281,12 +396,6 @@ myModule.filter('escape', function() {
             return input.replace(re, function (tag) {
                 return tagsToReplace[tag] || tag;
             });
-        } else if (typeof input !== 'undefined' && typeof input.content === 'string') {
-            var msg = input;
-            msg.content = msg.content.replace(re, function (tag) {
-                return tagsToReplace[tag] || tag;
-            });
-            return msg;
         }
         return '';
     };
@@ -365,6 +474,12 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
+        var id = 0;
+        channel.messages.forEach(function(val, key) {
+            if (val.id > id) id = val.id;
+        });
+        
+        $socket.emit('markBufferAsRead', channel.id, id);
     };
 }]);
 
@@ -447,6 +562,164 @@ myModule.controller('SocketController', ['$scope', '$socket', '$er', function($s
     });
     */
     
+}]);
+
+myModule.controller('InputController', ['$scope', '$socket', function($scope, $socket) {
+    var messagesHistory = [];
+    var MT = require('message').Type;
+    
+    $scope.message = '';
+    
+    var CircularBuffer = function(length){
+        this.wpointer = 0;
+        this.rpointer = 0;
+        this.lrpointer = null;
+        this.buffer = [];
+        this.max = length;
+    };
+    
+    CircularBuffer.prototype.push = function(item){
+        this.buffer[this.wpointer] = item;
+        this.wpointer = (this.max + this.wpointer + 1) % this.max;
+        this.rpointer = this.wpointer;
+    };
+    
+    CircularBuffer.prototype._previous = function(){
+        if (this.buffer.length === this.max) {
+            if (this.wpointer === this.max - 1) {
+                if (this.rpointer === 0) return false;
+            } else if (this.rpointer === this.wpointer && this.lrpointer !== null) {
+                return false;
+            }
+        } else if (this.rpointer === 0) return false;
+        this.lrpointer = this.rpointer;
+        this.rpointer -= 1;
+        if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
+        return true;
+    };
+    
+    CircularBuffer.prototype.previous = function(){
+        if (this.buffer.length === 0) return null;
+        if (this._previous()) {
+            return this.buffer[this.rpointer];
+        }
+        return null;
+    };
+    
+    CircularBuffer.prototype._next = function(key){
+        var ret = true;
+        if (this.buffer.length === this.max) {
+            if (this.lrpointer === null) {
+                ret = false;
+            } else if (this.wpointer === 0) {
+                if (this.rpointer === this.max - 1) ret = false;
+            } else if (this.rpointer + 1 === this.wpointer) {
+                ret = false;
+            }
+        } else if (this.rpointer === this.wpointer || this.rpointer === this.wpointer - 1) ret = false;
+        if (!ret) {
+            this.lrpointer = null;
+            return false;
+        }
+        this.lrpointer = this.rpointer;
+        this.rpointer += 1;
+        if (this.rpointer >= this.buffer.length) this.rpointer = 0;
+        return true;
+    };
+    
+    CircularBuffer.prototype.next = function(){
+        if (this.buffer.length === 0) return null;
+        if (this._next()) {
+            return this.buffer[this.rpointer];
+        }
+        return null;
+    };
+    
+    CircularBuffer.prototype.clearReadPointer = function(){
+        this.rpointer = this.wpointer - 1;
+        if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
+        this.lrpointer = null;
+    };
+    
+    $scope.addMessageHistory = function(message, bufferId) {
+        if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
+        messagesHistory[''+bufferId].push(message);
+    };
+
+    $scope.clearMessageHistory = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            messagesHistory[''+bufferId].clearReadPointer();
+        }
+    };
+    
+    $scope.showPreviousMessage = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            var msg = messagesHistory[''+bufferId].previous();
+            if (msg !== null) {
+                $("#messagebox").val(msg);
+            }
+        }
+    };
+
+    $scope.showNextMessage = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            var msg = messagesHistory[''+bufferId].next();
+            if (msg !== null) {
+                $("#messagebox").val(msg);
+            }
+        }
+    };
+    
+    $scope.sendMessage = function() {
+        if (typeof $scope.buffer.id === "number" && $scope.message.length > 0) {
+            $scope.clearMessageHistory($scope.buffer.id);
+            $socket.emit('sendMessage', $scope.buffer.id, $scope.message);
+            $scope.addMessageHistory($scope.message, $scope.buffer.id);
+            $scope.message = '';
+        }
+    };
+}]);
+
+myModule.controller('FilterController', ['$scope', function($scope) {
+    var filters = [
+        {label: 'Join', type: 32, value: false},
+        {label: 'Part', type: 64, value: false},
+        {label: 'Quit', type: 128, value: false},
+        {label: 'Nick', type: 8, value: false},
+        {label: 'Mode', type: 16, value: false},
+        {label: 'Topic', type: 16384, value: false},
+        {label: 'DayChange', type: 8192, value: false},
+    ];
+    var bufferFilters = [];
+    $scope.currentFilter = [];
+    $scope.currentFilter2 = {};
+    $scope.defaultFilter = filters;
+    
+    $scope.$watch('buffer', function(newValue, oldValue) {
+        if (oldValue !== null) {
+            bufferFilters[''+oldValue.id] = angular.copy($scope.currentFilter);
+        }
+        if ((newValue !== null && oldValue === null) || (newValue !== null && oldValue !== null && newValue.id !== oldValue.id)) {
+            if (typeof bufferFilters[''+newValue.id] === 'undefined') {
+                bufferFilters[''+newValue.id] = angular.copy($scope.defaultFilter);
+            }
+            $scope.currentFilter = bufferFilters[''+newValue.id];
+        }
+    });
+    
+    $scope.$watch('currentFilter', function(newValue, oldValue) {
+        angular.forEach($scope.currentFilter, function(value, key) {
+            $scope.currentFilter2[''+value.type] = value.value;
+        });
+    }, true);
+    
+    $scope.setAsDefault = function() {
+        $scope.defaultFilter = angular.copy($scope.currentFilter);
+    };
+    
+    $scope.useDefault = function() {
+        $scope.currentFilter = angular.copy($scope.defaultFilter);
+    };
 }]);
 
 myModule.run([function(){

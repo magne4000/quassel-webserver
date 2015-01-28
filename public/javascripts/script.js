@@ -12,76 +12,7 @@
     })(window.location.search.substr(1).split('&'));
 })(jQuery);
 
-var CircularBuffer = function(length){
-    this.wpointer = 0;
-    this.rpointer = 0;
-    this.lrpointer = null;
-    this.buffer = [];
-    this.max = length;
-};
 
-CircularBuffer.prototype.push = function(item){
-    this.buffer[this.wpointer] = item;
-    this.wpointer = (this.max + this.wpointer + 1) % this.max;
-    this.rpointer = this.wpointer;
-};
-
-CircularBuffer.prototype._previous = function(){
-    if (this.buffer.length === this.max) {
-        if (this.wpointer === this.max - 1) {
-            if (this.rpointer === 0) return false;
-        } else if (this.rpointer === this.wpointer && this.lrpointer !== null) {
-            return false;
-        }
-    } else if (this.rpointer === 0) return false;
-    this.lrpointer = this.rpointer;
-    this.rpointer -= 1;
-    if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
-    return true;
-};
-
-CircularBuffer.prototype.previous = function(){
-    if (this.buffer.length === 0) return null;
-    if (this._previous()) {
-        return this.buffer[this.rpointer];
-    }
-    return null;
-};
-
-CircularBuffer.prototype._next = function(key){
-    var ret = true;
-    if (this.buffer.length === this.max) {
-        if (this.lrpointer === null) {
-            ret = false;
-        } else if (this.wpointer === 0) {
-            if (this.rpointer === this.max - 1) ret = false;
-        } else if (this.rpointer + 1 === this.wpointer) {
-            ret = false;
-        }
-    } else if (this.rpointer === this.wpointer || this.rpointer === this.wpointer - 1) ret = false;
-    if (!ret) {
-        this.lrpointer = null;
-        return false;
-    }
-    this.lrpointer = this.rpointer;
-    this.rpointer += 1;
-    if (this.rpointer >= this.buffer.length) this.rpointer = 0;
-    return true;
-};
-
-CircularBuffer.prototype.next = function(){
-    if (this.buffer.length === 0) return null;
-    if (this._next()) {
-        return this.buffer[this.rpointer];
-    }
-    return null;
-};
-
-CircularBuffer.prototype.clearReadPointer = function(){
-    this.rpointer = this.wpointer - 1;
-    if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
-    this.lrpointer = null;
-};
 
 
 var er = null;
@@ -264,13 +195,6 @@ $(document).ready(function() {
         $(this).removeClass("collapsed").addClass("expanded");
     });
 
-    $(document).on("click", ".channel, .network .network-name", function() {
-        var bufferId = parseInt($(this).data("bufferId"), 10);
-        var buffer = networks.findBuffer(bufferId);
-        var lastMessageId = Views.showBuffer(buffer);
-        socket.emit('markBufferAsRead', buffer.id, lastMessageId);
-    });
-
     $(document).on("click", ".add-channel", function() {
         var NetworkId = $(this).data('network');
         $("#join-network-name").html(NetworkId);
@@ -282,150 +206,6 @@ $(document).ready(function() {
 
     $('#modal-join-channel').on('hidden.bs.modal', function() {
         $('#modal-join-channel-name').val("");
-    });
-
-    var addMessageHistory = function(message, bufferId) {
-        if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
-        messagesHistory[''+bufferId].push(message);
-    };
-
-    var clearMessageHistory = function(bufferId) {
-        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
-            messagesHistory[''+bufferId].clearReadPointer();
-        }
-    };
-
-    var sendMessage = function() {
-        if (socket !== null) {
-            var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
-            clearMessageHistory(bufferId);
-            var message = $("#messagebox").val();
-            $("#messagebox").val("");
-            socket.emit('sendMessage', bufferId, message);
-            addMessageHistory(message, bufferId);
-        }
-    };
-
-    var showPreviousMessage = function(bufferId) {
-        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
-            var msg = messagesHistory[''+bufferId].previous();
-            if (msg !== null) {
-                $("#messagebox").val(msg);
-            }
-        }
-    };
-
-    var showNextMessage = function(bufferId) {
-        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
-            var msg = messagesHistory[''+bufferId].next();
-            if (msg !== null) {
-                $("#messagebox").val(msg);
-            }
-        }
-    };
-
-    $("form#messageform").on("submit", function(evt) {
-        evt.preventDefault();
-        sendMessage();
-    });
-
-    $("#messagebox").on("keydown", function(evt) {
-        if (evt.which == 13) { // Enter
-            evt.preventDefault();
-            sendMessage();
-        } else if (evt.which == 38) { // Arrow up
-            evt.preventDefault();
-            showPreviousMessage(parseInt($(".backlog").data('currentBufferId'), 10));
-        } else if (evt.which == 40) { // Arrow down
-            evt.preventDefault();
-            showNextMessage(parseInt($(".backlog").data('currentBufferId'), 10));
-        } else if (evt.which == 9) { // Tab
-            console.log('tab');
-            evt.preventDefault();
-            var tokenEnd = this.selectionEnd;
-                
-            var message = $(this).val();
-            var messageLeft = message.substr(0, tokenEnd);
-            var tokenStart = messageLeft.lastIndexOf(' ');
-            tokenStart += 1; // -1 (not found) => 0 (start)
-            var token = messageLeft.substr(tokenStart);
-
-            // Find the most recent nick who has talked.
-            var getMostRecentNick = function(token) {
-                var bufferId = $(".backlog").data('currentBufferId');
-                if (!bufferId) return;
-                bufferId = parseInt(bufferId, 10);
-                var buffer = networks.findBuffer(bufferId);
-                if (!buffer) return;
-
-                var keys = buffer.messages.keys();
-                keys.sort();
-                keys.reverse();
-
-                for (var i = 0; i < keys.length; i++) {
-                    var messageId = keys[i];
-                    var message = buffer.messages.get(messageId);
-
-                    // Only check Plain and Action messages for nicks.
-                    if (!(message.type == MT.Plain || message.type == MT.Action))
-                        continue;
-
-                    var nick = message.getNick();
-                    if (nick.length <= token.length)
-                        continue;
-
-                    if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
-                        return nick;
-                }
-            };
-
-            // Find the closet nick alphabetically from the current buffer's nick list.
-            var getNickAlphabetically = function(token) {
-                var bufferId = $(".backlog").data('currentBufferId');
-                if (!bufferId) return;
-                bufferId = parseInt(bufferId, 10);
-                var buffer = networks.findBuffer(bufferId);
-                if (!buffer) return;
-
-                var nicks = Object.keys(buffer.nickUserMap);
-                nicks.sort(function(a, b) {
-                    return a.toLowerCase().localeCompare(b.toLowerCase());
-                });
-
-                for (var i = 0; i < nicks.length; i++) {
-                    var nick = nicks[i];
-                    if (nick.length <= token.length)
-                        continue;
-
-                    if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
-                        return nick;
-                }
-            };
-
-
-            var getTokenCompletion = function(token) {
-                var nick = getMostRecentNick(token);
-                if (!nick)
-                    nick = getNickAlphabetically(token);
-
-                if (nick) {
-                    if (tokenStart == 0) {
-                        return nick + ': ';
-                    } else {
-                        return nick;
-                    }
-                }
-            };
-
-            var newToken = getTokenCompletion(token);
-
-            if (newToken) {
-                var newMessage = message.substr(0, tokenStart) + newToken + message.substr(tokenEnd);
-                $(this).val(newMessage);
-                var newTokenEnd = tokenEnd + newToken.length - token.length;
-                this.setSelectionRange(newTokenEnd, newTokenEnd);
-            }
-        }
     });
 
     $("#hide-buffers").click(Views.hideBuffers);
@@ -455,34 +235,6 @@ $(document).ready(function() {
     
     $(".reconnect").on("click", function(evt) {
         window.location.reload();
-    });
-
-    $(".topic li").on("click", function(evt) {
-        evt.stopPropagation();
-    });
-
-    $(".topic li a").on("click", function(evt) {
-        if (!$(evt.target).is("input")) {
-            var checked = $(this).children("input").is(':checked');
-            $(this).children("input").prop('checked', !checked).trigger("change");
-        }
-    });
-
-    $(".topic li input[data-message-type]").on("change", function(evt) {
-        var type = $(this).data("messageType");
-        if (!$(this).is(':checked')) {
-            Views.showMessageTypes(type);
-        } else {
-            Views.hideMessageTypes(type);
-        }
-    });
-
-    $(".topic li input[data-default-filter]").on("change", function(evt) {
-        if ($(this).is(':checked')) {
-            Views.useDefaultFilter();
-        } else {
-            Views.doNotUseDefaultFilter();
-        }
     });
 
     function setQueryParamOrFocus(queryParamKey, selector) {

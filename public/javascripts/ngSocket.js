@@ -108,7 +108,11 @@
 
       function emit(name, data, callback) {
         initializeSocket();
-        socket.emit(name, data, angularCallback(callback));
+        if (typeof callback === 'function') {
+            socket.emit(name, data, angularCallback(callback));
+        } else {
+            socket.emit.apply(socket, Array.prototype.slice.call(arguments));
+        }
       }
     }
   }

@@ -52,7 +52,7 @@ html
               .buffer-container
                 .network(id="network-{{network.networkName}}", class="{{network.isConnected ? 'on' : 'off'}}", ng-repeat-start="network in networks")
                   span(class="{{network.isConnected ? 'expanded' : 'collapsed'}}", data-target="{{network.networkName}}-channels")
-                  span.network-name {{network.networkName}}
+                  span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
                   a.add-channel(data-network="{{network.networkName}}", data-toggle="modal", data-target="#modal-join-channel", title="Join channel")
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
                   .channel(class="{{channel.active ? 'on' : 'off'}}", data-buffer-id="{{channel.id}}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter")
@@ -61,57 +61,33 @@ html
               .buffer-bottom-bar
                 a#hide-buffers.showhide.right
                 a#show-buffers.showhide.right(style='display: none;')
-            #center.animation
+            #center.animation(ng-controller="FilterController")
               .topic
-                #topic
-                .btn-group.prefs
-                  button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown")
+                #topic {{buffer.topic}}
+                .btn-group.prefs(dropdown)
+                  button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown", dropdown-toggle)
                     span.glyphicon.glyphicon-th-list
                   ul.dropdown-menu(role="menu")
                     li.dropdown-header Hide events
-                    li
+                    li(ng-repeat="fil in currentFilter")
                       a(href="#")
-                        input(type="checkbox", data-message-type="32")
-                        label Join
-                    li
-                      a(href="#")
-                        input(type="checkbox", data-message-type="64")
-                        label Part
-                    li
-                      a(href="#")
-                        input(type="checkbox", data-message-type="128")
-                        label Quit
-                    li
-                      a(href="#")
-                        input(type="checkbox", data-message-type="8")
-                        label Nick
-                    li
-                      a(href="#")
-                        input(type="checkbox", data-message-type="16")
-                        label Mode
-                    li
-                      a(href="#")
-                        input(type="checkbox", data-message-type="16384")
-                        label Topic
-                    li
-                      a(href="#")
-                        input(type="checkbox", data-message-type="8192")
-                        label DayChange
+                        input(type="checkbox", id="filter-type-{{fil.type}}", data-message-type="{{fil.type}}", ng-model="fil.value")
+                        label(for="filter-type-{{fil.type}}") {{fil.label}}
                     li.divider
                     li
-                      a(href="#")
-                        input(type="checkbox", data-default-filter="true")
-                        label Default
+                        a.btn(ng-click="useDefault()", href="#") Use default
+                    li
+                        a.btn(ng-click="setAsDefault()", href="#") Set as default
               #backlog-container
                 ul.backlog
-                  li.irc-message(ng-repeat="message in buffer.messages.values()", class="type-{{message.type}}")
+                  li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'datetime'", class="type-{{message.type}} {{message.isHighlighted()?'highlighted':''}}", ng-if="currentFilter2[''+message.type] != true")
                     span.timestamp
                       span {{message.datetime | duration}}
                     span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
                     span.message(ng-bind-html="message | decoratecontent | color")
-                .input
-                  form#messageform
-                    input#messagebox(type='text', placeholder='Enter your message here')
+                .input(ng-controller="InputController")
+                  form#messageform(ng-submit="sendMessage()")
+                    input#messagebox(type='text', placeholder='Enter your message here', ng-model="message", ng-keydown="keydown($event)", caret)
             #nick-pane.animation.col-md-2
               .buffer-container
                 .user-group
@@ -148,9 +124,9 @@ html
 
       script(src='/javascripts/jquery-1.11.1.min.js')
       script(src='/javascripts/angular.min.js')
+      script(src='/javascripts/ui-bootstrap-0.12.0.min.js')
       script(src='/socket.io/socket.io.js')
       script(src='/javascripts/ngSocket.js')
-      script(src='/javascripts/Autolinker.min.js')
       script(src='/javascripts/events.js')
       script(src='/javascripts/angular-sanitize.min.js')
       script(src='/javascripts/libquassel.js')
