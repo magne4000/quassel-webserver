@@ -46,9 +46,8 @@ html
                   button.btn.btn-primary.btn-connect(type='submit', ng-disabled="{{connected}}") Connect
             .col-md-3
         
-        .logged.ng-hide.container-fluid.table(ng-show="logged", ng-controller="NetworkController")
-          .row
-            #buffer-pane.animation.col-md-2
+        .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
+            #buffer-pane.animation.pane
               .buffer-container
                 .network(id="network-{{network.networkName}}", class="{{network.isConnected ? 'on' : 'off'}}", ng-repeat-start="network in networks")
                   span(class="{{network.isConnected ? 'expanded' : 'collapsed'}}", data-target="{{network.networkName}}-channels")
@@ -78,17 +77,16 @@ html
                         a.btn(ng-click="useDefault()", href="#") Use default
                     li
                         a.btn(ng-click="setAsDefault()", href="#") Set as default
-              #backlog-container
-                ul.backlog(backlog="loadMore", parent-buffer="buffer")
-                  li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}} {{message.isHighlighted()?'highlighted':''}}")
-                    span.timestamp
-                      span {{message.datetime | duration}}
-                    span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
-                    span.message(ng-bind-html="message | decoratecontent | color")
-                .input(ng-controller="InputController")
-                  form#messageform(ng-submit="sendMessage()")
-                    input#messagebox(type='text', placeholder='Enter your message here', ng-model="message", ng-keydown="keydown($event)", caret)
-            #nick-pane.animation.col-md-2
+              ul.backlog(backlog="loadMore", parent-buffer="buffer")
+                li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}} {{message.isHighlighted()?'highlighted':''}}")
+                  span.timestamp
+                    span {{message.datetime | duration}}
+                  span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
+                  span.message(ng-bind-html="message | decoratecontent | color")
+              .input(ng-controller="InputController")
+                form#messageform(ng-submit="sendMessage()")
+                  input#messagebox(type='text', placeholder='Enter your message here', ng-model="message", ng-keydown="keydown($event)", caret)
+            #nick-pane.animation.pane
               .buffer-container
                 .user-group
                   span.expanded(data-target='users-operator')
@@ -105,22 +103,22 @@ html
               .buffer-bottom-bar
                 a#hide-nicks.showhide.left
                 a#show-nicks.showhide.left(style='display: none;')
-            // Modal 
-            #modal-join-channel.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
-              .modal-dialog
-                .modal-content
-                  .modal-header
-                    button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-                    h4#myModalLabel.modal-title
-                      | Join a channel on
-                      span#join-network-name {network name}
-                  .modal-body
-                    form
-                      .form-group
-                        input#modal-join-channel-name.form-control(type='text', placeholder='Enter channel name')
-                  .modal-footer
-                    button.btn.btn-default(type='button', data-dismiss='modal') Cancel
-                    button.btn.btn-primary(type='button') Join channel
+        // Modal 
+        #modal-join-channel.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
+          .modal-dialog
+            .modal-content
+              .modal-header
+                button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                h4#myModalLabel.modal-title
+                  | Join a channel on
+                  span#join-network-name {network name}
+              .modal-body
+                form
+                  .form-group
+                    input#modal-join-channel-name.form-control(type='text', placeholder='Enter channel name')
+              .modal-footer
+                button.btn.btn-default(type='button', data-dismiss='modal') Cancel
+                button.btn.btn-primary(type='button') Join channel
 
       script(src='/javascripts/jquery-1.11.1.min.js')
       script(src='/javascripts/angular.min.js')

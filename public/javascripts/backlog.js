@@ -27,10 +27,12 @@
                 scope.$watch('buffer', function(oldValue, newValue){
                     fetching = false;
                     lastBottom = 0;
-                    
-                    if (element[0].scrollHeight >= element[0].clientHeight) {
-                        launchHandler();
-                    }
+                    element[0].scrollTop = element[0].scrollHeight;
+                    timeout(function () {
+                        if (element[0].scrollHeight === element[0].clientHeight) {
+                            launchHandler();
+                        }
+                    }, 0);
                 });
                 
                 scope.$watch('buffer.messages', function(oldValue, newValue){

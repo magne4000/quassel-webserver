@@ -12,60 +12,20 @@ html,body,.container {
     height:100%;
 }
 
-.container-fluid.table {
-    display:table;
-    width: 100%;
-    padding: 0;
-    height: ~"calc(100% - 48px)";
-    .box-sizing(border-box);
-    margin-bottom: 0;
-    
-    &:before {
-        content: none;
-    }
-    
-    &:after {
-        content: none;
-    }
-}
-
-.table .row {
-    height: 100%;
-    display: table-row;
-    
-    &:before {
-        content: none;
-    }
-    
-    &:after {
-        content: none;
-    }
-}
-
-.table .col-md-1, .table .col-md-2, .table .col-md-3, .table .col-md-4, .table .col-md-5, .table .col-md-6,
-.table .col-md-7, .table .col-md-8, .table .col-md-9, .table .col-md-10, .table .col-md-11, .table .col-md-12, .table .col-md-0 {
-    padding-left: 0;
-    padding-right: 0;
-    display: table-cell;
-    float: none;
-}
-
-.table .col-md-0 {
-    min-width: 32px;
-    width: 1%;
-}
-
 #container {
     overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
     width: 100%;
     height: 100%;
 }
 
 .logged {
-    position: absolute;
-    top: @header-height;
-    bottom: 0;
-    .wide;
+    display: flex;
+    flex: 1;
+    align-items: stretch;
+    min-height: 0;
 }
 
 #buffer-pane {
@@ -80,6 +40,10 @@ html,body,.container {
     top: 0;
     width: 100%;
     bottom: @box-height;
+}
+
+.pane {
+    width: 16.6667%;
 }
 
 .animation, .animation .network, .animation .network-channels {
@@ -99,8 +63,9 @@ html,body,.container {
 
 #center {
     font-size: 15px;
-    height: 100%;
-    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
 }
 
 .topic {
@@ -128,9 +93,6 @@ html,body,.container {
     height: @header-height;
     line-height: @header-height;
     color: @text-color;
-    position: absolute;
-    top: 0;
-    .wide;
     .transition(background-color 0.5s linear);
 }
 
@@ -301,9 +263,6 @@ html,body,.container {
 
 .input {
     overflow-y: hidden;
-    position: absolute;
-    bottom: 0;
-    .wide;
 }
 
 .input input {
@@ -314,24 +273,13 @@ html,body,.container {
     outline: none;
 }
 
-#backlog-container {
-    overflow: auto;
-    top: @box-height;
-    bottom: 0;
-    .wide;
-    position: absolute;
-    background-color: #EAEAF8;
-}
-
-ul.backlog {
+.backlog {
     margin: 0;
     padding: 4px;
     border-spacing: 0;
-    position: absolute;
+    flex: 1;
     overflow: auto;
-    top: 0;
-    .wide;
-    bottom: @box-height;
+    background-color: #EAEAF8;
 }
 
 .backlog li {
