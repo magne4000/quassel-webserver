@@ -2,12 +2,14 @@
 (function (ng) {
     'use strict';
     var module = ng.module('backlog', []);
-    module.directive('backlog', ['$timeout', function (timeout) {
+    module.directive('backlog', ['$timeout', '$compile', function (timeout, $compile) {
         return {
             scope: {
                 backlog: "=",
-                buffer: "=parentBuffer"
+                buffer: "=parentBuffer",
+                currentFilter: "="
             },
+            template: "",
             link: function (scope, element, attr) {
                 var lengthThreshold = attr.scrollThreshold || 20;
                 var timeThreshold = attr.timeThreshold || 300;
@@ -15,8 +17,10 @@
                 var promise = null;
                 var lastScrolled = -9999;
                 var lastBottom = 0;
-                var fetching = false;
-
+                scope.fetching = false;
+                
+                element.prepend($compile('<li class="irc-message fetching" ng-show="fetching">Fetching more backlogs...</li>')(scope));
+                
                 lengthThreshold = parseInt(lengthThreshold, 10);
                 timeThreshold = parseInt(timeThreshold, 10);
 
@@ -24,8 +28,33 @@
                     handler = ng.noop;
                 }
                 
+                scope.$watch('fetching', function(oldValue, newValue){
+                    console.log('Fetching ' + newValue);
+                });
+                
+                scope.$watch('currentFilter', function(newValue, oldValue) {
+                    tryLaunchHandler();
+                }, true);
+                
                 scope.$watch('buffer', function(oldValue, newValue){
-                    fetching = false;
+                    tryLaunchHandler();
+                });
+                
+                scope.$watch('buffer.messages', function(oldValue, newValue){
+                    if (!oldValue || !newValue || (oldValue && newValue && oldValue.count() !== newValue.count())) {
+                        timeout(function () {
+                            element[0].scrollTop = element[0].scrollHeight - lastBottom;
+                            if (element[0].scrollHeight === element[0].clientHeight || element[0].scrollTop < lengthThreshold) {
+                                // If no scrollbar (or scrollTop to small), load more backlogs
+                                launchHandler();
+                            }
+                        }, 0);
+                    }
+                    scope.fetching = false;
+                }, true);
+                
+                function tryLaunchHandler() {
+                    scope.fetching = false;
                     lastBottom = 0;
                     element[0].scrollTop = element[0].scrollHeight;
                     timeout(function () {
@@ -33,28 +62,19 @@
                             launchHandler();
                         }
                     }, 0);
-                });
-                
-                scope.$watch('buffer.messages', function(oldValue, newValue){
-                    if (!oldValue || !newValue || (oldValue && newValue && oldValue.count() !== newValue.count())) {
-                        timeout(function () {
-                            element[0].scrollTop = element[0].scrollHeight - lastBottom;
-                        }, 0);
-                    }
-                    fetching = false;
-                }, true);
+                }
                 
                 function launchHandler() {
-                    // if there is already a timer running which has no expired yet we have to cancel it and restart the timer
+                    // if there is already a timer running which has not expired yet we have to cancel it and restart the timer
                     if (promise !== null) {
                         timeout.cancel(promise);
                     }
-                    if (!fetching) {
+                    if (!scope.fetching) {
                         lastBottom = element[0].scrollHeight - element[0].scrollTop;
                     }
                     promise = timeout(function () {
                         if (handler() === true) {
-                            fetching = true;
+                            scope.fetching = true;
                         }
                         promise = null;
                     }, timeThreshold);

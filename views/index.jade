@@ -77,8 +77,8 @@ html
                         a.btn(ng-click="useDefault()", href="#") Use default
                     li
                         a.btn(ng-click="setAsDefault()", href="#") Set as default
-              ul.backlog(backlog="loadMore", parent-buffer="buffer")
-                li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}} {{message.isHighlighted()?'highlighted':''}}")
+              ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
+                li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}} {{message.isHighlighted()?'highlighted':''}}", ng-if="!currentFilter2[message.type]")
                   span.timestamp
                     span {{message.datetime | duration}}
                   span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}

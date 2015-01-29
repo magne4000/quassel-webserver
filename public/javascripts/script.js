@@ -208,26 +208,6 @@ $(document).ready(function() {
         $('#modal-join-channel-name').val("");
     });
 
-    $("#hide-buffers").click(Views.hideBuffers);
-    $("#show-buffers").click(Views.showBuffers);
-
-    $("#hide-nicks").click(Views.hideNicks);
-    $("#show-nicks").click(Views.showNicks);
-
-    $(".backlog").on('mousewheel', function(event) {
-        if (event.deltaY > 0) { // up
-            var bufferId = parseInt($(".backlog").data('currentBufferId'), 10);
-            if (typeof loadingMoreBacklogs[''+bufferId] === 'undefined' || loadingMoreBacklogs[''+bufferId] === false) {
-                var buffer = networks.findBuffer(bufferId);
-                var firstMessage = Math.min.apply(null, buffer.messages.keys());
-                if ($(".backlog").scrollTop() === 0) {
-                    loadingMoreBacklogs[''+bufferId] = true;
-                    socket.emit('moreBacklogs', bufferId, firstMessage);
-                }
-            }
-        }
-    });
-
     $(".logout").on("click", function(evt) {
         socket.emit('logout');
         window.location.reload();
