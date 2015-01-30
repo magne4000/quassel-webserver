@@ -431,6 +431,36 @@ myModule.filter('hash', function() {
     };
 });
 
+myModule.filter('usersop', function() {
+    return function(input, buffer) {
+        var users = [];
+        angular.forEach(input, function(value, key) {
+            if (buffer.isOp(value.nick)) this.push(value);
+        }, users);
+        return users;
+    };
+});
+
+myModule.filter('usersvoiced', function() {
+    return function(input, buffer) {
+        var users = [];
+        angular.forEach(input, function(value, key) {
+            if (buffer.isVoiced(value.nick)) this.push(value);
+        }, users);
+        return users;
+    };
+});
+
+myModule.filter('usersstd', function() {
+    return function(input, buffer) {
+        var users = [];
+        angular.forEach(input, function(value, key) {
+            if (!buffer.isVoiced(value.nick) && !buffer.isOp(value.nick)) this.push(value);
+        }, users);
+        return users;
+    };
+});
+
 myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', function($scope, $networks, $socket, $er, $reviver) {
     $scope.networks = {};
     $scope.buffer = null;

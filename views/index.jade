@@ -49,12 +49,12 @@ html
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
             #buffer-pane.animation.pane
               .buffer-container
-                .network(id="network-{{network.networkName}}", class="{{network.isConnected ? 'on' : 'off'}}", ng-repeat-start="network in networks")
-                  span(class="{{network.isConnected ? 'expanded' : 'collapsed'}}", data-target="{{network.networkName}}-channels")
+                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks")
+                  span(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}")
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
-                  a.add-channel(data-network="{{network.networkName}}", data-toggle="modal", data-target="#modal-join-channel", title="Join channel")
+                  a.add-channel(data-toggle="modal", data-target="#modal-join-channel", title="Join channel")
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
-                  .channel(class="{{channel.active ? 'on' : 'off'}}", data-buffer-id="{{channel.id}}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter")
+                  .channel(ng-class="{on: channel.active, off: !channel.active}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter")
                     span.channel-icon
                     span.channel-name {{channel.name}}
               .buffer-bottom-bar
@@ -78,7 +78,7 @@ html
                     li
                         a.btn(ng-click="setAsDefault()", href="#") Set as default
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
-                li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}} {{message.isHighlighted()?'highlighted':''}}", ng-if="!currentFilter2[message.type]")
+                li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-if="!currentFilter2[message.type]")
                   span.timestamp
                     span {{message.datetime | duration}}
                   span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
@@ -92,14 +92,23 @@ html
                   span.expanded(data-target='users-operator')
                   span.group-name operators
                 #users-operator.group-users.clearfix
+                  .user(ng-repeat="user in buffer.nickUserMap | usersop:buffer | orderBy:'nick'")
+                    span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
+                    span.user-name {{user.nick}}
                 .user-group
                   span.expanded(data-target='users-voiced')
                   span.group-name voiced
                 #users-voiced.group-users.clearfix
+                  .user(ng-repeat="user in buffer.nickUserMap | usersvoiced:buffer | orderBy:'nick'")
+                    span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
+                    span.user-name {{user.nick}}
                 .user-group
                   span.expanded(data-target='users-user')
                   span.group-name users
                 #users-user.group-users.clearfix
+                  .user(ng-repeat="user in buffer.nickUserMap | usersstd:buffer | orderBy:'nick'")
+                    span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
+                    span.user-name {{user.nick}}
               .buffer-bottom-bar
                 a#hide-nicks.showhide.left
                 a#show-nicks.showhide.left(style='display: none;')

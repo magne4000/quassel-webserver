@@ -1,25 +1,3 @@
-(function($) {
-    $.QueryString = (function(a) {
-        if (a == "") return {};
-        var b = {};
-        for (var i = 0; i < a.length; ++i)
-        {
-            var p=a[i].split('=');
-            if (p.length != 2) continue;
-            b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
-        }
-        return b;
-    })(window.location.search.substr(1).split('&'));
-})(jQuery);
-
-
-
-
-var er = null;
-var changesTimeout = [];
-var loadingMoreBacklogs = [];
-var messagesHistory = {};
-
 /*
 // Internal
 er.on('_init', function(next, data) {
@@ -216,24 +194,4 @@ $(document).ready(function() {
     $(".reconnect").on("click", function(evt) {
         window.location.reload();
     });
-
-    function setQueryParamOrFocus(queryParamKey, selector) {
-        if ($.QueryString[queryParamKey]) {
-            $(selector).val($.QueryString[queryParamKey]);
-            return true;
-        } else if (!$(selector).val()) {
-            $(selector).focus();
-            return false;
-        }
-    }
-
-    var params = true;
-    params = params & setQueryParamOrFocus('password', '#password');
-    params = params & setQueryParamOrFocus('host', '#host');
-    params = params & setQueryParamOrFocus('port', '#port');
-    params = params & setQueryParamOrFocus('user', '#user');
-
-    if (params && $("#host").val() && $("#port").val() && $("#user").val() && $("#password").val()) {
-        $('#logonform').submit();
-    }
 });
