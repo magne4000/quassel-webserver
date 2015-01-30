@@ -206,9 +206,8 @@ myModule.filter('decoratenick', ['stripnickFilter', function(stripnick) {
 
 myModule.filter('decoratecontent', ['stripnickFilter', 'linkyFilter', function(stripnick, linky) {
     var MT = require('message').Type;
-    
     return function(message) {
-        var content;
+        var content, arr, servers;
         switch(message.type) {
             case MT.Plain:
                 content = linky(message.content, '_blank');
@@ -231,6 +230,16 @@ myModule.filter('decoratecontent', ['stripnickFilter', 'linkyFilter', function(s
             case MT.Kick:
                 var ind = message.content.indexOf(" ");
                 content = stripnick(message.sender) + " has kicked " + message.content.slice(0, ind) + " (" + message.content.slice(ind+1) + ")";
+                break;
+            case MT.NetsplitJoin:
+                arr = message.content.split("#:#");
+                servers = arr.pop().split(" ");
+                content = "Netsplit between " + servers[0] + " and " + servers[1] + " ended. Users joined: " + arr.map(stripnick).join(', ');
+                break;
+            case MT.NetsplitQuit:
+                arr = message.content.split("#:#");
+                servers = arr.pop().split(" ");
+                content = "Netsplit between " + servers[0] + " and " + servers[1] + ". Users quit: " + arr.map(stripnick).join(', ');
                 break;
             default:
                 content = message.content;
