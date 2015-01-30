@@ -12,18 +12,15 @@
             template: "",
             link: function (scope, element, attr) {
                 var lengthThreshold = attr.scrollThreshold || 20;
-                var timeThreshold = attr.timeThreshold || 300;
                 var handler = scope.backlog;
-                var promise = null;
                 var promiseFetching = null;
                 var lastScrolled = -9999;
                 var lastBottom = 0;
                 scope.fetching = false;
                 
-                element.prepend($compile('<li class="irc-message fetching" ng-show="fetching">Fetching more backlogs...</li>')(scope));
+                element.before($compile('<div class="fetching" ng-show="fetching">Fetching more backlogs...</div>')(scope));
                 
                 lengthThreshold = parseInt(lengthThreshold, 10);
-                timeThreshold = parseInt(timeThreshold, 10);
 
                 if (!handler || !ng.isFunction(handler)) {
                     handler = ng.noop;
@@ -72,19 +69,14 @@
                 }
                 
                 function launchHandler() {
-                    // if there is already a timer running which has not expired yet we have to cancel it and restart the timer
-                    if (promise !== null) {
-                        timeout.cancel(promise);
-                    }
                     if (!scope.fetching) {
-                        lastBottom = element[0].scrollHeight - element[0].scrollTop;
+                        lastBottom = element[0].scrollHeight;
                     }
-                    promise = timeout(function () {
+                    timeout(function () {
                         if (handler() === true) {
                             scope.fetching = true;
                         }
-                        promise = null;
-                    }, timeThreshold);
+                    }, 10);
                 }
 
                 element.bind('scroll', function(){
@@ -99,4 +91,3 @@
         };
     }]);
 })(angular);
-;

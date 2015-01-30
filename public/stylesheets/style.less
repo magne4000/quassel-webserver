@@ -66,6 +66,7 @@ html,body,.container {
     display: flex;
     flex: 1;
     flex-direction: column;
+    position: relative;
 }
 
 .topic {
@@ -322,11 +323,15 @@ html,body,.container {
     border-top: 1px solid @brand-success;
 }
 
-.backlog .fetching {
+.fetching {
     display: inherit;
     text-align: center;
     background-color: lighten(@brand-primary, 25%);
     color: white;
+    top: 32px;
+    position: absolute;
+    right: 0;
+    padding: 2px 7px;
 }
 
 .login-page {
