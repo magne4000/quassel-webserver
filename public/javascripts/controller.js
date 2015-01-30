@@ -12,6 +12,23 @@ myModule.directive('input', function ($parse) {
     };
 });
 
+myModule.directive('toggle', function ($parse) {
+    return {
+        link: function (scope, element, attrs) {
+            element.on('click', function(){
+                var eltToToggle = $('#'+attrs.toggle), self = $(this);
+                if (self.hasClass('expanded')) {
+                    eltToToggle.css("max-height", "0");
+                    self.removeClass("expanded").addClass("collapsed");
+                } else {
+                    eltToToggle.css("max-height", "");
+                    self.removeClass("collapsed").addClass("expanded");
+                }
+            });
+        }
+    };
+});
+
 myModule.directive('caret', function() {
     var MT = require('message').Type;
     

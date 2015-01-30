@@ -50,7 +50,7 @@ html
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container
                 .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks")
-                  span(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}")
+                  span(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}", toggle="{{network.networkName}}-channels")
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
                   a.add-channel(data-toggle="modal", data-target="#modal-join-channel", title="Join channel")
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
@@ -88,21 +88,21 @@ html
             #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
               .buffer-container
                 .user-group
-                  span.expanded(data-target='users-operator')
+                  span.expanded(data-target='users-operator', toggle="users-operator")
                   span.group-name operators
                 #users-operator.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersop:buffer | orderBy:'nick'")
                     span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                     span.user-name {{user.nick}}
                 .user-group
-                  span.expanded(data-target='users-voiced')
+                  span.expanded(data-target='users-voiced', toggle="users-voiced")
                   span.group-name voiced
                 #users-voiced.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersvoiced:buffer | orderBy:'nick'")
                     span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                     span.user-name {{user.nick}}
                 .user-group
-                  span.expanded(data-target='users-user')
+                  span.expanded(data-target='users-user', toggle="users-user")
                   span.group-name users
                 #users-user.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersstd:buffer | orderBy:'nick'")

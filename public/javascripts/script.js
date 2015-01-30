@@ -161,17 +161,6 @@ er.on('user.part', function(next, networkId, nick, bufferName) {
 
 
 $(document).ready(function() {
-    $(document).on("click", ".expanded", function() {
-        var channel = $(this).data("target");
-        $("#" + channel).css("max-height", "0");
-        $(this).removeClass("expanded").addClass("collapsed");
-    });
-
-    $(document).on("click", ".collapsed", function() {
-        var channel = $(this).data("target");
-        $("#" + channel).css("max-height", "");
-        $(this).removeClass("collapsed").addClass("expanded");
-    });
 
     $(document).on("click", ".add-channel", function() {
         var NetworkId = $(this).data('network');
