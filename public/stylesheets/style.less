@@ -46,6 +46,14 @@ html,body,.container {
     width: 16.6667%;
 }
 
+.pane.small {
+    width: 32px;
+}
+
+.pane.small .buffer-container {
+    opacity: 0;
+}
+
 .animation, .animation .network, .animation .network-channels {
     .transition(all 0.5s ease-in-out);
 }
@@ -216,20 +224,22 @@ html,body,.container {
     }
 }
 
-.showhide.left {
+.buffer-bottom-bar .showhide.left {
     left: 0;
-}
-
-.showhide.right {
-    right: 0;
-}
-
-#hide-nicks, #show-buffers {
     background-image: url(/images/hide-pane-right.png);
 }
 
-#show-nicks, #hide-buffers {
+.small .buffer-bottom-bar .showhide.left {
     background-image: url(/images/hide-pane-left.png);
+}
+
+.buffer-bottom-bar .showhide.right {
+    right: 0;
+    background-image: url(/images/hide-pane-left.png);
+}
+
+.small .buffer-bottom-bar .showhide.right {
+    background-image: url(/images/hide-pane-right.png);
 }
 
 .network-channels, .group-users {
