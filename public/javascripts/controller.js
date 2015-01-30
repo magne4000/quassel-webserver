@@ -319,6 +319,22 @@ myModule.filter('color', function() {
             nbSpanColor -= 1;
             return closeSpan();
         };
+        
+        var unescapeColorTags = function(str) {
+            var tagsToReplace = {
+                '&#2;': '\x02',
+                '&#29;': '\x1D',
+                '&#31;': '\x1F',
+                '&#3;': '\x03',
+                '&#15;': '\x0F'
+            };
+            var re = /&#(2|29|3|31|15);/g;
+            return str.replace(re, function (tag) {
+                return tagsToReplace[tag] || tag;
+            });
+        };
+        
+        input = unescapeColorTags(input);
     
         for (i = 0; i < input.length; i++) {
             switch (input[i]) {

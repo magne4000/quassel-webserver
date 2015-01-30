@@ -15,6 +15,7 @@
                 var timeThreshold = attr.timeThreshold || 300;
                 var handler = scope.backlog;
                 var promise = null;
+                var promiseFetching = null;
                 var lastScrolled = -9999;
                 var lastBottom = 0;
                 scope.fetching = false;
@@ -29,7 +30,13 @@
                 }
                 
                 scope.$watch('fetching', function(oldValue, newValue){
-                    console.log('Fetching ' + newValue);
+                    if (promiseFetching !== null) timeout.cancel(promiseFetching);
+                    if (newValue === true) {
+                        // In case no response for 30 seconds, reset fetching to false
+                        promiseFetching = timeout(function () {
+                            scope.fetching = false;
+                        }, 30000);
+                    }
                 });
                 
                 scope.$watch('currentFilter', function(newValue, oldValue) {
@@ -44,7 +51,7 @@
                     if (!oldValue || !newValue || (oldValue && newValue && oldValue.count() !== newValue.count())) {
                         timeout(function () {
                             element[0].scrollTop = element[0].scrollHeight - lastBottom;
-                            if (element[0].scrollHeight === element[0].clientHeight || element[0].scrollTop < lengthThreshold) {
+                            if (element[0].scrollTop < lengthThreshold) {
                                 // If no scrollbar (or scrollTop to small), load more backlogs
                                 launchHandler();
                             }
@@ -58,7 +65,7 @@
                     lastBottom = 0;
                     element[0].scrollTop = element[0].scrollHeight;
                     timeout(function () {
-                        if (element[0].scrollHeight === element[0].clientHeight) {
+                        if (element[0].scrollTop < lengthThreshold) {
                             launchHandler();
                         }
                     }, 0);
