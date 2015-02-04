@@ -33,22 +33,11 @@
 
 @font-face {
     font-family: 'Droid Sans Mono';
-    src: url('fonts/DroidSansMono-webfont.eot');
-    src: url('fonts/DroidSansMono-webfont.eot?#iefix') format('embedded-opentype'),
-    url('fonts/DroidSansMono-webfont.woff') format('woff'),
-    url('fonts/DroidSansMono-webfont.ttf') format('truetype'),
-    url('fonts/DroidSansMono-webfont.svg#droid_sans_monoregular') format('svg');
+    font-style: normal;
     font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Droid Sans Mono';
-    font-style: normal;
-    font-weight: 200;
     src: url('fonts/DroidSansMono-webfont.eot');
     src: url('fonts/DroidSansMono-webfont.eot?#iefix') format('embedded-opentype'),
          url('fonts/DroidSansMono-webfont.woff') format('woff'),
          url('fonts/DroidSansMono-webfont.ttf') format('truetype'),
-         url('fonts/DroidSansMono-webfont.svg#robotolight') format('svg');
+         url('fonts/DroidSansMono-webfont.svg#droid_sans_monoregular') format('svg');
 }

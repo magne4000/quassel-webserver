@@ -269,7 +269,7 @@ myModule.filter('channelsFilter', function() {
     return function(input) {
         input = input || [];
         var out = input.filter(function(elt){
-            return !elt.isStatusBuffer();
+            return !elt._isStatusBuffer;
         });
         out.sort(function(a, b){
             return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
@@ -487,10 +487,11 @@ myModule.filter('usersstd', function() {
     };
 });
 
-myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', function($scope, $networks, $socket, $er, $reviver) {
+myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', function($scope, $networks, $socket, $er, $reviver, $modal) {
     $scope.networks = {};
     $scope.buffer = null;
     
+    var MT = require('message').Type;
     var changesTimeout = [];
     var loadingMoreBacklogs = [];
     
@@ -520,14 +521,11 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     
     $er.on('network.init', function(next, networkId) {
         console.log('network.init');
-        //var network = networks2.get(networkId);
-        //Views.addNetwork(network);
-        //$scope.$digest();
         next();
     }).after('network._init');
     
     $er.on('network.addbuffer', function(next, networkId, bufferId) {
-        console.log('addbuffer');
+        next();
     }).after('network.init');
     
     $er.on('change', function(next, networkId, change) {
@@ -553,6 +551,44 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
         next();
     });
     
+    $er.on('buffer.lastseen', function(next, bufferId, messageId) {
+        messageId = parseInt(messageId, 10);
+        var buffer = $networks.get().findBuffer(bufferId);
+        if (buffer !== null && !buffer.isLast(messageId) && buffer.messages.has(messageId)) {
+            buffer.highlight = 1;
+        }
+        next();
+    }).after('buffer.backlog');
+    
+    $er.on('buffer.message', function(next, bufferId, messageId) {
+        var buffer = $networks.get().findBuffer(bufferId);
+        $reviver.afterReviving(buffer.messages, function(obj){
+            var message = obj.get(parseInt(messageId, 10));
+            if ($scope.buffer !== null && buffer.id === $scope.buffer.id) {
+                $socket.emit('markBufferAsRead', bufferId, messageId);
+            } else {
+                $reviver.afterReviving(message, function(obj2){
+                    if (obj2.isHighlighted()) {
+                        $scope.$apply(function(){
+                            buffer.highlight = 2;
+                        });
+                    } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
+                        $scope.$apply(function(){
+                            buffer.highlight = 1;
+                        });
+                    }
+                });
+            }
+        });
+        next();
+    }).after('network.addbuffer');
+    
+    $er.on('buffer.read', function(next, bufferId) {
+        var buffer = $networks.get().findBuffer(bufferId);
+        buffer.highlight = 0;
+        next();
+    }).after('network.addbuffer');
+    
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
         var id = 0;
@@ -572,7 +608,30 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
         }
         return false;
     };
+    
+    $scope.openModalJoinChannel = function(network) {
+        var modalInstance = $modal.open({
+            templateUrl: 'modalJoinChannel.html',
+            controller: 'ModalJoinChannelInstanceCtrl'
+        });
+    
+        modalInstance.result.then(function (name) {
+            $socket.emit('sendMessage', network.getStatusBuffer().id, '/join ' + name);
+        });
+      };
 }]);
+
+myModule.controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance) {
+    $scope.name = '';
+    
+    $scope.ok = function () {
+        $modalInstance.close($scope.name);
+    };
+    
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+});
 
 myModule.controller('SocketController', ['$scope', '$socket', '$er', function($scope, $socket, $er) {
     $scope.connected = false;

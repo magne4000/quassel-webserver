@@ -114,12 +114,6 @@ er.on('buffer.activate', function(next, bufferId) {
     next();
 }).after('network.addbuffer');
 
-er.on('buffer.read', function(next, bufferId) {
-    console.log('buffer.read : ' + bufferId);
-    Views.bufferMarkAsRead(bufferId);
-    next();
-}).after('network.addbuffer');
-
 er.on('buffer.unhide', function(next, bufferId, type) {
     Views.unhideBuffer(bufferId);
     next();

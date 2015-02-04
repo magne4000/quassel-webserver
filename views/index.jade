@@ -47,14 +47,26 @@ html
             .col-md-3
         
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
+            script(type="text/ng-template", id="modalJoinChannel.html")
+              .modal-header
+                button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                h4#myModalLabel.modal-title
+                  | Join a channel on
+                  span#join-network-name {network name}
+              .modal-body
+                .form-group
+                  input.form-control(type='text', placeholder='Enter channel name', ng-model="name")
+              .modal-footer
+                button.btn.btn-default(type='button', ng-click='cancel()') Cancel
+                button.btn.btn-primary(type='button', ng-click='ok()') Join channel
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container
                 .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks")
                   span(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}", toggle="{{network.networkName}}-channels")
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
-                  a.add-channel(data-toggle="modal", data-target="#modal-join-channel", title="Join channel")
+                  a.add-channel(title="Join channel", ng-click="openModalJoinChannel(network)")
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
-                  .channel(ng-class="{on: channel.active, off: !channel.active}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter")
+                  .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter", ng-if="!channel.isHidden()")
                     span.channel-icon
                     span.channel-name {{channel.name}}
               .buffer-bottom-bar
@@ -110,26 +122,10 @@ html
                     span.user-name {{user.nick}}
               .buffer-bottom-bar
                 a.showhide.left(href="#", ng-click="shown2 = !shown2")
-        // Modal 
-        #modal-join-channel.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
-          .modal-dialog
-            .modal-content
-              .modal-header
-                button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-                h4#myModalLabel.modal-title
-                  | Join a channel on
-                  span#join-network-name {network name}
-              .modal-body
-                form
-                  .form-group
-                    input#modal-join-channel-name.form-control(type='text', placeholder='Enter channel name')
-              .modal-footer
-                button.btn.btn-default(type='button', data-dismiss='modal') Cancel
-                button.btn.btn-primary(type='button') Join channel
 
       script(src='/javascripts/jquery-1.11.1.min.js')
       script(src='/javascripts/angular.min.js')
-      script(src='/javascripts/ui-bootstrap-0.12.0.min.js')
+      script(src='/javascripts/ui-bootstrap-tpls-0.12.0.min.js')
       script(src='/javascripts/backlog.js')
       script(src='/socket.io/socket.io.js')
       script(src='/javascripts/ngSocket.js')
