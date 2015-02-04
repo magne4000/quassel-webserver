@@ -61,10 +61,17 @@ html
                 button.btn.btn-primary(type='button', ng-click='ok()') Join channel
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container
-                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks")
+                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks", dropdown)
                   span(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}", toggle="{{network.networkName}}-channels")
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
-                  a.add-channel(title="Join channel", ng-click="openModalJoinChannel(network)")
+                  a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
+                  ul.dropdown-menu.dropdown-menu-right(role="menu")
+                    li
+                      a(href="#", ng-click="openModalJoinChannel(network)") Join channel
+                    li(ng-if="network.isConnected")
+                      a(href="#") Disconnect
+                    li(ng-if="!network.isConnected")
+                      a(href="#") Connect
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
                   .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter", ng-if="!channel.isHidden()")
                     span.channel-icon

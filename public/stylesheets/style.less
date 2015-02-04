@@ -121,6 +121,7 @@ html,body,.container {
 
 .network, .user-group {
     display: flex;
+    position: relative;
 }
 
 .channel, .user {
@@ -264,7 +265,7 @@ html,body,.container {
     .animation(spin 1s linear infinite);
 }
 
-.add-channel {
+.dropdown-channel {
     .icon;
     opacity: 0.5;
     display: inline-block;
@@ -274,6 +275,10 @@ html,body,.container {
     &:hover {
         opacity: 1;
     }
+}
+
+.network .dropdown-menu li {
+    color: black;
 }
 
 .input {
