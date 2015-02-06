@@ -9,6 +9,7 @@ var patch = require('./lib/patch');
 var path = require('path');
 var fs = require('fs');
 var O = require('observed');
+var debug = require('debug');
 var Quassel = require('libquassel');
 
 var routes = require('./routes/index');
@@ -53,7 +54,6 @@ if (opts.mode === 'http'){
     server = require('https').createServer(options, app);
     if (opts.port === null) opts.port = 64443;
 }
-console.log(opts.port);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -107,21 +107,19 @@ app.use(function(err, req, res, next) {
     });
 });
 
-var debug = require('debug')('quassel-webserver');
+var loggerqw = debug('quassel-webserver');
 
 app.set('port', opts.port);
 app.set('host', process.env.HOST || '');
 
 server.listen(app.get('port'), app.get('host'), function() {
-    debug('Express server listening on port ' + server.address().port);
+    loggerqw('Express server listening on port ' + server.address().port);
 });
 
 var io = require('socket.io')(server);
 
 io.on('connection', function(socket) {
-    console.log('new connection');
-
-    var registerEvents = ['login', 'loginFailed'], ee, quassel;
+    var registerEvents = ['login', 'loginfailed'], ee, quassel;
     
     var disconnected = function() {
         if (ee) {
@@ -175,6 +173,14 @@ io.on('connection', function(socket) {
             quassel.requestBacklog(bufferId, -1, firstMessageId, 20);
         });
         
+        socket.on('requestDisconnectNetwork', function(networkId) {
+            quassel.requestDisconnectNetwork(networkId);
+        });
+        
+        socket.on('requestConnectNetwork', function(networkId) {
+            quassel.requestConnectNetwork(networkId);
+        });
+        
         socket.on('markBufferAsRead', function(bufferId, lastMessageId) {
             quassel.requestSetLastMsgRead(bufferId, lastMessageId);
             quassel.requestMarkBufferAsRead(bufferId);
@@ -203,7 +209,6 @@ io.on('connection', function(socket) {
         });
 
         quassel.on('**', function() {
-            console.log(this.event);
             var args = Array.prototype.slice.call(arguments);
             args.unshift(this.event);
             if (this.event !== 'register' && this.event !== 'network.init' && registerEvents.indexOf(this.event) !== -1) {
@@ -217,7 +222,6 @@ io.on('connection', function(socket) {
     });
 
     socket.on('disconnect', function() {
-        console.log('disconnection');
         disconnected();
     });
 

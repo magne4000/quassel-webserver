@@ -114,9 +114,13 @@ html,body,.container {
     cursor: default;
     white-space: nowrap;
 
-    &:hover {
+    &:hover, &.active {
         background-color: darken(@pane-color, 5);
     }
+}
+
+.network.off > span, .network.off + .network-channels .channel > span, .channel.off > span {
+    opacity: 0.5;
 }
 
 .network, .user-group {
@@ -373,45 +377,21 @@ html,body,.container {
     }
 }
 
-.connecting #header {
-    background-color: @brand-warning;
-}
-
 .disconnected #header {
     background-color: @brand-danger;
 }
 
-.connecting #header:after {
-    content: 'Connecting';
-    background-color: @state-warning-bg;
-    border-color: @state-warning-border;
-    color: @state-warning-text;
-    .status;
+.connecting #header {
+    background-color: @brand-warning;
 }
 
-.disconnected #header:after {
-    content: 'Disconnected';
-    background-color: @state-danger-bg;
-    border-color: @state-danger-border;
-    color: @state-danger-text;
-    .status;
+#header small {
+    opacity: 0.8;
 }
 
 .logout, .reconnect {
     float: right;
     margin: 8px;
-}
-
-.reconnect, .login-page .logout {
-    display: none;
-}
-
-.connecting .reconnect, .disconnected .logout {
-    display: none;
-}
-
-.disconnected .reconnect {
-    display: block;
 }
 
 .prefs .dropdown-toggle {

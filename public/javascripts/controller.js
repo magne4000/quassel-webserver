@@ -12,6 +12,21 @@ myModule.directive('input', function ($parse) {
     };
 });
 
+myModule.directive('ngConfirmClick', function(){
+    return {
+        require: '?ngOkClick',
+        link: function (scope, element, attr) {
+            var msg = attr.ngConfirmClick;
+            var clickAction = attr.ngOkClick;
+            element.on('click', function (event) {
+                if (window.confirm(msg)) {
+                    scope.$apply(clickAction);
+                }
+            });
+        }
+    };
+});
+
 myModule.directive('toggle', function ($parse) {
     return {
         link: function (scope, element, attrs) {
@@ -609,6 +624,14 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
         return false;
     };
     
+    $scope.connect = function(network) {
+        $socket.emit('requestConnectNetwork', network.networkId);
+    };
+    
+    $scope.disconnect = function(network) {
+        $socket.emit('requestDisconnectNetwork', network.networkId);
+    };
+    
     $scope.openModalJoinChannel = function(network) {
         var modalInstance = $modal.open({
             templateUrl: 'modalJoinChannel.html',
@@ -633,20 +656,33 @@ myModule.controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInst
     };
 });
 
-myModule.controller('SocketController', ['$scope', '$socket', '$er', function($scope, $socket, $er) {
-    $scope.connected = false;
+myModule.controller('SocketController', ['$scope', '$socket', '$er', '$timeout', '$window', function($scope, $socket, $er, $timeout, $window) {
+    $scope.disconnected = false;
+    $scope.connecting = false;
+    $scope.firstconnected = false;
     $scope.logged = false;
     $scope.host = "";
     $scope.port = "";
     $scope.user = "";
     $scope.password = "";
+    $scope.alert = "";
+    
+    $scope.$watch('alert', function(newValue, oldValue) {
+        if (newValue !== "") {
+            $timeout(function(){
+                $scope.alert = "";
+            }, 8000);
+        }
+    });
     
     $socket.on('_error', function(e) {
         console.log('ERROR');
         console.log(e);
         switch (e.errno) {
         case 'ECONNREFUSED':
-            Views.alert("Connection refused.");
+            $scope.$apply(function(){
+                $scope.alert = "Connection refused.";
+            });
             break;
         default:
             console.log('Unknown error.');
@@ -656,27 +692,39 @@ myModule.controller('SocketController', ['$scope', '$socket', '$er', function($s
     $socket.on("connected", function() {
         console.log('CONNECTED');
         $scope.$apply(function(){
-            $scope.connected = true;
+            $scope.disconnected = false;
+            $scope.connecting = false;
+            $scope.firstconnected = true;
         });
     });
     
     $socket.on('reconnect_attempt', function() {
         console.log('RECONNECTING');
-        Views.connecting();
+        $scope.$apply(function(){
+            $scope.connecting = true;
+        });
     });
     
     $socket.on('reconnect_error', function() {
         console.log('RECONNECTING_ERROR');
-        Views.disconnected();
+        $scope.$apply(function(){
+            $scope.connecting = false;
+        });
     });
     
     $socket.on('reconnect_failed', function() {
         console.log('RECONNECTING_FAILED');
-        Views.disconnected();
+        $scope.$apply(function(){
+            $scope.connecting = false;
+            $scope.disconnected = true;
+        });
     });
     
     $socket.on('loginfailed', function() {
-        Views.alert("Invalid username or password.");
+        console.log('loginfailed');
+        $scope.$apply(function(){
+            $scope.alert = "Invalid username or password.";
+        });
     });
     
     $socket.on('login', function() {
@@ -686,6 +734,29 @@ myModule.controller('SocketController', ['$scope', '$socket', '$er', function($s
         });
     });
     
+    $socket.on('disconnect', function() {
+        console.log('DISCONNECT');
+        $er.clearReceived();
+        $scope.$apply(function(){
+            $scope.disconnected = true;
+        });
+    });
+    
+    $socket.on('reconnect', function() {
+        console.log('RECONNECT');
+        $er.redoCallbacks();
+        if ($scope.logged) {
+            $scope.login();
+        }
+        $scope.$apply(function(){
+            $scope.disconnected = false;
+        });
+    });
+    
+    $scope.reload = function(){
+        $window.location.reload();
+    };
+    
     $scope.login = function(){
         $socket.emit('credentials', {
             server: $scope.host,
@@ -694,24 +765,6 @@ myModule.controller('SocketController', ['$scope', '$socket', '$er', function($s
             password: $scope.password
         });
     };
-    
-    /*
-    $socket.on('disconnect', function() {
-        console.log('DISCONNECT');
-        $er.clearReceived();
-        $scope.$apply(function(){
-            $scope.connected = false;
-        });
-    });
-    $socket.on('reconnect', function() {
-        console.log('RECONNECT');
-        $er.redoCallbacks();
-        Views.connected();
-        Views.clear();
-        connect($socket);
-    });
-    */
-    
 }]);
 
 myModule.controller('InputController', ['$scope', '$socket', function($scope, $socket) {

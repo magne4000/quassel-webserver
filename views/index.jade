@@ -13,21 +13,19 @@ html
       link(rel='stylesheet', href='/stylesheets/style.css')
 
     body.login-page(ng-app="quassel")
-      #container(ng-controller="SocketController")
+      #container(ng-controller="SocketController", ng-class="{connecting: connecting, disconnected: disconnected}")
         #header
           span.quassel-logo
-          | Quassel Web App
-          button.btn.btn-default.logout(type="button") Logout
-          button.btn.btn-default.reconnect(type="button") Reconnect
+          span Quassel Web App
+          small(ng-if="connecting", ng-cloak)  (connecting)
+          small(ng-if="disconnected && !connecting", ng-cloak)  (disconnected)
+          button.btn.btn-default.logout(type="button", ng-if="logged && !disconnected", ng-cloak, ng-click="reload()") Logout
+          button.btn.btn-default.reconnect(type="button", ng-if="disconnected && !connecting", ng-cloak, ng-click="reload()") Reconnect
         .container.login(ng-if="!logged")
           .row
             .col-md-3
             .col-md-6.row.login-container
-                .alert.alert-warning.alert-dismissible.hidden(role="alert")
-                  button.close(type="button", data-dismiss="alert")
-                    span(aria-hidden="true") &times;
-                    span.sr-only Close
-                  span.alert-text
+                alert(ng-if="alert != ''", ng-cloak) {{alert}}
                 form#logonform(role='form', ng-submit="login()")
                   h1 Connect to Quassel Core
                   unless settings.forcedefault
@@ -43,7 +41,7 @@ html
                   .form-group
                     label(for='password') Password
                     input#password.form-control(type='password', ng-model="$parent.password")
-                  button.btn.btn-primary.btn-connect(type='submit', ng-disabled="{{connected}}") Connect
+                  button.btn.btn-primary.btn-connect(type='submit', ng-disabled="!firstconnected || disconnected", disabled) Connect
             .col-md-3
         
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
@@ -69,11 +67,11 @@ html
                     li
                       a(href="#", ng-click="openModalJoinChannel(network)") Join channel
                     li(ng-if="network.isConnected")
-                      a(href="#") Disconnect
+                      a(href="#", ng-click="disconnect(network)") Disconnect
                     li(ng-if="!network.isConnected")
-                      a(href="#") Connect
+                      a(href="#",  ng-click="connect(network)") Connect
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
-                  .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter", ng-if="!channel.isHidden()")
+                  .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter", ng-if="!channel.isHidden()")
                     span.channel-icon
                     span.channel-name {{channel.name}}
               .buffer-bottom-bar
