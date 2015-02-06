@@ -569,8 +569,28 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     $er.on('buffer.lastseen', function(next, bufferId, messageId) {
         messageId = parseInt(messageId, 10);
         var buffer = $networks.get().findBuffer(bufferId);
-        if (buffer !== null && !buffer.isLast(messageId) && buffer.messages.has(messageId)) {
-            buffer.highlight = 1;
+        if (bufferId === 7 || bufferId === 26) {
+            console.log(buffer);
+            if (buffer !== null) {
+                console.log(messageId);
+                console.log(buffer.messages);
+            }
+        }
+        if (buffer !== null && messageId < buffer.getLastMessage().id) {
+            var found = buffer.messages.forEach(function(val, key){
+                if (key > messageId && val.isHighlighted()) {
+                    $scope.$apply(function(){
+                        buffer.highlight = 2;
+                    });
+                    return false;
+                }
+                return true;
+            }, undefined, true);
+            if (!found) {
+                $scope.$apply(function(){
+                    buffer.highlight = 1;
+                });
+            }
         }
         next();
     }).after('buffer.backlog');
