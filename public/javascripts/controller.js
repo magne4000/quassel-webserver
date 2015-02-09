@@ -569,16 +569,9 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     $er.on('buffer.lastseen', function(next, bufferId, messageId) {
         messageId = parseInt(messageId, 10);
         var buffer = $networks.get().findBuffer(bufferId);
-        if (bufferId === 7 || bufferId === 26) {
-            console.log(buffer);
-            if (buffer !== null) {
-                console.log(messageId);
-                console.log(buffer.messages);
-            }
-        }
         if (buffer !== null && messageId < buffer.getLastMessage().id) {
             var found = buffer.messages.forEach(function(val, key){
-                if (key > messageId && val.isHighlighted()) {
+                if (key > messageId && typeof val.isHighlighted === 'function' && val.isHighlighted()) {
                     $scope.$apply(function(){
                         buffer.highlight = 2;
                     });
@@ -661,7 +654,19 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
         modalInstance.result.then(function (name) {
             $socket.emit('sendMessage', network.getStatusBuffer().id, '/join ' + name);
         });
-      };
+    };
+    
+    $scope.channelPart = function(channel) {
+        $socket.emit('sendMessage', channel.id, '/part ' + name);
+    };
+    
+    $scope.channelJoin = function(channel) {
+        $socket.emit('sendMessage', channel.id, '/join ' + name);
+    };
+    
+    $scope.channelDelete = function(channel) {
+        $socket.emit('requestRemoveBuffer', channel.id);
+    };
 }]);
 
 myModule.controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance) {

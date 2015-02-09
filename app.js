@@ -181,6 +181,10 @@ io.on('connection', function(socket) {
             quassel.requestConnectNetwork(networkId);
         });
         
+        socket.on('requestRemoveBuffer', function(bufferId) {
+            quassel.requestRemoveBuffer(bufferId);
+        });
+        
         socket.on('markBufferAsRead', function(bufferId, lastMessageId) {
             quassel.requestSetLastMsgRead(bufferId, lastMessageId);
             quassel.requestMarkBufferAsRead(bufferId);

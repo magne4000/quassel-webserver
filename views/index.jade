@@ -59,10 +59,11 @@ html
                 button.btn.btn-primary(type='button', ng-click='ok()') Join channel
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container
-                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks", dropdown)
-                  span(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}", toggle="{{network.networkName}}-channels")
+                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks | orderBy:'networkName'", dropdown)
+                  span.collapsable(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}", toggle="{{network.networkName}}-channels")
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
-                  a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
+                  a.dropdown-network.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
+                    span.glyphicon.glyphicon-menu-hamburger
                   ul.dropdown-menu.dropdown-menu-right(role="menu")
                     li
                       a(href="#", ng-click="openModalJoinChannel(network)") Join channel
@@ -71,9 +72,18 @@ html
                     li(ng-if="!network.isConnected")
                       a(href="#",  ng-click="connect(network)") Connect
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
-                  .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}", ng-click="showBuffer(channel)", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter", ng-if="!channel.isHidden()")
+                  .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter", ng-if="!channel.isHidden()", dropdown)
                     span.channel-icon
-                    span.channel-name {{channel.name}}
+                    span.channel-name(ng-click="showBuffer(channel)") {{channel.name}} {{channel.id}}
+                    a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
+                      span.glyphicon.glyphicon-menu-hamburger
+                    ul.dropdown-menu.dropdown-menu-right(role="menu")
+                      li(ng-if="channel.active")
+                        a(href="#", ng-click="channelPart(channel)") Part
+                      li(ng-if="!channel.active")
+                        a(href="#", ng-click="channelJoin(channel)") Join
+                      li(ng-if="!channel.active")
+                        a(href="#", ng-click="channelDelete(channel)") Delete
               .buffer-bottom-bar
                 a.showhide.right(href="#", ng-click="shown = !shown")
             #center.animation(ng-controller="FilterController")
@@ -90,9 +100,9 @@ html
                         label(for="filter-type-{{fil.type}}") {{fil.label}}
                     li.divider
                     li
-                        a.btn(ng-click="useDefault()", href="#") Use default
+                      a.btn(ng-click="useDefault()", href="#") Use default
                     li
-                        a.btn(ng-click="setAsDefault()", href="#") Set as default
+                      a.btn(ng-click="setAsDefault()", href="#") Set as default
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
                 li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-if="!currentFilter2[message.type]")
                   span.timestamp
