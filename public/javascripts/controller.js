@@ -74,10 +74,15 @@ myModule.directive('caret', function() {
                     $event.preventDefault();
                     scope.showNextMessage(scope.buffer.id);
                 } else if ($event.keyCode == 9) { // Tab
+                    /* !! Needs to be fixed
+                    
+                    
+                    
+                    
                     $event.preventDefault();
                     var tokenEnd = element[0].selectionEnd;
                         
-                    var message = scope.message;
+                    var message = scope.inputmessage;
                     var messageLeft = message.substr(0, tokenEnd);
                     var tokenStart = messageLeft.lastIndexOf(' ');
                     tokenStart += 1; // -1 (not found) => 0 (start)
@@ -131,7 +136,6 @@ myModule.directive('caret', function() {
                         var nick = getMostRecentNick(token);
                         if (!nick)
                             nick = getNickAlphabetically(token);
-                        console.log(nick);
                         if (nick) {
                             if (tokenStart === 0) {
                                 return nick + ': ';
@@ -146,12 +150,12 @@ myModule.directive('caret', function() {
                     if (newToken) {
                         var newMessage = message.substr(0, tokenStart) + newToken + message.substr(tokenEnd);
                         scope.$apply(function(){
-                            scope.message = newMessage;
+                            scope.inputmessage = newMessage;
                         });
                         var newTokenEnd = tokenEnd + newToken.length - token.length;
                         setCaretPosition(element[0], newTokenEnd);
                     }
-                }
+                */}
             });
         }
     };
