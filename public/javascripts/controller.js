@@ -153,8 +153,6 @@ myModule.directive('caret', function() {
                     }
                 }
             });
-            
-            
         }
     };
 });
@@ -657,11 +655,11 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     };
     
     $scope.channelPart = function(channel) {
-        $socket.emit('sendMessage', channel.id, '/part ' + name);
+        $socket.emit('sendMessage', channel.id, '/part');
     };
     
     $scope.channelJoin = function(channel) {
-        $socket.emit('sendMessage', channel.id, '/join ' + name);
+        $socket.emit('sendMessage', channel.id, '/join ' + channel.name);
     };
     
     $scope.channelDelete = function(channel) {
@@ -796,7 +794,7 @@ myModule.controller('InputController', ['$scope', '$socket', function($scope, $s
     var messagesHistory = [];
     var MT = require('message').Type;
     
-    $scope.message = '';
+    $scope.inputmessage = '';
     
     var CircularBuffer = function(length){
         this.wpointer = 0;
@@ -899,11 +897,11 @@ myModule.controller('InputController', ['$scope', '$socket', function($scope, $s
     };
     
     $scope.sendMessage = function() {
-        if (typeof $scope.buffer.id === "number" && $scope.message.length > 0) {
+        if (typeof $scope.buffer.id === "number" && $scope.inputmessage.length > 0) {
             $scope.clearMessageHistory($scope.buffer.id);
-            $socket.emit('sendMessage', $scope.buffer.id, $scope.message);
-            $scope.addMessageHistory($scope.message, $scope.buffer.id);
-            $scope.message = '';
+            $socket.emit('sendMessage', $scope.buffer.id, $scope.inputmessage);
+            $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
+            $scope.inputmessage = '';
         }
     };
 }]);
