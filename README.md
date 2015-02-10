@@ -2,6 +2,7 @@
 
 :warning: Alpha version
 :warning: Your node (NOT quassel core) version should be at least v0.11.13. (To install node, you can run `npm -g install n` and `n latest`.)
+:warning: Node v0.12 is now stable, so of course you can use it !
 
 A web client for Quassel (requires a running quasselcore)
 
@@ -44,16 +45,6 @@ cp scripts/startup /etc/init.d/quasselweb
 ```
 and then edit the file /etc/init.d/quasselweb and change `BASEDIR`, `RUNASUSER` and `RUNASGROUP` vars.
 
-#### Query String Arguments
-You can add arguments onto the url to automatically populate the login form. By filling out all 4 arguments, the client will automatically login.
-
-* `host` QuasselCore host
-* `port` QuasselCore port
-* `user` Your QuasselCore username
-* `password` Your QuasselCore password (Using this argument isn't advised)
-
-**Example:** https://yourserver:64443/?host=localhost&port=4242&user=AdminUser
-
 ## License
-Copyright (c) 2014 Joël Charles  
+Copyright (c) 2014-2015 Joël Charles  
 Licensed under the MIT license.
