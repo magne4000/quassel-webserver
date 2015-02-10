@@ -160,7 +160,7 @@ io.on('connection', function(socket) {
         }
         
         quassel = new Quassel(data.server, data.port, {
-            backloglimit: 20
+            backloglimit: 50
         }, function(next) {
             next(data.user, data.password);
         });
@@ -170,7 +170,7 @@ io.on('connection', function(socket) {
         });
         
         socket.on('moreBacklogs', function(bufferId, firstMessageId) {
-            quassel.requestBacklog(bufferId, -1, firstMessageId, 20);
+            quassel.requestBacklog(bufferId, -1, firstMessageId, 50);
         });
         
         socket.on('requestDisconnectNetwork', function(networkId) {

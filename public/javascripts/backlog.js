@@ -26,7 +26,7 @@
                     handler = ng.noop;
                 }
                 
-                scope.$watch('fetching', function(oldValue, newValue){
+                scope.$watch('fetching', function(newValue, oldValue){
                     if (promiseFetching !== null) timeout.cancel(promiseFetching);
                     if (newValue === true) {
                         // In case no response for 30 seconds, reset fetching to false
@@ -40,11 +40,11 @@
                     tryLaunchHandler();
                 }, true);
                 
-                scope.$watch('buffer', function(oldValue, newValue){
+                scope.$watch('buffer', function(newValue, oldValue){
                     tryLaunchHandler();
                 });
                 
-                scope.$watch('buffer.messages', function(oldValue, newValue){
+                scope.$watch('buffer.messages', function(newValue, oldValue){
                     if (!oldValue || !newValue || (oldValue && newValue && oldValue.count() !== newValue.count())) {
                         timeout(function () {
                             element[0].scrollTop = element[0].scrollHeight - lastBottom;

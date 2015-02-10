@@ -562,7 +562,10 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     }).after('network.init');
     
     $er.on('buffer.backlog', function(next, bufferId, messageIds) {
-        if ($scope.buffer !== null) {
+        if (messageIds.length === 0) {
+            // No more backlogs to receive for this buffer
+            loadingMoreBacklogs[''+$scope.buffer.id] = 'stop';
+        } else if ($scope.buffer !== null) {
             loadingMoreBacklogs[''+$scope.buffer.id] = false;
         }
         next();
@@ -630,7 +633,7 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     };
     
     $scope.loadMore = function() {
-        if ($scope.buffer !== null && (typeof loadingMoreBacklogs[''+$scope.buffer.id] === 'undefined' || loadingMoreBacklogs[''+$scope.buffer.id] === false)) {
+        if ($scope.buffer !== null && (typeof loadingMoreBacklogs[''+$scope.buffer.id] === 'undefined' || loadingMoreBacklogs[''+$scope.buffer.id] === false) && loadingMoreBacklogs[''+$scope.buffer.id] !== 'stop') {
             var firstMessage = Math.min.apply(null, $scope.buffer.messages.keys());
             loadingMoreBacklogs[''+$scope.buffer.id] = true;
             $socket.emit('moreBacklogs', $scope.buffer.id, firstMessage);
