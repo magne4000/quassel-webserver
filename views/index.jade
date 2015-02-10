@@ -115,21 +115,21 @@ html
             #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
               .buffer-container
                 .user-group
-                  span.expanded(data-target='users-operator', toggle="users-operator")
+                  span.collapsable.expanded(data-target='users-operator', toggle="users-operator")
                   span.group-name operators
                 #users-operator.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersop:buffer | orderBy:'nick'")
                     span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                     span.user-name {{user.nick}}
                 .user-group
-                  span.expanded(data-target='users-voiced', toggle="users-voiced")
+                  span.collapsable.expanded(data-target='users-voiced', toggle="users-voiced")
                   span.group-name voiced
                 #users-voiced.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersvoiced:buffer | orderBy:'nick'")
                     span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                     span.user-name {{user.nick}}
                 .user-group
-                  span.expanded(data-target='users-user', toggle="users-user")
+                  span.collapsable.expanded(data-target='users-user', toggle="users-user")
                   span.group-name users
                 #users-user.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersstd:buffer | orderBy:'nick'")

@@ -141,7 +141,7 @@ html,body,.container {
     text-transform: uppercase;
 }
 
-.collapsable.collapsed, .collapsable.expanded {
+.collapsable {
     .icon;
     opacity: 0.5;
     cursor: pointer;
@@ -153,6 +153,11 @@ html,body,.container {
 
 .collapsable.collapsed {
     background-image: url(/images/expander-collapsed.png);
+}
+
+.network-channels, .group-users {
+    display: block;
+    overflow: visible;
 }
 
 .user-icon {
@@ -244,10 +249,6 @@ html,body,.container {
 
 .small .buffer-bottom-bar .showhide.right {
     background-image: url(/images/hide-pane-right.png);
-}
-
-.network-channels, .group-users {
-    display: block;
 }
 
 .quassel-logo {

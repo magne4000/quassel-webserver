@@ -33,10 +33,10 @@ myModule.directive('toggle', function ($parse) {
             element.on('click', function(){
                 var eltToToggle = $('#'+attrs.toggle), self = $(this);
                 if (self.hasClass('expanded')) {
-                    eltToToggle.css("max-height", "0");
+                    eltToToggle.css("max-height", "0").css("overflow", "hidden");
                     self.removeClass("expanded").addClass("collapsed");
                 } else {
-                    eltToToggle.css("max-height", "");
+                    eltToToggle.css("max-height", "").css("overflow", "");
                     self.removeClass("collapsed").addClass("expanded");
                 }
             });
