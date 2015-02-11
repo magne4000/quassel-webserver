@@ -59,7 +59,7 @@ html
                 button.btn.btn-primary(type='button', ng-click='ok()') Join channel
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container
-                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks | orderBy:'networkName'", dropdown)
+                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
                   span.collapsable(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}", toggle="{{network.networkName}}-channels")
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
                   a.dropdown-network.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
@@ -72,17 +72,17 @@ html
                     li(ng-if="!network.isConnected")
                       a(href="#",  ng-click="connect(network)") Connect
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
-                  .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter", ng-if="!channel.isHidden()", dropdown)
+                  .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}", ng-repeat="channel in network.getBufferHashMap().values() | channelsFilter track by channel.id", ng-if="!channel.isHidden()", dropdown)
                     span.channel-icon
                     span.channel-name(ng-click="showBuffer(channel)") {{channel.name}}
                     a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
                       span.glyphicon.glyphicon-menu-hamburger
                     ul.dropdown-menu.dropdown-menu-right(role="menu")
-                      li(ng-if="channel.active")
+                      li(ng-if="channel.active && channel.isChannel()")
                         a(href="#", ng-click="channelPart(channel)") Part
-                      li(ng-if="!channel.active")
+                      li(ng-if="!channel.active  && channel.isChannel()")
                         a(href="#", ng-click="channelJoin(channel)") Join
-                      li(ng-if="!channel.active")
+                      li(ng-if="!channel.active || !channel.isChannel()")
                         a(href="#", ng-click="channelDelete(channel)") Delete
               .buffer-bottom-bar
                 a.showhide.right(href="#", ng-click="shown = !shown")
@@ -104,35 +104,35 @@ html
                     li
                       a.btn(ng-click="setAsDefault()", href="#") Set as default
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
-                li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id'", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-if="!currentFilter2[message.type]")
+                li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id' track by message.id", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-if="!currentFilter2[message.type]")
                   span.timestamp
                     span {{message.datetime | duration}}
                   span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
                   span.message(ng-bind-html="message | decoratecontent | color")
               .input(ng-controller="InputController")
                 form#messageform(ng-submit="sendMessage()")
-                  input#messagebox(type='text', placeholder='Enter your message here', ng-model="inputmessage", ng-model-options="{ updateOn: 'submit', debounce: 100 }", caret)
+                  input#messagebox(type='text', placeholder='Enter your message here', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)
             #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
               .buffer-container
                 .user-group
                   span.collapsable.expanded(data-target='users-operator', toggle="users-operator")
                   span.group-name operators
                 #users-operator.group-users.clearfix
-                  .user(ng-repeat="user in buffer.nickUserMap | usersop:buffer | orderBy:'nick'")
+                  .user(ng-repeat="user in buffer.nickUserMap | usersop:buffer | orderBy:'nick' track by user.nick")
                     span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                     span.user-name {{user.nick}}
                 .user-group
                   span.collapsable.expanded(data-target='users-voiced', toggle="users-voiced")
                   span.group-name voiced
                 #users-voiced.group-users.clearfix
-                  .user(ng-repeat="user in buffer.nickUserMap | usersvoiced:buffer | orderBy:'nick'")
+                  .user(ng-repeat="user in buffer.nickUserMap | usersvoiced:buffer | orderBy:'nick' track by user.nick")
                     span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                     span.user-name {{user.nick}}
                 .user-group
                   span.collapsable.expanded(data-target='users-user', toggle="users-user")
                   span.group-name users
                 #users-user.group-users.clearfix
-                  .user(ng-repeat="user in buffer.nickUserMap | usersstd:buffer | orderBy:'nick'")
+                  .user(ng-repeat="user in buffer.nickUserMap | usersstd:buffer | orderBy:'nick' track by user.nick")
                     span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                     span.user-name {{user.nick}}
               .buffer-bottom-bar

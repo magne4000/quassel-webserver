@@ -74,14 +74,8 @@ myModule.directive('caret', function() {
                     $event.preventDefault();
                     scope.showNextMessage(scope.buffer.id);
                 } else if ($event.keyCode == 9) { // Tab
-                    /* !! Needs to be fixed
-                    
-                    
-                    
-                    
                     $event.preventDefault();
                     var tokenEnd = element[0].selectionEnd;
-                        
                     var message = scope.inputmessage;
                     var messageLeft = message.substr(0, tokenEnd);
                     var tokenStart = messageLeft.lastIndexOf(' ');
@@ -155,7 +149,7 @@ myModule.directive('caret', function() {
                         var newTokenEnd = tokenEnd + newToken.length - token.length;
                         setCaretPosition(element[0], newTokenEnd);
                     }
-                */}
+                }
             });
         }
     };
