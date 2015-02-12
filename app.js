@@ -5,6 +5,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+//var jsonpatch = require('fast-json-patch');
 var patch = require('./lib/patch');
 var path = require('path');
 var fs = require('fs');
@@ -28,6 +29,11 @@ var opts = require("nomnom")
         default: 'https',
         choices: ['http', 'https'],
         help: 'Use HTTP or HTTPS'
+    })
+    .option('unsecurecore', {
+        abbr: 'u',
+        flag: true,
+        help: 'Connect to the core without using SSL'
     })
     .parse();
 
@@ -160,7 +166,8 @@ io.on('connection', function(socket) {
         }
         
         quassel = new Quassel(data.server, data.port, {
-            backloglimit: 50
+            backloglimit: 50,
+            unsecurecore: opts.unsecurecore
         }, function(next) {
             next(data.user, data.password);
         });
@@ -208,7 +215,10 @@ io.on('connection', function(socket) {
                 ee.on('change', function(op) {
                     socket.emit.call(socket, 'change', networkId, patch(op));
                 });
-            }
+            }/*
+            jsonpatch.observe(network, function(op) {
+                socket.emit.call(socket, 'change', networkId, op);
+            });*/
             socket.emit('network.init', networkId);
         });
 

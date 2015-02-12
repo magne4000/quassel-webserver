@@ -542,8 +542,7 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     $er.on('change', function(next, networkId, change) {
         if (!jsonpatch.apply($networks.get().get(networkId), change)) {
             console.log('Patch failed!');
-        }
-        else {
+        } else {
             clearTimeout(changesTimeout[networkId]);
             changesTimeout[networkId] = setTimeout(function() {
                 $scope.$apply(function(){
@@ -589,30 +588,34 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     
     $er.on('buffer.message', function(next, bufferId, messageId) {
         var buffer = $networks.get().findBuffer(bufferId);
-        $reviver.afterReviving(buffer.messages, function(obj){
-            var message = obj.get(parseInt(messageId, 10));
-            if ($scope.buffer !== null && buffer.id === $scope.buffer.id) {
-                $socket.emit('markBufferAsRead', bufferId, messageId);
-            } else {
-                $reviver.afterReviving(message, function(obj2){
-                    if (obj2.isHighlighted()) {
-                        $scope.$apply(function(){
-                            buffer.highlight = 2;
-                        });
-                    } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
-                        $scope.$apply(function(){
-                            buffer.highlight = 1;
-                        });
-                    }
-                });
-            }
-        });
+        if (buffer !== null) {
+            $reviver.afterReviving(buffer.messages, function(obj){
+                var message = obj.get(parseInt(messageId, 10));
+                if ($scope.buffer !== null && buffer.id === $scope.buffer.id) {
+                    $socket.emit('markBufferAsRead', bufferId, messageId);
+                } else {
+                    $reviver.afterReviving(message, function(obj2){
+                        if (obj2.isHighlighted()) {
+                            $scope.$apply(function(){
+                                buffer.highlight = 2;
+                            });
+                        } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
+                            $scope.$apply(function(){
+                                buffer.highlight = 1;
+                            });
+                        }
+                    });
+                }
+            });
+        }
         next();
     }).after('network.addbuffer');
     
     $er.on('buffer.read', function(next, bufferId) {
         var buffer = $networks.get().findBuffer(bufferId);
-        buffer.highlight = 0;
+        $scope.$apply(function(){
+            buffer.highlight = 0;
+        });
         next();
     }).after('network.addbuffer');
     
@@ -630,6 +633,7 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
         if ($scope.buffer !== null && (typeof loadingMoreBacklogs[''+$scope.buffer.id] === 'undefined' || loadingMoreBacklogs[''+$scope.buffer.id] === false) && loadingMoreBacklogs[''+$scope.buffer.id] !== 'stop') {
             var firstMessage = Math.min.apply(null, $scope.buffer.messages.keys());
             loadingMoreBacklogs[''+$scope.buffer.id] = true;
+            if (firstMessage === Infinity) firstMessage = -1;
             $socket.emit('moreBacklogs', $scope.buffer.id, firstMessage);
             return true;
         }
@@ -883,7 +887,9 @@ myModule.controller('InputController', ['$scope', '$socket', function($scope, $s
         if (typeof messagesHistory[''+bufferId] !== 'undefined') {
             var msg = messagesHistory[''+bufferId].previous();
             if (msg !== null) {
-                $("#messagebox").val(msg);
+                $scope.$apply(function(){
+                    $scope.inputmessage = msg;
+                });
             }
         }
     };
@@ -892,7 +898,9 @@ myModule.controller('InputController', ['$scope', '$socket', function($scope, $s
         if (typeof messagesHistory[''+bufferId] !== 'undefined') {
             var msg = messagesHistory[''+bufferId].next();
             if (msg !== null) {
-                $("#messagebox").val(msg);
+                $scope.$apply(function(){
+                    $scope.inputmessage = msg;
+                });
             }
         }
     };
@@ -922,6 +930,10 @@ myModule.controller('FilterController', ['$scope', function($scope) {
     $scope.currentFilter2 = {};
     $scope.defaultFilter = filters;
     
+    if (localStorage.filter) {
+        $scope.defaultFilter = JSON.parse(localStorage.filter);
+    }
+    
     $scope.$watch('buffer', function(newValue, oldValue) {
         if (oldValue !== null) {
             bufferFilters[''+oldValue.id] = angular.copy($scope.currentFilter);
@@ -942,6 +954,7 @@ myModule.controller('FilterController', ['$scope', function($scope) {
     
     $scope.setAsDefault = function() {
         $scope.defaultFilter = angular.copy($scope.currentFilter);
+        localStorage.filter = JSON.stringify($scope.defaultFilter);
     };
     
     $scope.useDefault = function() {
