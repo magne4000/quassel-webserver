@@ -59,7 +59,7 @@ html
                 button.btn.btn-primary(type='button', ng-click='ok()') Join channel
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container
-                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
+                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.getStatusBuffer().id}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
                   span.collapsable(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}", toggle="{{network.networkName}}-channels")
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
                   a.dropdown-network.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
