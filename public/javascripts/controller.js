@@ -942,6 +942,12 @@ myModule.controller('FilterController', ['$scope', function($scope) {
     $scope.currentFilter2 = {};
     $scope.defaultFilter = filters;
     
+    function onCurrentFilterUpdate() {
+        angular.forEach($scope.currentFilter, function(value, key) {
+            $scope.currentFilter2[''+value.type] = value.value;
+        });
+    }
+    
     if (localStorage.filter) {
         $scope.defaultFilter = JSON.parse(localStorage.filter);
     }
@@ -955,14 +961,9 @@ myModule.controller('FilterController', ['$scope', function($scope) {
                 bufferFilters[''+newValue.id] = angular.copy($scope.defaultFilter);
             }
             $scope.currentFilter = bufferFilters[''+newValue.id];
+            onCurrentFilterUpdate();
         }
     });
-    
-    $scope.$watch('currentFilter', function(newValue, oldValue) {
-        angular.forEach($scope.currentFilter, function(value, key) {
-            $scope.currentFilter2[''+value.type] = value.value;
-        });
-    }, true);
     
     $scope.setAsDefault = function() {
         $scope.defaultFilter = angular.copy($scope.currentFilter);
@@ -971,6 +972,7 @@ myModule.controller('FilterController', ['$scope', function($scope) {
     
     $scope.useDefault = function() {
         $scope.currentFilter = angular.copy($scope.defaultFilter);
+        onCurrentFilterUpdate();
     };
 }]);
 
