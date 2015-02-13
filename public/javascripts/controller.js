@@ -615,9 +615,9 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
                     });
                 }
             });
-        }
-        if (bufferId === $scope.buffer.id) {
-            $scope.messages = $scope.buffer.messages.values();
+            if (bufferId === $scope.buffer.id) {
+                $scope.messages = $scope.buffer.messages.values();
+            }
         }
         next();
     }).after('network.addbuffer');
