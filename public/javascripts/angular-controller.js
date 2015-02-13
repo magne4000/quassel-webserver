@@ -54,7 +54,7 @@ angular.module('quassel')
                     $reviver.reviveAll($networks.get().get(networkId));
                     $scope.networks = $networks.get().all();
                 });
-            }, 100);
+            }, 10);
         }
         next();
     }).after('network.init');
@@ -133,6 +133,16 @@ angular.module('quassel')
         }
         next();
     }).after('network.addbuffer');
+    
+    $er.on('buffer.remove', function(next, bufferId) {
+        var networks = $networks.get().all();
+        $scope.$apply(function(){
+            for (var i=0; i<networks.length; i++) {
+                networks[i]._buffers = networks[i].getBufferHashMap().values();
+            }
+        });
+        next();
+    });
     
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
