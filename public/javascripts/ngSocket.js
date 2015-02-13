@@ -17,7 +17,7 @@
     .provider('$socket', socketProvider);
 
   function socketProvider() {
-    var url;
+    var url = '';
     var options;
 
     this.setUrl = setUrl;

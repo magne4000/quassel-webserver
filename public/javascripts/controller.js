@@ -158,7 +158,8 @@ myModule.directive('caret', function() {
 myModule.config(["$socketProvider", function ($socketProvider) {
     $socketProvider.setOptions({
         timeout: 6000,
-        reconnectionAttempts: 5
+        reconnectionAttempts: 5,
+        path: location.pathname + 'socket.io'
     });
 }]);
 

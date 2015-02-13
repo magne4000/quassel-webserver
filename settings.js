@@ -3,6 +3,7 @@ module.exports = {
         host: '',
         port: 4242
     },
-    forcedefault: false
+    forcedefault: false,
+    prefixpath: ''
 };
 

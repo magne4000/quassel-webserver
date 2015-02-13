@@ -14,7 +14,6 @@ var debug = require('debug');
 var Quassel = require('libquassel');
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
 
 var settings = require('./settings');
 
@@ -61,6 +60,18 @@ if (opts.mode === 'http'){
     if (opts.port === null) opts.port = 64443;
 }
 
+// check that prefixpath do not contains ../, and it starts with / if not empty
+if (settings.prefixpath.length > 0) {
+    if (settings.prefixpath.indexOf('../') > -1) {
+        console.log(' ../ forbidden in prefixpath setting');
+        process.exit(3);
+    }
+    if (settings.prefixpath[0] !== '/') {
+        console.log(' prefixpath setting must begin with trailing /');
+        process.exit(4);
+    }
+}
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -73,14 +84,17 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-app.use(lessMiddleware(path.join(__dirname, 'public')));
-app.get('/javascripts/libquassel.js', function(req, res) {
+app.use(settings.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
+app.get(settings.prefixpath+'/javascripts/libquassel.js', function(req, res) {
     res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.js'));
 });
-app.use(express.static(path.join(__dirname, 'public')));
+if (settings.prefixpath.length > 0) {
+    app.use(settings.prefixpath, express.static(path.join(__dirname, 'public')));
+} else {
+    app.use(express.static(path.join(__dirname, 'public')));
+}
 
-app.use('/', routes);
-app.use('/users', users);
+app.use(settings.prefixpath+'/', routes);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -122,7 +136,7 @@ server.listen(app.get('port'), app.get('host'), function() {
     loggerqw('Express server listening on port ' + server.address().port);
 });
 
-var io = require('socket.io')(server);
+var io = require('socket.io')(server, {path: settings.prefixpath + '/socket.io'});
 
 io.on('connection', function(socket) {
     var registerEvents = ['login', 'loginfailed'], ee, quassel;
