@@ -501,8 +501,9 @@ myModule.filter('usersstd', function() {
 
 myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', function($scope, $networks, $socket, $er, $reviver, $modal) {
     $scope.networks = {};
+    $scope.buffers = [];
     $scope.buffer = null;
-    $scope.messages = null;
+    $scope.messages = [];
     
     var MT = require('message').Type;
     var changesTimeout = [];
@@ -538,6 +539,8 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     }).after('network._init');
     
     $er.on('network.addbuffer', function(next, networkId, bufferId) {
+        var network = $networks.get().get(networkId);
+        network._buffers = network.getBufferHashMap().values();
         next();
     }).after('network.init');
     
