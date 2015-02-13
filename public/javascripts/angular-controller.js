@@ -1,0 +1,477 @@
+angular.module('quassel')
+.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', function($scope, $networks, $socket, $er, $reviver, $modal) {
+    $scope.networks = {};
+    $scope.buffers = [];
+    $scope.buffer = null;
+    $scope.messages = [];
+    
+    var MT = require('message').Type;
+    var changesTimeout = [];
+    var loadingMoreBacklogs = [];
+    
+    $er.setCallback(function(event) {
+        $socket.emit('register', event);
+    });
+    
+    // Internal
+    $er.on('_init', function(next, data) {
+        console.log('_init');
+        $scope.$apply(function(){
+            $networks.set(data);
+            $reviver.reviveAll($networks.get());
+            $scope.networks = $networks.get().all();
+        });
+        next();
+    });
+    
+    // Internal
+    $er.on('network._init', function(next, networkId, data) {
+        console.log('network._init');
+        $reviver.reviveAll(data);
+        $networks.get().set(networkId, data);
+        $scope.networks = $networks.get().all();
+        next();
+    }).after('_init');
+    
+    $er.on('network.init', function(next, networkId) {
+        console.log('network.init');
+        next();
+    }).after('network._init');
+    
+    $er.on('network.addbuffer', function(next, networkId, bufferId) {
+        var network = $networks.get().get(networkId);
+        network._buffers = network.getBufferHashMap().values();
+        next();
+    }).after('network.init');
+    
+    $er.on('change', function(next, networkId, change) {
+        if (!jsonpatch.apply($networks.get().get(networkId), change)) {
+            console.log('Patch failed!');
+        } else {
+            clearTimeout(changesTimeout[networkId]);
+            changesTimeout[networkId] = setTimeout(function() {
+                $scope.$apply(function(){
+                    $reviver.reviveAll($networks.get().get(networkId));
+                    $scope.networks = $networks.get().all();
+                });
+            }, 100);
+        }
+        next();
+    }).after('network.init');
+    
+    $er.on('buffer.backlog', function(next, bufferId, messageIds) {
+        if (messageIds.length === 0) {
+            // No more backlogs to receive for this buffer
+            loadingMoreBacklogs[''+$scope.buffer.id] = 'stop';
+        } else if ($scope.buffer !== null) {
+            loadingMoreBacklogs[''+$scope.buffer.id] = false;
+            if (bufferId === $scope.buffer.id) {
+                $scope.messages = $scope.buffer.messages.values();
+            }
+        }
+        next();
+    });
+    
+    $er.on('buffer.lastseen', function(next, bufferId, messageId) {
+        messageId = parseInt(messageId, 10);
+        var buffer = $networks.get().findBuffer(bufferId);
+        if (buffer !== null && messageId < buffer.getLastMessage().id) {
+            var found = buffer.messages.forEach(function(val, key){
+                if (key > messageId && typeof val.isHighlighted === 'function' && val.isHighlighted()) {
+                    $scope.$apply(function(){
+                        buffer.highlight = 2;
+                    });
+                    return false;
+                }
+                return true;
+            }, undefined, true);
+            if (!found) {
+                $scope.$apply(function(){
+                    buffer.highlight = 1;
+                });
+            }
+        }
+        next();
+    }).after('buffer.backlog');
+    
+    $er.on('buffer.message', function(next, bufferId, messageId) {
+        var buffer = $networks.get().findBuffer(bufferId);
+        if (buffer !== null) {
+            $reviver.afterReviving(buffer.messages, function(obj){
+                var message = obj.get(parseInt(messageId, 10));
+                if ($scope.buffer !== null && buffer.id === $scope.buffer.id) {
+                    $socket.emit('markBufferAsRead', bufferId, messageId);
+                } else {
+                    $reviver.afterReviving(message, function(obj2){
+                        if (obj2.isHighlighted()) {
+                            $scope.$apply(function(){
+                                buffer.highlight = 2;
+                            });
+                        } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
+                            $scope.$apply(function(){
+                                buffer.highlight = 1;
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        if ($scope.buffer === null) {
+            $scope.messages = [];
+        } else if (bufferId === $scope.buffer.id) {
+            $scope.messages = $scope.buffer.messages.values();
+        }
+        next();
+    }).after('network.addbuffer');
+    
+    $er.on('buffer.read', function(next, bufferId) {
+        var buffer = $networks.get().findBuffer(bufferId);
+        if (buffer !== null) {
+            $scope.$apply(function(){
+                buffer.highlight = 0;
+            });
+        }
+        next();
+    }).after('network.addbuffer');
+    
+    $scope.showBuffer = function(channel) {
+        $scope.buffer = channel;
+        $scope.messages = channel.messages.values();
+        var id = 0;
+        channel.messages.forEach(function(val, key) {
+            if (val.id > id) id = val.id;
+        });
+        
+        $socket.emit('markBufferAsRead', channel.id, id);
+    };
+    
+    $scope.loadMore = function() {
+        if ($scope.buffer !== null && (typeof loadingMoreBacklogs[''+$scope.buffer.id] === 'undefined' || loadingMoreBacklogs[''+$scope.buffer.id] === false) && loadingMoreBacklogs[''+$scope.buffer.id] !== 'stop') {
+            var firstMessage = Math.min.apply(null, $scope.buffer.messages.keys());
+            loadingMoreBacklogs[''+$scope.buffer.id] = true;
+            if (firstMessage === Infinity) firstMessage = -1;
+            $socket.emit('moreBacklogs', $scope.buffer.id, firstMessage);
+            return true;
+        }
+        return false;
+    };
+    
+    $scope.connect = function(network) {
+        $socket.emit('requestConnectNetwork', network.networkId);
+    };
+    
+    $scope.disconnect = function(network) {
+        $socket.emit('requestDisconnectNetwork', network.networkId);
+    };
+    
+    $scope.openModalJoinChannel = function(network) {
+        var modalInstance = $modal.open({
+            templateUrl: 'modalJoinChannel.html',
+            controller: 'ModalJoinChannelInstanceCtrl'
+        });
+    
+        modalInstance.result.then(function (name) {
+            $socket.emit('sendMessage', network.getStatusBuffer().id, '/join ' + name);
+        });
+    };
+    
+    $scope.channelPart = function(channel) {
+        $socket.emit('sendMessage', channel.id, '/part');
+    };
+    
+    $scope.channelJoin = function(channel) {
+        $socket.emit('sendMessage', channel.id, '/join ' + channel.name);
+    };
+    
+    $scope.channelDelete = function(channel) {
+        $socket.emit('requestRemoveBuffer', channel.id);
+    };
+}])
+.controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance) {
+    $scope.name = '';
+    
+    $scope.ok = function () {
+        $modalInstance.close($scope.name);
+    };
+    
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+})
+.controller('SocketController', ['$scope', '$socket', '$er', '$timeout', '$window', function($scope, $socket, $er, $timeout, $window) {
+    $scope.disconnected = false;
+    $scope.connecting = false;
+    $scope.firstconnected = false;
+    $scope.logged = false;
+    $scope.host = "";
+    $scope.port = "";
+    $scope.user = "";
+    $scope.password = "";
+    $scope.alert = "";
+    
+    $scope.$watch('alert', function(newValue, oldValue) {
+        if (newValue !== "") {
+            $timeout(function(){
+                $scope.alert = "";
+            }, 8000);
+        }
+    });
+    
+    $socket.on('_error', function(e) {
+        console.log('ERROR');
+        console.log(e);
+        switch (e.errno) {
+        case 'ECONNREFUSED':
+            $scope.$apply(function(){
+                $scope.alert = "Connection refused.";
+            });
+            break;
+        default:
+            console.log('Unknown error.');
+        }
+    });
+    
+    $socket.on("connected", function() {
+        console.log('CONNECTED');
+        $scope.$apply(function(){
+            $scope.disconnected = false;
+            $scope.connecting = false;
+            $scope.firstconnected = true;
+        });
+    });
+    
+    $socket.on('reconnect_attempt', function() {
+        console.log('RECONNECTING');
+        $scope.$apply(function(){
+            $scope.connecting = true;
+        });
+    });
+    
+    $socket.on('reconnect_error', function() {
+        console.log('RECONNECTING_ERROR');
+        $scope.$apply(function(){
+            $scope.connecting = false;
+        });
+    });
+    
+    $socket.on('reconnect_failed', function() {
+        console.log('RECONNECTING_FAILED');
+        $scope.$apply(function(){
+            $scope.connecting = false;
+            $scope.disconnected = true;
+        });
+    });
+    
+    $socket.on('loginfailed', function() {
+        console.log('loginfailed');
+        $scope.$apply(function(){
+            $scope.alert = "Invalid username or password.";
+        });
+    });
+    
+    $socket.on('login', function() {
+        console.log('Logged in');
+        $scope.$apply(function(){
+            $scope.logged = true;
+        });
+    });
+    
+    $socket.on('disconnect', function() {
+        console.log('DISCONNECT');
+        $er.clearReceived();
+        $scope.$apply(function(){
+            $scope.disconnected = true;
+        });
+    });
+    
+    $socket.on('reconnect', function() {
+        console.log('RECONNECT');
+        $er.redoCallbacks();
+        if ($scope.logged) {
+            $scope.login();
+        }
+        $scope.$apply(function(){
+            $scope.disconnected = false;
+        });
+    });
+    
+    $scope.reload = function(){
+        $window.location.reload();
+    };
+    
+    $scope.login = function(){
+        $socket.emit('credentials', {
+            server: $scope.host,
+            port: $scope.port,
+            user: $scope.user,
+            password: $scope.password
+        });
+    };
+}])
+.controller('InputController', ['$scope', '$socket', function($scope, $socket) {
+    var messagesHistory = [];
+    var MT = require('message').Type;
+    
+    $scope.inputmessage = '';
+    
+    var CircularBuffer = function(length){
+        this.wpointer = 0;
+        this.rpointer = 0;
+        this.lrpointer = null;
+        this.buffer = [];
+        this.max = length;
+    };
+    
+    CircularBuffer.prototype.push = function(item){
+        this.buffer[this.wpointer] = item;
+        this.wpointer = (this.max + this.wpointer + 1) % this.max;
+        this.rpointer = this.wpointer;
+    };
+    
+    CircularBuffer.prototype._previous = function(){
+        if (this.buffer.length === this.max) {
+            if (this.wpointer === this.max - 1) {
+                if (this.rpointer === 0) return false;
+            } else if (this.rpointer === this.wpointer && this.lrpointer !== null) {
+                return false;
+            }
+        } else if (this.rpointer === 0) return false;
+        this.lrpointer = this.rpointer;
+        this.rpointer -= 1;
+        if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
+        return true;
+    };
+    
+    CircularBuffer.prototype.previous = function(){
+        if (this.buffer.length === 0) return null;
+        if (this._previous()) {
+            return this.buffer[this.rpointer];
+        }
+        return null;
+    };
+    
+    CircularBuffer.prototype._next = function(key){
+        var ret = true;
+        if (this.buffer.length === this.max) {
+            if (this.lrpointer === null) {
+                ret = false;
+            } else if (this.wpointer === 0) {
+                if (this.rpointer === this.max - 1) ret = false;
+            } else if (this.rpointer + 1 === this.wpointer) {
+                ret = false;
+            }
+        } else if (this.rpointer === this.wpointer || this.rpointer === this.wpointer - 1) ret = false;
+        if (!ret) {
+            this.lrpointer = null;
+            return false;
+        }
+        this.lrpointer = this.rpointer;
+        this.rpointer += 1;
+        if (this.rpointer >= this.buffer.length) this.rpointer = 0;
+        return true;
+    };
+    
+    CircularBuffer.prototype.next = function(){
+        if (this.buffer.length === 0) return null;
+        if (this._next()) {
+            return this.buffer[this.rpointer];
+        }
+        return null;
+    };
+    
+    CircularBuffer.prototype.clearReadPointer = function(){
+        this.rpointer = this.wpointer - 1;
+        if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
+        this.lrpointer = null;
+    };
+    
+    $scope.addMessageHistory = function(message, bufferId) {
+        if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
+        messagesHistory[''+bufferId].push(message);
+    };
+
+    $scope.clearMessageHistory = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            messagesHistory[''+bufferId].clearReadPointer();
+        }
+    };
+    
+    $scope.showPreviousMessage = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            var msg = messagesHistory[''+bufferId].previous();
+            if (msg !== null) {
+                $scope.$apply(function(){
+                    $scope.inputmessage = msg;
+                });
+            }
+        }
+    };
+
+    $scope.showNextMessage = function(bufferId) {
+        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
+            var msg = messagesHistory[''+bufferId].next();
+            if (msg !== null) {
+                $scope.$apply(function(){
+                    $scope.inputmessage = msg;
+                });
+            }
+        }
+    };
+    
+    $scope.sendMessage = function() {
+        if (typeof $scope.buffer.id === "number" && $scope.inputmessage.length > 0) {
+            $scope.clearMessageHistory($scope.buffer.id);
+            $socket.emit('sendMessage', $scope.buffer.id, $scope.inputmessage);
+            $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
+            $scope.inputmessage = '';
+        }
+    };
+}])
+.controller('FilterController', ['$scope', function($scope) {
+    var filters = [
+        {label: 'Join', type: 32, value: false},
+        {label: 'Part', type: 64, value: false},
+        {label: 'Quit', type: 128, value: false},
+        {label: 'Nick', type: 8, value: false},
+        {label: 'Mode', type: 16, value: false},
+        {label: 'Topic', type: 16384, value: false},
+        {label: 'DayChange', type: 8192, value: false},
+    ];
+    var bufferFilters = [];
+    $scope.currentFilter = [];
+    $scope.currentFilter2 = {};
+    $scope.defaultFilter = filters;
+    
+    function onCurrentFilterUpdate() {
+        angular.forEach($scope.currentFilter, function(value, key) {
+            $scope.currentFilter2[''+value.type] = value.value;
+        });
+    }
+    
+    if (localStorage.filter) {
+        $scope.defaultFilter = JSON.parse(localStorage.filter);
+    }
+    
+    $scope.$watch('buffer', function(newValue, oldValue) {
+        if (oldValue !== null) {
+            bufferFilters[''+oldValue.id] = angular.copy($scope.currentFilter);
+        }
+        if ((newValue !== null && oldValue === null) || (newValue !== null && oldValue !== null && newValue.id !== oldValue.id)) {
+            if (typeof bufferFilters[''+newValue.id] === 'undefined') {
+                bufferFilters[''+newValue.id] = angular.copy($scope.defaultFilter);
+            }
+            $scope.currentFilter = bufferFilters[''+newValue.id];
+            onCurrentFilterUpdate();
+        }
+    });
+    
+    $scope.setAsDefault = function() {
+        $scope.defaultFilter = angular.copy($scope.currentFilter);
+        localStorage.filter = JSON.stringify($scope.defaultFilter);
+    };
+    
+    $scope.useDefault = function() {
+        $scope.currentFilter = angular.copy($scope.defaultFilter);
+        onCurrentFilterUpdate();
+    };
+}]);
