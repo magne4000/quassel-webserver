@@ -145,14 +145,15 @@ html,body,.container {
     .icon;
     opacity: 0.5;
     cursor: pointer;
+    padding: 6px;
 }
 
-.collapsable.expanded {
-    background-image: url(../images/expander-expanded.png);
+.collapsable .glyphicon:before{
+    content:"\e114"
 }
 
-.collapsable.collapsed {
-    background-image: url(../images/expander-collapsed.png);
+.collapsable.collapsed .glyphicon:before{
+    content:"\e080"
 }
 
 .network-channels, .group-users {

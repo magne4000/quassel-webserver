@@ -61,6 +61,7 @@ html
               .buffer-container
                 .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.getStatusBuffer().id}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
                   span.collapsable(ng-class="{expanded: network.isConnected, collapsed: !network.isConnected}", toggle="{{network.networkName}}-channels")
+                    span.glyphicon
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
                   a.dropdown-network.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
                     span.glyphicon.glyphicon-menu-hamburger
@@ -116,6 +117,7 @@ html
               .buffer-container
                 .user-group
                   span.collapsable.expanded(data-target='users-operator', toggle="users-operator")
+                    span.glyphicon
                   span.group-name operators
                 #users-operator.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersop:buffer | orderBy:'nick' track by user.nick")
@@ -123,6 +125,7 @@ html
                     span.user-name {{user.nick}}
                 .user-group
                   span.collapsable.expanded(data-target='users-voiced', toggle="users-voiced")
+                    span.glyphicon
                   span.group-name voiced
                 #users-voiced.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersvoiced:buffer | orderBy:'nick' track by user.nick")
@@ -130,6 +133,7 @@ html
                     span.user-name {{user.nick}}
                 .user-group
                   span.collapsable.expanded(data-target='users-user', toggle="users-user")
+                    span.glyphicon
                   span.group-name users
                 #users-user.group-users.clearfix
                   .user(ng-repeat="user in buffer.nickUserMap | usersstd:buffer | orderBy:'nick' track by user.nick")
