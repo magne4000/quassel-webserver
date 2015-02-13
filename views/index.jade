@@ -83,7 +83,7 @@ html
                       li(ng-if="!channel.active  && channel.isChannel()")
                         a(href="#", ng-click="channelJoin(channel)") Join
                       li(ng-if="!channel.active || !channel.isChannel()")
-                        a(href="#", ng-click="channelDelete(channel)") Delete
+                        a(href="#", ng-confirm-click="Are you sure you want to delete this buffer permanently ?", ng-ok-click="channelDelete(channel)") Delete
               .buffer-bottom-bar
                 a.showhide.right(href="#", ng-click="shown = !shown")
             #center.animation(ng-controller="FilterController")
@@ -148,4 +148,7 @@ html
       script(src='#{settings.prefixpath}/javascripts/angular-sanitize.min.js')
       script(src='#{settings.prefixpath}/javascripts/libquassel.js')
       script(src='#{settings.prefixpath}/javascripts/json-patch.js')
-      script(src='#{settings.prefixpath}/javascripts/controller.js')
+      script(src='#{settings.prefixpath}/javascripts/angular-init.js')
+      script(src='#{settings.prefixpath}/javascripts/angular-directive.js')
+      script(src='#{settings.prefixpath}/javascripts/angular-filter.js')
+      script(src='#{settings.prefixpath}/javascripts/angular-controller.js')
