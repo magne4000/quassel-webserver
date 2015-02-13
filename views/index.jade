@@ -104,7 +104,7 @@ html
                     li
                       a.btn(ng-click="useDefault()", href="#") Use default
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
-                li.irc-message(ng-repeat="message in buffer.messages.values() | orderBy:'id' track by message.id", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-if="!currentFilter2[message.type]")
+                li.irc-message(ng-repeat="message in messages | orderBy:'id' track by message.id", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-if="!currentFilter2[message.type]")
                   span.timestamp
                     span {{message.datetime | duration}}
                   span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}

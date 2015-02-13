@@ -502,6 +502,7 @@ myModule.filter('usersstd', function() {
 myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', function($scope, $networks, $socket, $er, $reviver, $modal) {
     $scope.networks = {};
     $scope.buffer = null;
+    $scope.messages = null;
     
     var MT = require('message').Type;
     var changesTimeout = [];
@@ -561,6 +562,9 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
             loadingMoreBacklogs[''+$scope.buffer.id] = 'stop';
         } else if ($scope.buffer !== null) {
             loadingMoreBacklogs[''+$scope.buffer.id] = false;
+            if (bufferId === $scope.buffer.id) {
+                $scope.messages = $scope.buffer.messages.values();
+            }
         }
         next();
     });
@@ -609,6 +613,9 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
                 }
             });
         }
+        if (bufferId === $scope.buffer.id) {
+            $scope.messages = $scope.buffer.messages.values();
+        }
         next();
     }).after('network.addbuffer');
     
@@ -622,6 +629,7 @@ myModule.controller('NetworkController', ['$scope', '$networks', '$socket', '$er
     
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
+        $scope.messages = channel.messages.values();
         var id = 0;
         channel.messages.forEach(function(val, key) {
             if (val.id > id) id = val.id;
