@@ -1,4 +1,4 @@
-angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'backlog'])
+angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap'])
 .config(["$socketProvider", function ($socketProvider) {
     $socketProvider.setOptions({
         timeout: 6000,

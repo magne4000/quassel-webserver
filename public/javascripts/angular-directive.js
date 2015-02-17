@@ -1,6 +1,5 @@
-var myModule = angular.module('quassel');
-
-myModule.directive('input', function ($parse) {
+angular.module('quassel')
+.directive('input', function ($parse) {
     return {
         restrict: 'E',
         require: '?ngModel',
@@ -10,9 +9,8 @@ myModule.directive('input', function ($parse) {
             }
         }
     };
-});
-
-myModule.directive('ngConfirmClick', function(){
+})
+.directive('ngConfirmClick', function(){
     return {
         require: '?ngOkClick',
         link: function (scope, element, attr) {
@@ -25,9 +23,8 @@ myModule.directive('ngConfirmClick', function(){
             });
         }
     };
-});
-
-myModule.directive('toggle', function ($parse) {
+})
+.directive('toggle', function ($parse) {
     return {
         link: function (scope, element, attrs) {
             element.on('click', function(){
@@ -42,9 +39,8 @@ myModule.directive('toggle', function ($parse) {
             });
         }
     };
-});
-
-myModule.directive('caret', function() {
+})
+.directive('caret', function() {
     var MT = require('message').Type;
     
     function setCaretPosition(elem, caretPos) {
@@ -153,4 +149,93 @@ myModule.directive('caret', function() {
             });
         }
     };
-});
+})
+.directive('backlog', ['$timeout', '$compile', '$socket', function (timeout, $compile, $socket) {
+    return {
+        scope: {
+            backlog: "=",
+            buffer: "=parentBuffer",
+            currentFilter: "="
+        },
+        template: "",
+        link: function (scope, element, attr) {
+            var lengthThreshold = attr.scrollThreshold || 20;
+            var handler = scope.backlog;
+            var promiseFetching = null;
+            var lastScrolled = -9999;
+            var lastBottom = 0;
+            scope.fetching = false;
+            
+            element.before($compile('<div class="fetching" ng-show="fetching">Fetching more backlogs...</div>')(scope));
+            
+            lengthThreshold = parseInt(lengthThreshold, 10);
+
+            if (!handler || !angular.isFunction(handler)) {
+                handler = angular.noop;
+            }
+            
+            function clearFetching() {
+                if (promiseFetching !== null) timeout.cancel(promiseFetching);
+                // In case no response for 30 seconds, reset fetching to false
+                promiseFetching = timeout(function () {
+                    scope.fetching = false;
+                }, 30000);
+            }
+            
+            scope.$watch('currentFilter', function(newValue, oldValue) {
+                tryLaunchHandler();
+            }, true);
+            
+            scope.$watch('buffer', function(newValue, oldValue){
+                tryLaunchHandler();
+            });
+            
+            $socket.on('buffer.backlog', function(bufferId, messageIds) {
+                if (scope.buffer !== null && bufferId == scope.buffer.id) {
+                    timeout(function () {
+                        element[0].scrollTop = element[0].scrollHeight - lastBottom;
+                        if (element[0].scrollTop < lengthThreshold) {
+                            // If no scrollbar (or scrollTop to small), load more backlogs
+                            launchHandler();
+                        }
+                    }, 10);
+                }
+                if (promiseFetching !== null) timeout.cancel(promiseFetching);
+                scope.fetching = false;
+            });
+            
+            function tryLaunchHandler() {
+                if (promiseFetching !== null) timeout.cancel(promiseFetching);
+                scope.fetching = false;
+                lastBottom = 0;
+                element[0].scrollTop = element[0].scrollHeight;
+                timeout(function () {
+                    if (element[0].scrollTop < lengthThreshold) {
+                        launchHandler();
+                    }
+                }, 0);
+            }
+            
+            function launchHandler() {
+                if (!scope.fetching) {
+                    lastBottom = element[0].scrollHeight;
+                }
+                timeout(function () {
+                    if (handler() === true) {
+                        scope.fetching = true;
+                        clearFetching();
+                    }
+                }, 10);
+            }
+
+            element.bind('scroll', function(){
+                var scrolled = element[0].scrollTop;
+                // if we have reached the threshold and we scroll up
+                if (scrolled < lengthThreshold && (scrolled - lastScrolled) < 0) {
+                    launchHandler();
+                }
+                lastScrolled = scrolled;
+            });
+        }
+    };
+}]);
