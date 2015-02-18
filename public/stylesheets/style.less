@@ -351,8 +351,14 @@ html,body,.container {
     background-color: @brand-warning;
 }
 
-.backlog .irc-message.markerline > span {
-    border-top: 1px solid @brand-success;
+.backlog .markerline {
+    background-color: @brand-danger;
+    display: block;
+    height: 1px;
+}
+
+.backlog .markerline:last-child {
+    display: none;
 }
 
 .fetching {

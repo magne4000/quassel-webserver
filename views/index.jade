@@ -7,7 +7,7 @@ html
       meta(name='description', content='Quassel Web App')
       meta(name='author', content='Joël Charles')
       meta(name='author', content='Johannes Siipola')
-      link(rel='shortcut icon', href='favicon.ico')
+      link(rel='icon', href='favicon.ico')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/bootstrap.min.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/fonts.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/style.css')
@@ -105,7 +105,7 @@ html
                     li
                       a.btn(ng-click="useDefault()", href="#") Use default
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
-                li.irc-message(ng-repeat="message in messages | orderBy:'id' track by message.id", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-show="!currentFilter2[message.type]")
+                li.irc-message(markerline="buffer.markerline == message.id", ng-repeat="message in messages | orderBy:'id' track by message.id", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-show="!currentFilter2[message.type]")
                   span.timestamp
                     span {{message.datetime | duration}}
                   span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
@@ -146,6 +146,7 @@ html
       script(src='#{settings.prefixpath}/javascripts/angular.min.js')
       script(src='#{settings.prefixpath}/javascripts/ui-bootstrap-tpls-0.12.0.min.js')
       script(src='#{settings.prefixpath}/socket.io/socket.io.js')
+      script(src='#{settings.prefixpath}/javascripts/favico-0.3.6.min.js')
       script(src='#{settings.prefixpath}/javascripts/ngSocket.js')
       script(src='#{settings.prefixpath}/javascripts/events.js')
       script(src='#{settings.prefixpath}/javascripts/angular-sanitize.min.js')

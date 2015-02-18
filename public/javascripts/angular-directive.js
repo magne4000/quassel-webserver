@@ -24,7 +24,7 @@ angular.module('quassel')
         }
     };
 })
-.directive('toggle', function ($parse) {
+.directive('toggle', function () {
     return {
         link: function (scope, element, attrs) {
             element.on('click', function(){
@@ -37,6 +37,15 @@ angular.module('quassel')
                     self.removeClass("collapsed").addClass("expanded");
                 }
             });
+        }
+    };
+})
+.directive('markerline', function ($parse) {
+    return {
+        link: function (scope, element, attrs) {
+            if ($parse(attrs.markerline)(scope)) {
+                element.after('<li class="markerline"></li>');
+            }
         }
     };
 })

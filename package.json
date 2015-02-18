@@ -39,7 +39,7 @@
     "express": "4.*",
     "jade": "~1.9.1",
     "less": "~2.3.1",
-    "less-middleware": "~1.0.4",
+    "less-middleware": "^1.0.4",
     "libquassel": "*",
     "morgan": "~1.5.1",
     "nomnom": "~1.8.1",

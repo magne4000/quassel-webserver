@@ -30,6 +30,35 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap'])
     
     return reviver;
 }])
+.factory('$favico', [function() {
+    var num = 0;
+    var favico = new Favico({
+        animation: 'pop',
+        type: 'rectangle',
+        bgColor: '#f0ad4e',
+        textColor: '#fff'
+    });
+
+    var more = function() {
+        num = num + 1;
+        favico.badge(num);
+    };
+    
+    var less = function() {
+        num = (num-1 < 0) ? 0 : (num - 1);
+        favico.badge(num);
+    };
+    
+    var reset = function() {
+        favico.reset();
+    };
+
+    return {
+        more: more,
+        less: less,
+        reset: reset
+    };
+}])
 .run([function(){
     console.log('AngularJS loaded');
 }]);

@@ -1,5 +1,5 @@
 angular.module('quassel')
-.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', function($scope, $networks, $socket, $er, $reviver, $modal) {
+.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', function($scope, $networks, $socket, $er, $reviver, $modal, $favico) {
     $scope.networks = {};
     $scope.buffers = [];
     $scope.buffer = null;
@@ -78,9 +78,12 @@ angular.module('quassel')
         if (buffer !== null && messageId < buffer.getLastMessage().id) {
             var found = buffer.messages.forEach(function(val, key){
                 if (key > messageId && typeof val.isHighlighted === 'function' && val.isHighlighted()) {
-                    $scope.$apply(function(){
-                        buffer.highlight = 2;
-                    });
+                    if (buffer.highlight !== 2) {
+                        $scope.$apply(function(){
+                            buffer.highlight = 2;
+                            $favico.more();
+                        });
+                    }
                     return false;
                 }
                 return true;
@@ -90,6 +93,14 @@ angular.module('quassel')
                     buffer.highlight = 1;
                 });
             }
+        }
+        next();
+    }).after('buffer.backlog');
+    
+    $er.on('buffer.markerline', function(next, bufferId, messageId) {
+        var buffer = $networks.get().findBuffer(bufferId);
+        if (buffer !== null) {
+            buffer.markerline = parseInt(messageId, 10);
         }
         next();
     }).after('buffer.backlog');
@@ -104,13 +115,18 @@ angular.module('quassel')
                 } else {
                     $reviver.afterReviving(message, function(obj2){
                         if (obj2.isHighlighted()) {
-                            $scope.$apply(function(){
-                                buffer.highlight = 2;
-                            });
+                            if (buffer.highlight !== 2) {
+                                $scope.$apply(function(){
+                                    buffer.highlight = 2;
+                                    $favico.more();
+                                });
+                            }
                         } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
-                            $scope.$apply(function(){
-                                buffer.highlight = 1;
-                            });
+                            if (buffer.highlight !== 2 && buffer.highlight !== 1) {
+                                $scope.$apply(function(){
+                                    buffer.highlight = 1;
+                                });
+                            }
                         }
                     });
                 }
@@ -127,6 +143,9 @@ angular.module('quassel')
     $er.on('buffer.read', function(next, bufferId) {
         var buffer = $networks.get().findBuffer(bufferId);
         if (buffer !== null) {
+            if (buffer.highlight === 2) {
+                $favico.less();
+            }
             $scope.$apply(function(){
                 buffer.highlight = 0;
             });
