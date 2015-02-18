@@ -115,34 +115,13 @@ html
                   input#messagebox(type='text', placeholder='Enter your message here', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)
             #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
               .buffer-container
-                .user-group
-                  span.collapsable.expanded(data-target='users-operator', toggle="users-operator")
-                    span.glyphicon
-                  span.group-name operators
-                #users-operator.group-users.clearfix
-                  .user(ng-repeat="user in buffer.nickUserMap | usersop:buffer | orderBy:'nick' track by user.nick")
-                    span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
-                    span.user-name {{user.nick}}
-                .user-group
-                  span.collapsable.expanded(data-target='users-voiced', toggle="users-voiced")
-                    span.glyphicon
-                  span.group-name voiced
-                #users-voiced.group-users.clearfix
-                  .user(ng-repeat="user in buffer.nickUserMap | usersvoiced:buffer | orderBy:'nick' track by user.nick")
-                    span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
-                    span.user-name {{user.nick}}
-                .user-group
-                  span.collapsable.expanded(data-target='users-user', toggle="users-user")
-                    span.glyphicon
-                  span.group-name users
-                #users-user.group-users.clearfix
-                  .user(ng-repeat="user in buffer.nickUserMap | usersstd:buffer | orderBy:'nick' track by user.nick")
-                    span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
-                    span.user-name {{user.nick}}
+                .user(ng-repeat="user in buffer.nickUserMap | ordernicks:buffer track by user.nick")
+                  span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
+                  span.user-name(ng-class="{'user-op': buffer.isOp(user.nick), 'user-voiced': buffer.isVoiced(user.nick)}") {{user.nick}}
               .buffer-bottom-bar
                 a.showhide.left(href="#", ng-click="shown2 = !shown2")
 
-      script(src='#{settings.prefixpath}/javascripts/jquery-1.11.1.min.js')
+      script(src='#{settings.prefixpath}/javascripts/jquery-2.1.3.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular.min.js')
       script(src='#{settings.prefixpath}/javascripts/ui-bootstrap-tpls-0.12.0.min.js')
       script(src='#{settings.prefixpath}/socket.io/socket.io.js')

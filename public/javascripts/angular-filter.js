@@ -270,30 +270,24 @@ angular.module('quassel')
         return Math.abs(hash) % 16;
     };
 })
-.filter('usersop', function() {
-    return function(input, buffer) {
-        var users = [];
-        angular.forEach(input, function(value, key) {
-            if (buffer.isOp(value.nick)) this.push(value);
-        }, users);
-        return users;
-    };
-})
-.filter('usersvoiced', function() {
-    return function(input, buffer) {
-        var users = [];
-        angular.forEach(input, function(value, key) {
-            if (buffer.isVoiced(value.nick)) this.push(value);
-        }, users);
-        return users;
-    };
-})
-.filter('usersstd', function() {
-    return function(input, buffer) {
-        var users = [];
-        angular.forEach(input, function(value, key) {
-            if (!buffer.isVoiced(value.nick) && !buffer.isOp(value.nick)) this.push(value);
-        }, users);
-        return users;
+.filter('ordernicks', function() {
+    return function(users, buffer) {
+        if (!users || buffer === null) return users;
+        var op = [], voiced = [], other = [];
+        
+        angular.forEach(users, function(value) {
+            if (buffer.isOp(value.nick)) op.push(value);
+            else if (buffer.isVoiced(value.nick)) voiced.push(value);
+            else other.push(value);
+        });
+        
+        function sortNicks(a, b){
+            return a.nick.toLowerCase().localeCompare(b.nick.toLowerCase());
+        }
+        
+        op.sort(sortNicks);
+        voiced.sort(sortNicks);
+        other.sort(sortNicks);
+        return op.concat(voiced, other);
     };
 });
