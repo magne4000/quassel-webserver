@@ -494,6 +494,8 @@ angular.module('quassel')
         }
     });
     
+    $scope.$watch('currentFilter', onCurrentFilterUpdate, true);
+    
     $scope.setAsDefault = function() {
         $scope.defaultFilter = angular.copy($scope.currentFilter);
         localStorage.filter = JSON.stringify($scope.defaultFilter);
