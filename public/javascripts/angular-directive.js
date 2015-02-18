@@ -44,7 +44,7 @@ angular.module('quassel')
     return {
         link: function (scope, element, attrs) {
             if ($parse(attrs.markerline)(scope)) {
-                element.after('<li class="markerline"></li>');
+                element.after('<li class="markerline irc-message"><span></span><span></span><span></span></li>');
             }
         }
     };

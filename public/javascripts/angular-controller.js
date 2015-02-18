@@ -15,7 +15,6 @@ angular.module('quassel')
     
     // Internal
     $er.on('_init', function(next, data) {
-        console.log('_init');
         $scope.$apply(function(){
             $networks.set(data);
             $reviver.reviveAll($networks.get());
@@ -26,7 +25,6 @@ angular.module('quassel')
     
     // Internal
     $er.on('network._init', function(next, networkId, data) {
-        console.log('network._init');
         $reviver.reviveAll(data);
         $networks.get().set(networkId, data);
         $scope.networks = $networks.get().all();
@@ -34,7 +32,6 @@ angular.module('quassel')
     }).after('_init');
     
     $er.on('network.init', function(next, networkId) {
-        console.log('network.init');
         next();
     }).after('network._init');
     
