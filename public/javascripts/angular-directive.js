@@ -191,12 +191,35 @@ angular.module('quassel')
                 }, 30000);
             }
             
+            function showme(messageId) {
+                var obj = $("#irc-message-"+messageId);
+                if (obj.length > 0) {
+                    if (!obj.is(':hidden')) {
+                        if (element[0].offsetHeight + element[0].scrollTop + obj.height() + 10 >= element[0].scrollHeight) {
+                            element[0].scrollTop = element[0].scrollHeight;
+                        }
+                    }
+                } else {
+                    setTimeout(function(){
+                        showme(messageId);
+                    }, 10);
+                }
+            }
+            
             scope.$watch('currentFilter', function(newValue, oldValue) {
                 tryLaunchHandler();
             }, true);
             
             scope.$watch('buffer', function(newValue, oldValue){
                 tryLaunchHandler();
+            });
+            
+            $socket.on('buffer.message', function(bufferId, messageId) {
+                if (scope.buffer !== null && bufferId == scope.buffer.id) {
+                    setTimeout(function(){
+                        showme(messageId);
+                    }, 10);
+                }
             });
             
             $socket.on('buffer.backlog', function(bufferId, messageIds) {
