@@ -451,6 +451,18 @@ html,body,.container {
     padding: 0 5px;
 }
 
+[draggable] {
+    user-select: none;
+}
+
+.drag.dragging {
+    opacity: 0.7;
+}
+
+.drop.dropable.hover {
+    box-shadow: inset 0 0 8px #000;
+}
+
 //MIRC colors
 .mirc-fg-0 {color:#fff;}
 .mirc-fg-1 {color:#000;}

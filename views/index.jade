@@ -73,7 +73,15 @@ html
                     li(ng-if="!network.isConnected")
                       a(href="#",  ng-click="connect(network)") Connect
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
-                  .channel(ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}", ng-repeat="channel in network._buffers | channelsFilter track by channel.id", ng-if="!channel.isHidden()", dropdown)
+                  .channel(
+                        ng-model="channel"
+                        drag
+                        drop="onDropComplete"
+                        ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}"
+                        ng-repeat="channel in network._buffers | channelsFilter track by channel.id"
+                        ng-if="!channel.isHidden()"
+                        dropdown
+                    )
                     span.channel-icon
                     span.channel-name(ng-click="showBuffer(channel)") {{channel.name}}
                     a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
@@ -129,6 +137,7 @@ html
       script(src='#{settings.prefixpath}/javascripts/ngSocket.js')
       script(src='#{settings.prefixpath}/javascripts/events.js')
       script(src='#{settings.prefixpath}/javascripts/angular-sanitize.min.js')
+      script(src='#{settings.prefixpath}/javascripts/angular-dnd.min.js')
       script(src='#{settings.prefixpath}/javascripts/libquassel.js')
       script(src='#{settings.prefixpath}/javascripts/json-patch.js')
       script(src='#{settings.prefixpath}/javascripts/angular-init.js')

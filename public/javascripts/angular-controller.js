@@ -221,6 +221,16 @@ angular.module('quassel')
     $scope.channelDelete = function(channel) {
         $socket.emit('requestRemoveBuffer', channel.id);
     };
+    
+    $scope.onDropComplete = function(dragged, dropped){
+        if (dragged.id !== dropped.id && dragged.network === dropped.network && !dragged.isChannel() && !dropped.isChannel()) {
+            if (window.confirm("Do you want to merge buffer '" + dragged.name + "' into buffer '" + dropped.name + "' ?")) {
+                $socket.emit('requestMergeBuffersPermanently', dropped.id, dragged.id);
+            }
+        } else {
+            console.log("Can't merge buffer " + dragged.name + " into buffer " + dropped.name);
+        }
+    };
 }])
 .controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance) {
     $scope.name = '';
