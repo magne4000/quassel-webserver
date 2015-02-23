@@ -1,4 +1,4 @@
-angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'dragAndDrop'])
+angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
 .config(["$socketProvider", function ($socketProvider) {
     $socketProvider.setOptions({
         timeout: 6000,
@@ -57,6 +57,37 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         more: more,
         less: less,
         reset: reset
+    };
+}])
+.factory('$alert', ['notify', function(notify) {
+    
+    notify.config({startTop: 2, verticalSpacing: 4, duration: 8000});
+    
+    function info(message, options) {
+        options = options || {};
+        options.message = message;
+        options.classes = ["alert-info"];
+        notify(options);
+    }
+    
+    function warn(message, options) {
+        options = options || {};
+        options.message = message;
+        options.classes = ["alert-warning"];
+        notify(options);
+    }
+    
+    function error(message, options) {
+        options = options || {};
+        options.message = message;
+        options.classes = ["alert-danger"];
+        notify(options);
+    }
+    
+    return {
+        info: info,
+        warn: warn,
+        error: error
     };
 }])
 .run([function(){

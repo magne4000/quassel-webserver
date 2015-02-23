@@ -556,6 +556,87 @@ html,body,.container {
 .type-1 .nick[data-nickhash="14"] { color: #2AA198; }
 .type-1 .nick[data-nickhash="15"] { color: #859900; }
 
+// Notifications
+.cg-notify-message {
+    position: fixed;
+    left: 50%;
+    top: 0px;
+    z-index: 9999;
+    max-width: 400px;
+    text-align: center;
+    font-size: 14px;
+
+    background-color: @state-info-bg;
+    color: @state-info-text;
+    padding: 10px 15px 10px 10px;
+    border: 1px solid @state-info-border;
+
+    -webkit-transition: top 0.5s ease-out,opacity 0.2s ease-out;
+    -moz-transition: top 0.5s ease-out,opacity 0.2s ease-out;
+    -o-transition: top 0.5s ease-out,opacity 0.2s ease-out;
+    transition: top 0.5s ease-out,opacity 0.2s ease-out;    
+
+    visibility: hidden;
+}
+
+.cg-notify-message.alert-warning {
+    background-color: @state-warning-bg;
+    color: @state-warning-text;
+    border: 1px solid @state-warning-border;
+}
+
+.cg-notify-message.alert-danger {
+    background-color: @state-danger-bg;
+    color: @state-danger-text;
+    border: 1px solid @state-danger-border;
+}
+
+.cg-notify-message a {
+    font-weight: bold;
+    color: inherit;
+}
+
+.cg-notify-message a:hover {
+    color: inherit;
+}
+
+.cg-notify-close {
+    -webkit-appearance: none;
+    padding: 0;
+    cursor: pointer;
+    background: 0 0;
+    border: 0;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .2;
+
+    position: absolute;
+    top: 0px;
+    right: 3px;
+    line-height: 15px;    
+}
+
+.cg-notify-close:hover, .cg-notify-close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    opacity: .5;
+}
+
+.cg-notify-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+}
+
 // Scrollbars customization
 ::-webkit-scrollbar {
     width: 8px;

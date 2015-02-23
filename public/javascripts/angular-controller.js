@@ -1,5 +1,5 @@
 angular.module('quassel')
-.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', function($scope, $networks, $socket, $er, $reviver, $modal, $favico) {
+.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', '$alert', function($scope, $networks, $socket, $er, $reviver, $modal, $favico, $alert) {
     $scope.networks = {};
     $scope.buffers = [];
     $scope.buffer = null;
@@ -222,13 +222,15 @@ angular.module('quassel')
         $socket.emit('requestRemoveBuffer', channel.id);
     };
     
-    $scope.onDropComplete = function(dragged, dropped){
-        if (dragged.id !== dropped.id && dragged.network === dropped.network && !dragged.isChannel() && !dropped.isChannel()) {
+    $scope.onDropComplete = function(dragged, dropped) {
+        if (dragged.isChannel() || dropped.isChannel()) {
+            $alert.warn("Merging non-query buffers is not supported");
+        } else if (dragged.network !== dropped.network) {
+            $alert.warn("Merging buffers from different networks is not supported");
+        } else if (dragged.id !== dropped.id) {
             if (window.confirm("Do you want to merge buffer '" + dragged.name + "' into buffer '" + dropped.name + "' ?")) {
                 $socket.emit('requestMergeBuffersPermanently', dropped.id, dragged.id);
             }
-        } else {
-            console.log("Can't merge buffer " + dragged.name + " into buffer " + dropped.name);
         }
     };
 }])
@@ -243,7 +245,7 @@ angular.module('quassel')
         $modalInstance.dismiss('cancel');
     };
 })
-.controller('SocketController', ['$scope', '$socket', '$er', '$timeout', '$window', function($scope, $socket, $er, $timeout, $window) {
+.controller('SocketController', ['$scope', '$socket', '$er', '$timeout', '$window', '$alert', function($scope, $socket, $er, $timeout, $window, $alert) {
     $scope.disconnected = false;
     $scope.connecting = false;
     $scope.firstconnected = false;
@@ -263,7 +265,6 @@ angular.module('quassel')
     });
     
     $socket.on('_error', function(e) {
-        console.log('ERROR');
         console.log(e);
         switch (e.errno) {
         case 'ECONNREFUSED':
@@ -272,7 +273,7 @@ angular.module('quassel')
             });
             break;
         default:
-            console.log('Unknown error.');
+            $alert.error('Error received from server. See Javascript console for details.');
         }
     });
     
