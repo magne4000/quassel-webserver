@@ -1,5 +1,5 @@
 angular.module('quassel')
-.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', '$alert', function($scope, $networks, $socket, $er, $reviver, $modal, $favico, $alert) {
+.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', '$alert', '$desktop', function($scope, $networks, $socket, $er, $reviver, $modal, $favico, $alert, $desktop) {
     $scope.networks = {};
     $scope.buffers = [];
     $scope.buffer = null;
@@ -81,6 +81,7 @@ angular.module('quassel')
                             $favico.more();
                         });
                     }
+                    $desktop(buffer.name, val.content);
                     return false;
                 }
                 return true;
@@ -118,6 +119,7 @@ angular.module('quassel')
                                     $favico.more();
                                 });
                             }
+                            $desktop(buffer.name, obj2.content);
                         } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
                             if (buffer.highlight !== 2 && buffer.highlight !== 1) {
                                 $scope.$apply(function(){

@@ -90,6 +90,29 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         error: error
     };
 }])
+.factory('$desktop', [function(){
+    var granted = false;
+    if (!("Notification" in window)) {
+        granted = false;
+    } else if (Notification.permission === "granted") {
+        granted = true;
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission(function (permission) {
+            if(!('permission' in Notification)) {
+                Notification.permission = permission;
+            }
+            granted = permission === "granted";
+        });
+    }
+    
+    return function(title, body){
+        if (granted) {
+            var options = {};
+            if (body) options.body = body;
+            return new Notification(title, options);
+        }
+    };
+}])
 .run([function(){
     console.log('AngularJS loaded');
 }]);
