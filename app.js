@@ -139,7 +139,7 @@ server.listen(app.get('port'), app.get('host'), function() {
 var io = require('socket.io')(server, {path: settings.prefixpath + '/socket.io'});
 
 io.on('connection', function(socket) {
-    var registerEvents = ['login', 'loginfailed'], ee, quassel;
+    var registerEvents = ['login', 'loginfailed'], ee, quassel, isConnected = false;
     
     var disconnected = function() {
         if (ee) {
@@ -151,6 +151,7 @@ io.on('connection', function(socket) {
         }
         quassel = null;
         ee = null;
+        isConnected = false;
     };
     
     socket.on('logout', disconnected);
@@ -170,9 +171,11 @@ io.on('connection', function(socket) {
     });
 
     socket.on('credentials', function(data) {
+        if (isConnected) return;
         // If the client send a new connection,
         // the old one must be closed
         disconnected();
+        isConnected = true;
 
         if (settings.forcedefault) {
             data.server = settings.default.host;
