@@ -160,6 +160,15 @@ angular.module('quassel')
         next();
     });
     
+    $er.on('buffer.merge', function(next, bufferId1, bufferId2) {
+        var buffer1 = $networks.get().findBuffer(bufferId1);
+        var network = $networks.get().get(buffer1.network);
+        $scope.$apply(function(){
+            network._buffers = network.getBufferHashMap().values();
+        });
+        next();
+    });
+    
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
         $scope.messages = channel.messages.values();

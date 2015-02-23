@@ -37,6 +37,7 @@ angular.module('er', ['ngSocket'])
             'buffer.highlight': ["bufferId", "messageId"],
             'buffer.remove': ["bufferId"],
             'buffer.rename': ["bufferId", "bufferName"],
+            'buffer.merge': ["bufferId", "bufferId"],
             'buffer.activate': ["bufferId"],
             'buffer.deactivate': ["bufferId"],
             'buffer.message': ["bufferId", "messageId"],
