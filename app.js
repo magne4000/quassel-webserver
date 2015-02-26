@@ -5,11 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
-var jsonpatch = require('fast-json-patch');
-//var patch = require('./lib/patch');
+//var jsonpatch = require('fast-json-patch');
+var patch = require('./lib/patch');
 var path = require('path');
 var fs = require('fs');
-//var O = require('observed');
+var O = require('observed');
 var debug = require('debug');
 var Quassel = require('libquassel');
 
@@ -230,16 +230,15 @@ io.on('connection', function(socket) {
             var network = networks.get(networkId);
             // Internal lib use, send Network object
             socket.emit('network._init', networkId, network);
-            /*if (typeof Object.observe !== 'undefined') {
-                // Keep in sync NetworkCollection object
-                ee = O(network);
-                ee.on('change', function(op) {
-                    socket.emit.call(socket, 'change', networkId, patch(op));
-                });
-            }*/
+            // Keep in sync NetworkCollection object
+            ee = O(network);
+            ee.on('change', function(op) {
+                socket.emit.call(socket, 'change', networkId, patch(op));
+            });
+            /*
             jsonpatch.observe(network, function(op) {
                 socket.emit.call(socket, 'change', networkId, op);
-            });
+            });*/
             socket.emit('network.init', networkId);
         });
 

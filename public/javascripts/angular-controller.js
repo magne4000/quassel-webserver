@@ -1,7 +1,6 @@
 angular.module('quassel')
 .controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', '$alert', '$desktop', function($scope, $networks, $socket, $er, $reviver, $modal, $favico, $alert, $desktop) {
     $scope.networks = {};
-    $scope.buffers = [];
     $scope.buffer = null;
     $scope.messages = [];
     

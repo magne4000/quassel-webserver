@@ -37,13 +37,13 @@
     "cookie-parser": "~1.3.3",
     "debug": "~2.1.1",
     "express": "4.*",
-    "fast-json-patch": "^0.5.1",
     "jade": "~1.9.1",
     "less": "~2.3.1",
     "less-middleware": "^1.0.4",
     "libquassel": "*",
     "morgan": "~1.5.1",
     "nomnom": "~1.8.1",
+    "observed": "^1.1.1",
     "serve-favicon": "~2.2.0",
     "socket.io": "~1.3.3"
   }
