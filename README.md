@@ -6,7 +6,13 @@
 
 A web client for Quassel (requires a running quasselcore)
 
-![Webmusic screenshot](https://github.com/magne4000/magne4000.github.com/raw/master/images/quasselwebapp.png)
+### Screenshots
+
+#### Default
+![default theme](https://github.com/magne4000/magne4000.github.com/raw/master/images/quassel-default-1.png)
+
+#### Solarized
+![solarized theme](https://github.com/magne4000/magne4000.github.com/raw/master/images/quassel-solarized-1.png)
 
 ### On the server
 Install the server with: 
