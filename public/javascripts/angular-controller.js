@@ -252,13 +252,14 @@ angular.module('quassel')
 })
 .controller('ConfigController', ['$scope', '$modal', '$theme', function($scope, $modal, $theme) {
     $scope.theme = "";
-    $scope.themes = $theme;
+    $scope.themes = $theme.get();
     
     $scope.$watch('theme', function(newValue, oldValue) {
         if (newValue) {
             $scope.themes.forEach(function(element){
                 element.active = (element.name === $scope.theme);
             });
+            $theme.save($scope.themes);
         }
     });
     

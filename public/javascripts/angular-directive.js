@@ -10,7 +10,7 @@ angular.module('quassel')
         }
     };
 })
-.directive('theme', function ($parse) {
+.directive('theme', ['$theme', '$parse', function ($theme, $parse) {
     var regex = /(.*theme-).*\.css$/;
     
     return {
@@ -19,7 +19,11 @@ angular.module('quassel')
         },
         require: '?defaultTheme',
         link: function (scope, element, attrs) {
-            $parse(attrs.theme).assign(scope, attrs.defaultTheme);
+            if ($theme.default()) {
+                $parse(attrs.theme).assign(scope, $theme.default());
+            } else {
+                $parse(attrs.theme).assign(scope, attrs.defaultTheme);
+            }
             
             scope.$watch('theme', function(newValue, oldValue){
                 if (newValue) {
@@ -30,7 +34,7 @@ angular.module('quassel')
             });
         }
     };
-})
+}])
 .directive('ngConfirmClick', function(){
     return {
         require: '?ngOkClick',

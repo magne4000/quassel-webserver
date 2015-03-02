@@ -122,7 +122,33 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         active: true
     }];
     
-    return obj;
+    load();
+    
+    function save(newobj) {
+        newobj.forEach(function(element){
+            if (element.active) localStorage.defaultTheme = element.name;
+        });
+    }
+    
+    function load() {
+        if (localStorage.defaultTheme) {
+            obj.forEach(function(element){
+                if (element.name === localStorage.defaultTheme) element.active = true;
+                else element.active = false;
+            });
+        }
+    }
+    
+    return {
+        get: function() {
+            return obj;
+        },
+        default: function() {
+            return localStorage.defaultTheme?localStorage.defaultTheme:null;
+        },
+        save: save,
+        load: load
+    };
 }])
 .run([function(){
     console.log('AngularJS loaded');
