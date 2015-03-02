@@ -4,6 +4,6 @@ module.exports = {
         port: 4242
     },
     forcedefault: false,
-    prefixpath: ''
+    prefixpath: '',
+    theme: 'default'
 };
-

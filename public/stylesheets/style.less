@@ -1,14 +1,18 @@
-@import "globals";
-@import "bootstrap-overrides";
+@import (reference) "bootstrap-overrides";
+
+@panel-width: 200px;
+@header-height: 48px;
+@box-height: 32px;
 
 body {
-    background-color: #EAEAF8;
     font-size: 16px;
-    font-family: "Roboto";
     font-weight: 200;
+    background-color: @body-bg;
+    font-family: "Roboto";
+    color: @text-color;
 }
 
-html,body,.container {
+html, body, .container {
     height:100%;
 }
 
@@ -28,10 +32,11 @@ html,body,.container {
     min-height: 0;
 }
 
-#buffer-pane {
-    background-color: #39383E;
-    color: @text-color;
+#buffer-pane, #nick-pane {
     position: relative;
+    overflow: auto;
+    background-color: @pane-color;
+    color: @text-color;
 }
 
 .buffer-container {
@@ -62,13 +67,6 @@ html,body,.container {
     .transition(opacity 0.5s linear);
 }
 
-#nick-pane {
-    background-color: #39383E;
-    color: @text-color;
-    overflow: auto;
-    position: relative;
-}
-
 #center {
     font-size: 15px;
     display: flex;
@@ -83,8 +81,8 @@ html,body,.container {
     min-height: 32px;
     overflow: visible;
     text-overflow: ellipsis;
-    background-color: white;
     position: relative;
+    background-color: @topic-bg;
 }
 
 #topic {
@@ -92,7 +90,7 @@ html,body,.container {
     padding-right: 36px;
     height: 32px;
     overflow: hidden;
-    background-color: white;
+    background-color: @topic-bg;
 }
 
 #topic:hover {
@@ -103,10 +101,22 @@ html,body,.container {
 
 #header {
     background-color: @brand-primary;
+    color: @header-text-color;
     height: @header-height;
     line-height: @header-height;
-    color: @text-color;
     .transition(background-color 0.5s linear);
+}
+
+#header small {
+    opacity: 0.8;
+}
+
+.disconnected #header {
+    background-color: @brand-danger;
+}
+
+.connecting #header {
+    background-color: @brand-warning;
 }
 
 .network, .channel, .user {
@@ -137,7 +147,6 @@ html,body,.container {
     line-height: 32px;
     opacity: 0.75;
     flex: 1;
-    font-family: "Roboto Condensed";
     text-transform: uppercase;
 }
 
@@ -168,7 +177,6 @@ html,body,.container {
 }
 
 .channel.selected {
-    background-color: black;
     font-weight: normal;
 }
 
@@ -199,6 +207,7 @@ html,body,.container {
     display: inline-block;
     line-height: 32px;
     opacity: 0.75;
+    font-family: @font-side;
 }
 
 .channel-icon {
@@ -211,23 +220,16 @@ html,body,.container {
     flex: 1;
     line-height: 32px;
     opacity: 0.75;
-}
-
-.buffer-newmessage {
-    background: linear-gradient(to right, @brand-success 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
-}
-
-.buffer-highlight {
-    background: linear-gradient(to right, @brand-warning 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+    font-family: @font-side;
 }
 
 .buffer-bottom-bar {
     min-height: 32px;
-    background-color: darken(@pane-color, 5);
     display: inline-block;
     bottom: 0;
     position: absolute;
     width: 100%;
+    background-color: darken(@pane-color, 5);
 }
 
 .showhide {
@@ -298,11 +300,6 @@ html,body,.container {
     top: 6px;
     left: 5px;
     font-size: 1.3em;
-    color: white;
-}
-
-.network .dropdown-menu li, .network-channels .dropdown-menu li {
-    color: black;
 }
 
 .input {
@@ -317,13 +314,18 @@ html,body,.container {
     outline: none;
 }
 
+input {
+    color: @input-color !important;
+    background: @input-bg !important;
+}
+
 .backlog {
     margin: 0;
     padding: 4px;
     border-spacing: 0;
     flex: 1;
     overflow: auto;
-    background-color: #EAEAF8;
+    background-color: @body-bg;
 }
 
 .backlog li {
@@ -333,7 +335,6 @@ html,body,.container {
 .backlog .timestamp > span {
     padding-right: 8px;
     padding-left: 4px;
-    font-family: "Droid Sans Mono", monospace;
     font-size: 14px;
     opacity: 0.5;
 }
@@ -348,7 +349,6 @@ html,body,.container {
 .backlog .message {
     word-wrap: break-word;
     width: 100%;
-    font-family: 'Droid Sans Mono';
     font-size: 0.85em;
     white-space: pre-wrap;
 }
@@ -357,13 +357,9 @@ html,body,.container {
     display: table-cell;
 }
 
-.backlog .irc-message.highlighted {
-    background-color: @brand-warning;
-}
-
 .backlog .markerline {
-    background-color: @brand-danger;
     height: 1px;
+    background-color: @brand-danger;
 }
 
 .backlog .markerline:last-child {
@@ -373,23 +369,19 @@ html,body,.container {
 .fetching {
     display: inherit;
     text-align: center;
-    background-color: lighten(@brand-primary, 25%);
-    color: white;
     top: 32px;
     position: absolute;
     right: 0;
     padding: 2px 7px;
-}
-
-.login-page {
-    background-color: @pane-color;
+    background-color: lighten(@brand-primary, 25%);
+    color: white;
 }
 
 .login-container {
-    background-color: white;
     padding: 16px;
     margin: 16px;
     margin-top: 64px;
+    background-color: @login-bg;
     .border-radius;
 
     h1 {
@@ -402,19 +394,7 @@ html,body,.container {
     }
 }
 
-.disconnected #header {
-    background-color: @brand-danger;
-}
-
-.connecting #header {
-    background-color: @brand-warning;
-}
-
-#header small {
-    opacity: 0.8;
-}
-
-.logout, .reconnect {
+.logout, .reconnect, .config {
     float: right;
     margin: 8px;
 }
@@ -459,10 +439,6 @@ html,body,.container {
     opacity: 0.7;
 }
 
-.drop.dropable.hover {
-    box-shadow: inset 0 0 8px #000;
-}
-
 //MIRC colors
 .mirc-fg-0 {color:#fff;}
 .mirc-fg-1 {color:#000;}
@@ -500,62 +476,6 @@ html,body,.container {
 .mirc-italic {font-style: italic;}
 .mirc-underline {text-decoration:underline !important;}
 
-// Message styles
-// Plain
-.type-1 {}
-// Notice
-.type-2 { .nick,.message {color: #916409;}}
-// Action
-.type-4 { .nick,.message {color: #0000ff;}}
-// Nick
-.type-8 { .nick,.message {color: #000088;}}
-// Mode
-.type-16 { .nick,.message {color: #ff7700;}}
-// Join
-.type-32 { .nick,.message {color: #009600;}}
-// Part
-.type-64 { .nick,.message {color: #990000;}}
-// Quit
-.type-128 { .nick,.message {color: #990000;}}
-// Kick
-.type-256 { .nick,.message {color: #990000;}}
-// Kill
-.type-512 { .nick,.message {color: #990000;}}
-// Server
-.type-1024 { .nick,.message {color: #916409;}}
-// Info
-.type-2048 { .nick,.message {color: #916409;}}
-// Error
-.type-4096 { .nick,.message {color: #916409;}}
-// DayChange
-.type-8192 { .nick,.message {color: #ff0000;}}
-// Topic
-.type-16384 { .nick,.message {color: #ff7700;}}
-// NetsplitJoin
-.type-32768 { .nick,.message {color: #960096;}}
-// NetsplitQuit
-.type-65536 { .nick,.message {color: #960096;}}
-// Invite
-.type-131072 { .nick,.message {color: #960096;}}
-
-// Colorize nicks
-.type-1 .nick[data-nickhash="0"] { color: #B58900; }
-.type-1 .nick[data-nickhash="1"] { color: #CB4B16; }
-.type-1 .nick[data-nickhash="2"] { color: #DC322f; }
-.type-1 .nick[data-nickhash="3"] { color: #D33682; }
-.type-1 .nick[data-nickhash="4"] { color: #6C71C4; }
-.type-1 .nick[data-nickhash="5"] { color: #268BD2; }
-.type-1 .nick[data-nickhash="6"] { color: #2AA198; }
-.type-1 .nick[data-nickhash="7"] { color: #859900; }
-.type-1 .nick[data-nickhash="8"] { color: #B58900; }
-.type-1 .nick[data-nickhash="9"] { color: #CB4B16; }
-.type-1 .nick[data-nickhash="10"] { color: #DC322f; }
-.type-1 .nick[data-nickhash="11"] { color: #D33682; }
-.type-1 .nick[data-nickhash="12"] { color: #6C71C4; }
-.type-1 .nick[data-nickhash="13"] { color: #268BD2; }
-.type-1 .nick[data-nickhash="14"] { color: #2AA198; }
-.type-1 .nick[data-nickhash="15"] { color: #859900; }
-
 // Notifications
 .cg-notify-message {
     position: fixed;
@@ -565,18 +485,27 @@ html,body,.container {
     max-width: 400px;
     text-align: center;
     font-size: 14px;
-
+    padding: 10px 15px 10px 10px;
+    
     background-color: @state-info-bg;
     color: @state-info-text;
-    padding: 10px 15px 10px 10px;
     border: 1px solid @state-info-border;
 
     -webkit-transition: top 0.5s ease-out,opacity 0.2s ease-out;
     -moz-transition: top 0.5s ease-out,opacity 0.2s ease-out;
     -o-transition: top 0.5s ease-out,opacity 0.2s ease-out;
-    transition: top 0.5s ease-out,opacity 0.2s ease-out;    
+    transition: top 0.5s ease-out,opacity 0.2s ease-out;
 
     visibility: hidden;
+}
+
+.cg-notify-message a {
+    font-weight: bold;
+    color: inherit;
+    
+    &:hover {
+        color: inherit;
+    }
 }
 
 .cg-notify-message.alert-warning {
@@ -591,38 +520,30 @@ html,body,.container {
     border: 1px solid @state-danger-border;
 }
 
-.cg-notify-message a {
-    font-weight: bold;
-    color: inherit;
-}
-
-.cg-notify-message a:hover {
-    color: inherit;
-}
-
 .cg-notify-close {
     -webkit-appearance: none;
     padding: 0;
     cursor: pointer;
-    background: 0 0;
-    border: 0;
     font-size: 18px;
     font-weight: 700;
     line-height: 1;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    opacity: .2;
 
     position: absolute;
     top: 0px;
     right: 3px;
-    line-height: 15px;    
+    line-height: 15px; 
+    
+    background: 0 0;
+    border: 0;
+    color: black;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .2;
 }
 
 .cg-notify-close:hover, .cg-notify-close:focus {
-    color: #000;
     text-decoration: none;
     cursor: pointer;
+    color: black;
     opacity: .5;
 }
 
@@ -635,6 +556,69 @@ html,body,.container {
     overflow: hidden;
     clip: rect(0,0,0,0);
     border: 0;
+}
+
+/* Style */
+.btn-default {
+    color: @button-default-text-color;
+    background-color: @button-default-bg;
+    border: none;
+}
+
+.btn-default:hover,
+.btn-default:focus,
+.btn-default:active {
+    color: @button-default-text-color;
+    background-color: darken(@button-default-bg, 5);
+}
+
+.btn-primary {
+    color: @button-primary-text-color;
+    background-color: @button-primary-bg;
+    border: none;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    color: @button-primary-text-color;
+    background-color: darken(@button-primary-bg, 5);
+}
+
+.network-name, .group-name {
+    font-family: @font-side;
+}
+
+.channel.selected {
+    background-color: black;
+}
+
+.buffer-newmessage {
+    background: linear-gradient(to right, @brand-success 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+}
+
+.buffer-highlight {
+    background: linear-gradient(to right, @brand-warning 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+}
+
+.dropdown-network .glyphicon, .dropdown-channel .glyphicon {
+    color: @text-color;
+}
+
+.network .dropdown-menu li, .network-channels .dropdown-menu li {
+    color: black;
+}
+
+.backlog .timestamp > span, .backlog .message, .backlog .nick {
+    font-family: @font-backlog;
+}
+
+.backlog .irc-message.highlighted {
+    background-color: @brand-warning;
+}
+
+.drop.dropable.hover {
+    box-shadow: inset 0 0 8px #000;
 }
 
 // Scrollbars customization
@@ -656,3 +640,41 @@ html,body,.container {
     border-radius: 4px;
     box-shadow: inset 0 0 6px 1px rgba(0,0,0,0.5);
 }
+
+// Message styles
+.type-1 { .nick,.message {color: @type-1-color;}} // Plain
+.type-2 { .nick,.message {color: @type-2-color;}} // Notice
+.type-4 { .nick,.message {color: @type-4-color;}} // Action
+.type-8 { .nick,.message {color: @type-8-color;}} // Nick
+.type-16 { .nick,.message {color: @type-16-color;}} // Mode
+.type-32 { .nick,.message {color: @type-32-color;}} // Join
+.type-64 { .nick,.message {color: @type-64-color;}} // Part
+.type-128 { .nick,.message {color: @type-128-color;}} // Quit
+.type-256 { .nick,.message {color: @type-256-color;}} // Kick
+.type-512 { .nick,.message {color: @type-512-color;}} // Kill
+.type-1024 { .nick,.message {color: @type-1024-color;}} // Server
+.type-2048 { .nick,.message {color: @type-2048-color;}} // Info
+.type-4096 { .nick,.message {color: @type-4096-color;}} // Error
+.type-8192 { .nick,.message {color: @type-8192-color;}} // DayChange
+.type-16384 { .nick,.message {color: @type-16384-color;}} // Topic
+.type-32768 { .nick,.message {color: @type-32768-color;}} // NetsplitJoin
+.type-65536 { .nick,.message {color: @type-65536-color;}} // NetsplitQuit
+.type-131072 { .nick,.message {color: @type-131072-color;}} // Invite
+
+// Colorize nicks
+.type-1 .nick[data-nickhash="0"] { color: @nichkash-0-color; }
+.type-1 .nick[data-nickhash="1"] { color: @nichkash-1-color; }
+.type-1 .nick[data-nickhash="2"] { color: @nichkash-2-color; }
+.type-1 .nick[data-nickhash="3"] { color: @nichkash-3-color; }
+.type-1 .nick[data-nickhash="4"] { color: @nichkash-4-color; }
+.type-1 .nick[data-nickhash="5"] { color: @nichkash-5-color; }
+.type-1 .nick[data-nickhash="6"] { color: @nichkash-6-color; }
+.type-1 .nick[data-nickhash="7"] { color: @nichkash-7-color; }
+.type-1 .nick[data-nickhash="8"] { color: @nichkash-8-color; }
+.type-1 .nick[data-nickhash="9"] { color: @nichkash-9-color; }
+.type-1 .nick[data-nickhash="10"] { color: @nichkash-10-color; }
+.type-1 .nick[data-nickhash="11"] { color: @nichkash-11-color; }
+.type-1 .nick[data-nickhash="12"] { color: @nichkash-12-color; }
+.type-1 .nick[data-nickhash="13"] { color: @nichkash-13-color; }
+.type-1 .nick[data-nickhash="14"] { color: @nichkash-14-color; }
+.type-1 .nick[data-nickhash="15"] { color: @nichkash-15-color; }

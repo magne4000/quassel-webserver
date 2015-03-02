@@ -10,12 +10,33 @@ angular.module('quassel')
         }
     };
 })
+.directive('theme', function ($parse) {
+    var regex = /(.*theme-).*\.css$/;
+    
+    return {
+        scope: {
+            theme: "=",
+        },
+        require: '?defaultTheme',
+        link: function (scope, element, attrs) {
+            $parse(attrs.theme).assign(scope, attrs.defaultTheme);
+            
+            scope.$watch('theme', function(newValue, oldValue){
+                if (newValue) {
+                    var href = element.attr("href");
+                    href = href.replace(regex, "$1" + newValue + ".css");
+                    element.attr("href", href);
+                }
+            });
+        }
+    };
+})
 .directive('ngConfirmClick', function(){
     return {
         require: '?ngOkClick',
-        link: function (scope, element, attr) {
-            var msg = attr.ngConfirmClick;
-            var clickAction = attr.ngOkClick;
+        link: function (scope, element, attrs) {
+            var msg = attrs.ngConfirmClick;
+            var clickAction = attrs.ngOkClick;
             element.on('click', function (event) {
                 if (window.confirm(msg)) {
                     scope.$apply(clickAction);

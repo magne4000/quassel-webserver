@@ -113,6 +113,17 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         }
     };
 }])
+.factory('$theme', [function(){
+    var obj = [{
+        name: 'default',
+        active: false
+    },{
+        name: 'darksolarized',
+        active: true
+    }];
+    
+    return obj;
+}])
 .run([function(){
     console.log('AngularJS loaded');
 }]);

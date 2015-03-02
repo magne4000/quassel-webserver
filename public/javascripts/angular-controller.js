@@ -203,7 +203,10 @@ angular.module('quassel')
     $scope.openModalJoinChannel = function(network) {
         var modalInstance = $modal.open({
             templateUrl: 'modalJoinChannel.html',
-            controller: 'ModalJoinChannelInstanceCtrl'
+            controller: 'ModalJoinChannelInstanceCtrl',
+            resolve: {
+                network: function(){return network;}
+            }
         });
     
         modalInstance.result.then(function (name) {
@@ -235,8 +238,9 @@ angular.module('quassel')
         }
     };
 }])
-.controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance) {
+.controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance, network) {
     $scope.name = '';
+    $scope.network = network;
     
     $scope.ok = function () {
         $modalInstance.close($scope.name);
@@ -244,6 +248,39 @@ angular.module('quassel')
     
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
+    };
+})
+.controller('ConfigController', ['$scope', '$modal', '$theme', function($scope, $modal, $theme) {
+    $scope.theme = "";
+    $scope.themes = $theme;
+    
+    $scope.$watch('theme', function(newValue, oldValue) {
+        if (newValue) {
+            $scope.themes.forEach(function(element){
+                element.active = (element.name === $scope.theme);
+            });
+        }
+    });
+    
+    $scope.configTheme = function() {
+        $modal.open({
+            templateUrl: 'modalChangeTheme.html',
+            controller: 'ModalChangeThemeInstanceCtrl',
+            resolve: {
+                ctrlScope: function(){return $scope;}
+            }
+        });
+    };
+}])
+.controller('ModalChangeThemeInstanceCtrl', function ($scope, $modalInstance, ctrlScope) {
+    $scope.themes = ctrlScope.themes;
+    
+    $scope.ok = function () {
+        $modalInstance.close();
+    };
+    
+    $scope.setTheme = function (theme) {
+        ctrlScope.theme = theme.name;
     };
 })
 .controller('SocketController', ['$scope', '$socket', '$er', '$timeout', '$window', '$alert', function($scope, $socket, $er, $timeout, $window, $alert) {

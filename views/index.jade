@@ -1,5 +1,5 @@
 doctype html
-html
+html(ng-app="quassel", ng-controller="ConfigController")
     head
       meta(charset='utf-8')
       title Quassel Web App
@@ -10,15 +10,41 @@ html
       link(rel='icon', href='favicon.ico')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/bootstrap.min.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/fonts.css')
-      link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/style.css')
-
-    body.login-page(ng-app="quassel")
+      link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/theme-#{settings.theme}.css', default-theme="#{settings.theme}", theme="theme")
+      
+    body.login-page
+      script(type="text/ng-template", id="modalJoinChannel.html")
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title
+            | Join a channel on
+            span#join-network-name  {{network.networkName}}
+        .modal-body
+          .form-group
+            input.form-control(type='text', placeholder='Enter channel name', ng-model="name")
+        .modal-footer
+          button.btn.btn-default(type='button', ng-click='cancel()') Cancel
+          button.btn.btn-default(type='button', ng-click='ok()') Join channel
+      script(type="text/ng-template", id="modalChangeTheme.html")
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Select theme
+        .modal-body
+          .list-group
+            a.list-group-item(href="#", ng-repeat="theme in themes", ng-class="{active: theme.active}", ng-click="setTheme(theme)") {{theme.name}}
+        .modal-footer
+          button.btn.btn-default(type='button', ng-click='ok()') Close
       #container(ng-controller="SocketController", ng-class="{connecting: connecting, disconnected: disconnected}")
-        #header
+        #header.dropdown(dropdown)
           span.quassel-logo
           span Quassel Web App
           small(ng-if="connecting", ng-cloak)  (connecting)
           small(ng-if="disconnected && !connecting", ng-cloak)  (disconnected)
+          button.btn.btn-default.config.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
+            span.glyphicon.glyphicon-cog
+          ul.dropdown-menu.dropdown-menu-right(role="menu")
+            li
+              a(href="#", ng-click="configTheme()") Change Theme
           button.btn.btn-default.logout(type="button", ng-if="logged && !disconnected", ng-cloak, ng-click="reload()") Logout
           button.btn.btn-default.reconnect(type="button", ng-if="disconnected && !connecting", ng-cloak, ng-click="reload()") Reconnect
         .container.login(ng-if="!logged")
@@ -45,18 +71,6 @@ html
             .col-md-3
         
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
-            script(type="text/ng-template", id="modalJoinChannel.html")
-              .modal-header
-                button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-                h4#myModalLabel.modal-title
-                  | Join a channel on
-                  span#join-network-name {network name}
-              .modal-body
-                .form-group
-                  input.form-control(type='text', placeholder='Enter channel name', ng-model="name")
-              .modal-footer
-                button.btn.btn-default(type='button', ng-click='cancel()') Cancel
-                button.btn.btn-primary(type='button', ng-click='ok()') Join channel
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container
                 .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.getStatusBuffer().id}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
