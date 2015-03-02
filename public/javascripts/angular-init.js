@@ -116,10 +116,10 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
 .factory('$theme', [function(){
     var obj = [{
         name: 'default',
-        active: false
+        active: true
     },{
         name: 'darksolarized',
-        active: true
+        active: false
     }];
     
     load();
