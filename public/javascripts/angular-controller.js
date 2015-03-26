@@ -56,9 +56,9 @@ angular.module('quassel')
     $er.on('buffer.backlog', function(next, bufferId, messageIds) {
         if (messageIds.length === 0) {
             // No more backlogs to receive for this buffer
-            loadingMoreBacklogs[''+$scope.buffer.id] = 'stop';
+            loadingMoreBacklogs[''+bufferId] = 'stop';
         } else if ($scope.buffer !== null) {
-            loadingMoreBacklogs[''+$scope.buffer.id] = false;
+            loadingMoreBacklogs[''+bufferId] = false;
             if (bufferId === $scope.buffer.id) {
                 $scope.messages = $scope.buffer.messages.values();
             }
