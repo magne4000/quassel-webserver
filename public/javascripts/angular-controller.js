@@ -69,24 +69,27 @@ angular.module('quassel')
     $er.on('buffer.lastseen', function(next, bufferId, messageId) {
         messageId = parseInt(messageId, 10);
         var buffer = $networks.get().findBuffer(bufferId);
-        if (buffer !== null && messageId < buffer.getLastMessage().id) {
-            var found = buffer.messages.forEach(function(val, key){
-                if (key > messageId && typeof val.isHighlighted === 'function' && val.isHighlighted()) {
-                    if (buffer.highlight !== 2) {
-                        $scope.$apply(function(){
-                            buffer.highlight = 2;
-                            $favico.more();
-                        });
+        if (buffer !== null) {
+            var bufferLastMessage = buffer.getLastMessage();
+            if (typeof bufferLastMessage !== 'undefined' && messageId < bufferLastMessage.id) {
+                var found = buffer.messages.forEach(function(val, key){
+                    if (key > messageId && typeof val.isHighlighted === 'function' && val.isHighlighted()) {
+                        if (buffer.highlight !== 2) {
+                            $scope.$apply(function(){
+                                buffer.highlight = 2;
+                                $favico.more();
+                            });
+                        }
+                        $desktop(buffer.name, val.content);
+                        return false;
                     }
-                    $desktop(buffer.name, val.content);
-                    return false;
+                    return true;
+                }, undefined, true);
+                if (!found) {
+                    $scope.$apply(function(){
+                        buffer.highlight = 1;
+                    });
                 }
-                return true;
-            }, undefined, true);
-            if (!found) {
-                $scope.$apply(function(){
-                    buffer.highlight = 1;
-                });
             }
         }
         next();
