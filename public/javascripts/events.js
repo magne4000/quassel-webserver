@@ -171,7 +171,6 @@ angular.module('er', ['ngSocket'])
                 if (condition._check(event, args)) {
                     condition._call(event, args, callback);
                 } else {
-                    console.log(event, args);
                     condition._store(event, args, callback);
                 }
             });

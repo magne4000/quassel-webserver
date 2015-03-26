@@ -84,6 +84,9 @@ var jsonpatch;
     /* The operations applicable to an object */
     var objOps = {
         add: function (obj, key) {
+            if (jsonpatch.reviver) {
+                jsonpatch.reviver.reviveAll(this.value);
+            }
             obj[key] = this.value;
             return true;
         },
@@ -92,6 +95,9 @@ var jsonpatch;
             return true;
         },
         replace: function (obj, key) {
+            if (jsonpatch.reviver) {
+                jsonpatch.reviver.reviveAll(this.value);
+            }
             obj[key] = this.value;
             return true;
         },
@@ -125,6 +131,9 @@ var jsonpatch;
     /* The operations applicable to an array. Many are the same as for the object */
     var arrOps = {
         add: function (arr, i) {
+            if (jsonpatch.reviver) {
+                jsonpatch.reviver.reviveAll(this.value);
+            }
             arr.splice(i, 0, this.value);
             return true;
         },
@@ -133,6 +142,9 @@ var jsonpatch;
             return true;
         },
         replace: function (arr, i) {
+            if (jsonpatch.reviver) {
+                jsonpatch.reviver.reviveAll(this.value);
+            }
             arr[i] = this.value;
             return true;
         },
@@ -148,6 +160,9 @@ var jsonpatch;
             rootOps.remove.call(this, obj);
             for (var key in this.value) {
                 if (this.value.hasOwnProperty(key)) {
+                    if (jsonpatch.reviver) {
+                        jsonpatch.reviver.reviveAll(this.value[key]);
+                    }
                     obj[key] = this.value[key];
                 }
             }

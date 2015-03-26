@@ -40,16 +40,14 @@ angular.module('quassel')
         next();
     }).after('network.init');
     
+    jsonpatch.reviver = $reviver;
     $er.on('change', function(next, networkId, change) {
         if (!jsonpatch.apply($networks.get().get(networkId), change)) {
             console.log('Patch failed!');
         } else {
             clearTimeout(changesTimeout[networkId]);
             changesTimeout[networkId] = setTimeout(function() {
-                $scope.$apply(function(){
-                    $reviver.reviveAll($networks.get().get(networkId));
-                    $scope.networks = $networks.get().all();
-                });
+                $scope.$apply();
             }, 10);
         }
         next();
