@@ -241,7 +241,11 @@ io.on('connection', function(socket) {
             });*/
             socket.emit('network.init', networkId);
         });
-
+        
+        quassel.on('loginfailed', function() {
+            isConnected = false;
+        });
+        
         quassel.on('**', function() {
             var args = Array.prototype.slice.call(arguments);
             args.unshift(this.event);

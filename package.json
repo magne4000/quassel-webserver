@@ -1,7 +1,7 @@
 {
   "name": "quassel-webserver",
   "description": "Quassel web interface",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/magne4000/quassel-webserver",
   "author": {
     "name": "Joël Charles",
@@ -39,7 +39,7 @@
     "express": "4.*",
     "jade": "~1.9.1",
     "less": "~2.3.1",
-    "less-middleware": "^1.0.4",
+    "less-middleware": "~2.0.1",
     "libquassel": "*",
     "morgan": "~1.5.1",
     "nomnom": "~1.8.1",
