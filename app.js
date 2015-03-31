@@ -15,7 +15,7 @@ var Quassel = require('libquassel');
 
 var routes = require('./routes/index');
 
-var settings = require('./settings');
+var settings = require(fs.existsSync('./settings-user.js') ? './settings-user' : './settings');
 
 var opts = require("nomnom")
     .option('port', {
