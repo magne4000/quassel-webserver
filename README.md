@@ -32,7 +32,7 @@ File `settings.js` can be modified to specify default quasselcore `host` and `po
 If `forcedefault` is set to `true`, `host` and `port` will not be editable on client side.  
 If `prefixpath` is not empty, the webserver will not be accessible at https://server:64443/ but at https://server:64443`prefixpath`/;  
 `initialBacklogLimit` defines the number of messages that will de retrieved for each buffer on connection.  
-`backlogLimit` defines the number of messages that will de retrieved for a buffer on each request to fetch additional backlogs.  
+`backlogLimit` defines the number of messages that will be retrieved for a buffer on each request to fetch additional backlogs.  
 
 ### Usage
 See the output of the command `node app.js --help`
