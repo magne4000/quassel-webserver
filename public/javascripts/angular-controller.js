@@ -112,7 +112,7 @@ angular.module('quassel')
                     $socket.emit('markBufferAsRead', bufferId, messageId);
                 } else {
                     $reviver.afterReviving(message, function(obj2){
-                        if (!$wfocus.isFocus()) {
+                        if (!$wfocus.isFocus() && $scope.buffer !== null && buffer.id === $scope.buffer.id) {
                             $wfocus.onNextFocus(function(){
                                 $socket.emit('markBufferAsRead', bufferId, messageId);
                             });
