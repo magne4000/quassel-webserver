@@ -150,6 +150,30 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         load: load
     };
 }])
+.factory('$wfocus', [function(){
+    var focus = true;
+    var nextFocusCallback = null;
+    $(window).focus(function() {
+        focus = true;
+        if (typeof nextFocusCallback === "function") {
+            nextFocusCallback();
+            nextFocusCallback = null;
+        }
+    });
+    
+    $(window).blur(function() {
+        focus = false;
+    });
+    
+    return {
+        isFocus: function() {
+            return focus;
+        },
+        onNextFocus: function(callback) {
+            nextFocusCallback = callback;
+        }
+    };
+}])
 .run([function(){
     console.log('AngularJS loaded');
 }]);

@@ -1,5 +1,5 @@
 angular.module('quassel')
-.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', '$alert', '$desktop', function($scope, $networks, $socket, $er, $reviver, $modal, $favico, $alert, $desktop) {
+.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', '$alert', '$desktop', '$wfocus', function($scope, $networks, $socket, $er, $reviver, $modal, $favico, $alert, $desktop, $wfocus) {
     $scope.networks = {};
     $scope.buffer = null;
     $scope.messages = [];
@@ -108,10 +108,15 @@ angular.module('quassel')
         if (buffer !== null) {
             $reviver.afterReviving(buffer.messages, function(obj){
                 var message = obj.get(parseInt(messageId, 10));
-                if ($scope.buffer !== null && buffer.id === $scope.buffer.id) {
+                if ($scope.buffer !== null && buffer.id === $scope.buffer.id && $wfocus.isFocus()) {
                     $socket.emit('markBufferAsRead', bufferId, messageId);
                 } else {
                     $reviver.afterReviving(message, function(obj2){
+                        if (!$wfocus.isFocus()) {
+                            $wfocus.onNextFocus(function(){
+                                $socket.emit('markBufferAsRead', bufferId, messageId);
+                            });
+                        }
                         if (obj2.isHighlighted()) {
                             if (buffer.highlight !== 2) {
                                 $scope.$apply(function(){
