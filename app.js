@@ -183,7 +183,7 @@ io.on('connection', function(socket) {
         }
         
         quassel = new Quassel(data.server, data.port, {
-            backloglimit: 50,
+            backloglimit: settings.default.initialBacklogLimit || 50,
             unsecurecore: opts.unsecurecore
         }, function(next) {
             next(data.user, data.password);
@@ -194,7 +194,7 @@ io.on('connection', function(socket) {
         });
         
         socket.on('moreBacklogs', function(bufferId, firstMessageId) {
-            quassel.requestBacklog(bufferId, -1, firstMessageId, 50);
+            quassel.requestBacklog(bufferId, -1, firstMessageId, settings.default.backlogLimit || 50);
         });
         
         socket.on('requestDisconnectNetwork', function(networkId) {
