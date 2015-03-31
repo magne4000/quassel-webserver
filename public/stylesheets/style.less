@@ -627,6 +627,20 @@ input {
     box-shadow: inset 0 0 8px #000;
 }
 
+// Dropdown
+
+.open > .dropdown-menu {
+    background-color: @dropdown-bg;
+}
+
+.dropdown-menu > li > a {
+    color: @text-color !important;
+}
+
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+    background-color: @dropdown-bg-hover;
+}
+
 // Scrollbars customization
 ::-webkit-scrollbar {
     width: 8px;
