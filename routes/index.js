@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var settings = require('../settings');
+var settings = require('../lib/utils').settings();
 
 if (!settings.theme) {
     settings.theme = 'default';

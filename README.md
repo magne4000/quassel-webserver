@@ -28,7 +28,11 @@ and run the following command: `node app.js`
 The server is now running.
 
 #### Settings
-File `settings.js` can be modified to specify default quasselcore `host` and `port`.  
+It is recommended to copy settings.js file to a new settings-user.js file
+```
+cp settings.js settings-user.js
+```
+File `settings-user.js` can then be modified to specify default quasselcore `host` and `port`.  
 If `forcedefault` is set to `true`, `host` and `port` will not be editable on client side.  
 If `prefixpath` is not empty, the webserver will not be accessible at https://server:64443/ but at https://server:64443`prefixpath`/;  
 `initialBacklogLimit` defines the number of messages that will de retrieved for each buffer on connection.  

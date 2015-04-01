@@ -7,7 +7,6 @@ var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
 //var jsonpatch = require('fast-json-patch');
 var patch = require('./lib/patch');
-var path = require('path');
 var fs = require('fs');
 var O = require('observed');
 var debug = require('debug');
@@ -15,7 +14,7 @@ var Quassel = require('libquassel');
 
 var routes = require('./routes/index');
 
-var settings = require('./settings');
+var settings = require('./lib/utils').settings(true);
 
 var opts = require("nomnom")
     .option('port', {
