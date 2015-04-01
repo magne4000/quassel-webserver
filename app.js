@@ -183,6 +183,7 @@ io.on('connection', function(socket) {
         }
         
         quassel = new Quassel(data.server, data.port, {
+            nobacklogs: settings.default.initialBacklogLimit === 0,
             backloglimit: settings.default.initialBacklogLimit || 50,
             unsecurecore: opts.unsecurecore
         }, function(next) {
