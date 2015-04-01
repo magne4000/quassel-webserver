@@ -57,13 +57,14 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   unless settings.forcedefault
                     .form-group
                       label(for='host') Server address
-                      input#host.form-control(type='text', value='#{settings.default.host}', ng-model="$parent.host")
+                      input#host.form-control(type='text', value='#{settings.default.host || ""}', ng-model="$parent.host")
                     .form-group
                       label(for='port') Server port
-                      input#port.form-control(type='text', value='#{settings.default.port}', ng-model="$parent.port")
-                  .form-group
-                    label(for='user') User name
-                    input#user.form-control(type='text', ng-model="$parent.user")
+                      input#port.form-control(type='text', value='#{settings.default.port || ""}', ng-model="$parent.port")
+                  unless settings.forcedefault && settings.default.user
+                    .form-group
+                      label(for='user') User name
+                      input#user.form-control(type='text', value='#{settings.default.user || ""}', ng-model="$parent.user")
                   .form-group
                     label(for='password') Password
                     input#password.form-control(type='password', ng-model="$parent.password")

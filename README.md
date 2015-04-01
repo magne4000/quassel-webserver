@@ -33,7 +33,7 @@ It is recommended to copy settings.js file to a new settings-user.js file
 cp settings.js settings-user.js
 ```
 File `settings-user.js` can then be modified to specify default quasselcore `host` and `port`.  
-If `forcedefault` is set to `true`, `host` and `port` will not be editable on client side.  
+If `forcedefault` is set to `true`, `host`, `port` (and `user` if it is set) will not be editable on client side. If `password` is also set, the client will automatically login when the page loads.  
 If `prefixpath` is not empty, the webserver will not be accessible at https://server:64443/ but at https://server:64443`prefixpath`/;  
 `initialBacklogLimit` defines the number of messages that will de retrieved for each buffer on connection.  
 `backlogLimit` defines the number of messages that will be retrieved for a buffer on each request to fetch additional backlogs.  
