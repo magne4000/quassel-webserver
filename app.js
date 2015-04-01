@@ -138,7 +138,19 @@ server.listen(app.get('port'), app.get('host'), function() {
 var io = require('socket.io')(server, {path: settings.prefixpath + '/socket.io'});
 
 io.on('connection', function(socket) {
-    var registerEvents = ['login', 'loginfailed'], ee, quassel, isConnected = false;
+    var registerEvents = ['login', 'loginfailed'], ee, quassel, isConnected = false, socketListeners = [];
+    
+    function addListener(sckt, evt, cb) {
+        sckt.on(evt, cb);
+        socketListeners.push(evt);
+    }
+    
+    function removeAllListeners(sckt) {
+        for (var i=0; i<socketListeners.length; i++) {
+            sckt.removeAllListeners(socketListeners[i]);
+        }
+        socketListeners = [];
+    }
     
     var disconnected = function() {
         if (ee) {
@@ -148,6 +160,7 @@ io.on('connection', function(socket) {
             quassel.removeAllListeners();
             quassel.disconnect();
         }
+        removeAllListeners(socket);
         quassel = null;
         ee = null;
         isConnected = false;
@@ -188,32 +201,32 @@ io.on('connection', function(socket) {
         }, function(next) {
             next(data.user, data.password);
         });
-
-        socket.on('sendMessage', function(bufferId, message) {
+        
+        addListener(socket, 'sendMessage', function(bufferId, message) {
             quassel.sendMessage(bufferId, message);
         });
         
-        socket.on('moreBacklogs', function(bufferId, firstMessageId) {
+        addListener(socket, 'moreBacklogs', function(bufferId, firstMessageId) {
             quassel.requestBacklog(bufferId, -1, firstMessageId, settings.default.backlogLimit || 50);
         });
         
-        socket.on('requestDisconnectNetwork', function(networkId) {
+        addListener(socket, 'requestDisconnectNetwork', function(networkId) {
             quassel.requestDisconnectNetwork(networkId);
         });
         
-        socket.on('requestConnectNetwork', function(networkId) {
+        addListener(socket, 'requestConnectNetwork', function(networkId) {
             quassel.requestConnectNetwork(networkId);
         });
         
-        socket.on('requestRemoveBuffer', function(bufferId) {
+        addListener(socket, 'requestRemoveBuffer', function(bufferId) {
             quassel.requestRemoveBuffer(bufferId);
         });
         
-        socket.on('requestMergeBuffersPermanently', function(bufferId1, bufferId2) {
+        addListener(socket, 'requestMergeBuffersPermanently', function(bufferId1, bufferId2) {
             quassel.requestMergeBuffersPermanently(bufferId1, bufferId2);
         });
         
-        socket.on('markBufferAsRead', function(bufferId, lastMessageId) {
+        addListener(socket, 'markBufferAsRead', function(bufferId, lastMessageId) {
             quassel.requestSetLastMsgRead(bufferId, lastMessageId);
             quassel.requestMarkBufferAsRead(bufferId);
             quassel.requestSetMarkerLine(bufferId, lastMessageId);
@@ -243,7 +256,7 @@ io.on('connection', function(socket) {
         });
         
         quassel.on('loginfailed', function() {
-            isConnected = false;
+            disconnected();
         });
         
         quassel.on('**', function() {
