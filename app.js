@@ -182,7 +182,8 @@ io.on('connection', function(socket) {
         }
     });
 
-    socket.on('credentials', function(data) {
+
+    var onCredentials = function(data) {
         if (isConnected) return;
         // If the client send a new connection,
         // the old one must be closed
@@ -270,13 +271,23 @@ io.on('connection', function(socket) {
         });
 
         quassel.connect();
-    });
+    };
+    socket.on('credentials', onCredentials);
+
 
     socket.on('disconnect', function() {
         disconnected();
     });
 
     socket.emit('connected');
+    if (settings.default.forcedefault && settings.default.host && settings.default.port && settings.default.user && settings.default.password) {
+        onCredentials({
+            host: settings.default.host,
+            port: settings.default.port,
+            user: settings.default.user,
+            password: settings.default.password
+        });
+    }
 });
 
 module.exports = app;
