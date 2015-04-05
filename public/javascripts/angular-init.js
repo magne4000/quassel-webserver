@@ -114,40 +114,29 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
     };
 }])
 .factory('$theme', [function(){
-    var obj = [{
-        name: 'default',
-        active: true
-    },{
-        name: 'darksolarized',
-        active: false
-    }];
-    
-    load();
-    
-    function save(newobj) {
-        newobj.forEach(function(element){
-            if (element.active) localStorage.defaultTheme = element.name;
-        });
-    }
-    
-    function load() {
-        if (localStorage.defaultTheme) {
-            obj.forEach(function(element){
-                if (element.name === localStorage.defaultTheme) element.active = true;
-                else element.active = false;
-            });
-        }
-    }
-    
+    var defaultTheme = '';
+    var packagedThemes = [
+        'default',
+        'darksolarized',
+    ];
+
     return {
-        get: function() {
-            return obj;
+        setDefaultTheme: function(theme) {
+            defaultTheme = theme;
         },
-        default: function() {
-            return localStorage.defaultTheme?localStorage.defaultTheme:null;
+        getClientTheme: function() {
+            return localStorage.defaultTheme || null;
         },
-        save: save,
-        load: load
+        setClientTheme: function(theme) {
+            localStorage.defaultTheme = theme;
+        },
+        getAllThemes: function() {
+            var themes = [].concat(packagedThemes);
+            if (defaultTheme && themes.indexOf(defaultTheme) === -1) {
+                themes.push(defaultTheme);
+            }
+            return themes;
+        },
     };
 }])
 .factory('$wfocus', [function(){

@@ -257,39 +257,21 @@ angular.module('quassel')
     };
 })
 .controller('ConfigController', ['$scope', '$modal', '$theme', function($scope, $modal, $theme) {
-    $scope.theme = "";
-    $scope.themes = $theme.get();
-    
-    $scope.$watch('theme', function(newValue, oldValue) {
-        if (newValue) {
-            $scope.themes.forEach(function(element){
-                element.active = (element.name === $scope.theme);
-            });
-            $theme.save($scope.themes);
-        }
-    });
-    
+    // $scope.activeTheme is assigned in the theme directive
+    $scope.getAllThemes = $theme.getAllThemes;
+    $scope.setTheme = function(theme) {
+        $scope.activeTheme = theme;
+        $theme.setClientTheme(theme);
+    }
+
     $scope.configTheme = function() {
         $modal.open({
             templateUrl: 'modalChangeTheme.html',
-            controller: 'ModalChangeThemeInstanceCtrl',
-            resolve: {
-                ctrlScope: function(){return $scope;}
-            }
+            scope: $scope,
         });
-    };
+    };   
+    
 }])
-.controller('ModalChangeThemeInstanceCtrl', function ($scope, $modalInstance, ctrlScope) {
-    $scope.themes = ctrlScope.themes;
-    
-    $scope.ok = function () {
-        $modalInstance.close();
-    };
-    
-    $scope.setTheme = function (theme) {
-        ctrlScope.theme = theme.name;
-    };
-})
 .controller('SocketController', ['$scope', '$socket', '$er', '$timeout', '$window', '$alert', function($scope, $socket, $er, $timeout, $window, $alert) {
     $scope.disconnected = false;
     $scope.connecting = false;

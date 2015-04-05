@@ -14,18 +14,14 @@ angular.module('quassel')
     var regex = /(.*theme-).*\.css$/;
     
     return {
-        scope: {
-            theme: "=",
-        },
         require: '?defaultTheme',
         link: function (scope, element, attrs) {
-            if ($theme.default()) {
-                $parse(attrs.theme).assign(scope, $theme.default());
-            } else {
-                $parse(attrs.theme).assign(scope, attrs.defaultTheme);
+            $theme.setDefaultTheme(attrs.defaultTheme);
+            if ($theme.getClientTheme()) {
+                scope.activeTheme = $theme.getClientTheme();
             }
             
-            scope.$watch('theme', function(newValue, oldValue){
+            scope.$watch('activeTheme', function(newValue, oldValue){
                 if (newValue) {
                     var href = element.attr("href");
                     href = href.replace(regex, "$1" + newValue + ".css");
