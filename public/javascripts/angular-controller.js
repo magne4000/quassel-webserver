@@ -579,6 +579,11 @@ angular.module('quassel')
     function onCurrentFilterUpdate() {
         angular.forEach($scope.currentFilter, function(value, key) {
             $scope.currentFilter2[''+value.type] = value.value;
+            if (value.label == 'Join') { // Also handle NetsplitJoin
+                $scope.currentFilter2['32768'] = value.value;
+            } else if (value.label == 'Quit') { // Also handle NetsplitQuit
+                $scope.currentFilter2['65536'] = value.value;
+            }
         });
     }
     
