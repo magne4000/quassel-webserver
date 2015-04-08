@@ -19,12 +19,12 @@ var settings = require('./lib/utils').settings(true);
 var opts = require("nomnom")
     .option('port', {
         abbr: 'p',
-        default: null,
-        help: 'HTTP port to use'
+        'default': null,
+        help: 'HTTP(S) port to use'
     })
     .option('mode', {
         abbr: 'm',
-        default: 'https',
+        'default': 'https',
         choices: ['http', 'https'],
         help: 'Use HTTP or HTTPS'
     })

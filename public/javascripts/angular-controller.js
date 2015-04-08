@@ -5,8 +5,51 @@ angular.module('quassel')
     $scope.messages = [];
     
     var MT = require('message').Type;
+    var MF = require('message').Flag;
+    var IRCMessage = require('message').IRCMessage;
     var changesTimeout = [];
     var loadingMoreBacklogs = [];
+    
+    function createDayChangeMessage(id, timestamp) {
+        var message = new IRCMessage({
+            id: id,
+            timestamp: timestamp/1000,
+            type: MT.DayChange,
+            flags: MF.ServerMsg
+        });
+        message.__s_done = true;
+        return message;
+    }
+    
+    function insertDayChangeMessages(messages) {
+        var i, j, lastMessageDay, lastMessageId, currentMessageDay, currentMessageId,
+            interval, today = new Date().setHours(0, 0, 0, 0);
+        // Sort by id
+        messages.sort(function(a, b){
+            if (a.id === b.id) return 0;
+            else if (a.id > b.id) return 1;
+            else return 0;
+        });
+        // Add missing DayChange messages between existing messages
+        for (i=0; i<messages.length; i++) {
+            currentMessageDay = new Date(messages[i].datetime).setHours(0, 0, 0, 0);
+            currentMessageId = messages[i].id;
+            if (i > 0) {
+                interval = (currentMessageDay - lastMessageDay) / 86400000;
+                for (j=interval; j>0; j--) {
+                    messages.splice(i++, 0, createDayChangeMessage(lastMessageId, currentMessageDay - ((j-1)*86400000)));
+                }
+            }
+            lastMessageDay = currentMessageDay;
+            lastMessageId = currentMessageId;
+        }
+        interval = (today - lastMessageDay) / 86400000;
+        // Add missing DayChange messages after last message
+        for (j=0; j<interval; j++) {
+            messages.push(createDayChangeMessage(lastMessageId, lastMessageDay + ((j+1)*86400000)));
+        }
+        return messages;
+    }
     
     $er.setCallback(function(event) {
         $socket.emit('register', event);
@@ -60,7 +103,7 @@ angular.module('quassel')
         } else if ($scope.buffer !== null) {
             loadingMoreBacklogs[''+bufferId] = false;
             if (bufferId === $scope.buffer.id) {
-                $scope.messages = $scope.buffer.messages.values();
+                $scope.messages = insertDayChangeMessages($scope.buffer.messages.values());
             }
         }
         next();
@@ -139,7 +182,7 @@ angular.module('quassel')
         if ($scope.buffer === null) {
             $scope.messages = [];
         } else if (bufferId === $scope.buffer.id) {
-            $scope.messages = $scope.buffer.messages.values();
+            $scope.messages = insertDayChangeMessages($scope.buffer.messages.values());
         }
         next();
     }).after('network.addbuffer');
@@ -178,7 +221,7 @@ angular.module('quassel')
     
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
-        $scope.messages = channel.messages.values();
+        $scope.messages = insertDayChangeMessages(channel.messages.values());
         var id = 0;
         channel.messages.forEach(function(val, key) {
             if (val.id > id) id = val.id;

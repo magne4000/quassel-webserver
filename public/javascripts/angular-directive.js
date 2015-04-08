@@ -66,10 +66,13 @@ angular.module('quassel')
     };
 })
 .directive('markerline', function ($parse) {
+    var lastElement = null;
     return {
         link: function (scope, element, attrs) {
             if ($parse(attrs.markerline)(scope)) {
-                element.after('<li class="markerline irc-message"><span></span><span></span><span></span></li>');
+                if (lastElement !== null) lastElement.remove();
+                lastElement = $('<li class="markerline irc-message"><span></span><span></span><span></span></li>');
+                element.after(lastElement);
             }
         }
     };

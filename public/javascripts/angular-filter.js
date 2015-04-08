@@ -35,6 +35,9 @@ angular.module('quassel')
             case MT.NetsplitQuit:
                 sender = '<=';
                 break;
+            case MT.DayChange:
+                sender = '-';
+                break;
             default:
                 sender = stripnick(message.sender);
         }
@@ -43,6 +46,17 @@ angular.module('quassel')
 }])
 .filter('decoratecontent', ['stripnickFilter', 'linkyFilter', function(stripnick, linky) {
     var MT = require('message').Type;
+    var dateFormat;
+    if (Intl && Intl.DateTimeFormat) {
+        dateFormat = new Intl.DateTimeFormat(undefined, {weekday: "long", year: "numeric", month: "long", day: "numeric"});
+    } else {
+        dateFormat = {
+            format: function(date) {
+                return date.toDateString();
+            }
+        };
+    }
+    
     return function(message) {
         var content, arr, servers;
         switch(message.type) {
@@ -77,6 +91,9 @@ angular.module('quassel')
                 arr = message.content.split("#:#");
                 servers = arr.pop().split(" ");
                 content = "Netsplit between " + servers[0] + " and " + servers[1] + ". Users quit: " + arr.map(stripnick).join(', ');
+                break;
+            case MT.DayChange:
+                content = "{Day changed to " + dateFormat.format(message.datetime) + "}";
                 break;
             default:
                 content = message.content;
