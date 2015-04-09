@@ -29,7 +29,7 @@ angular.module('quassel')
         messages.sort(function(a, b){
             if (a.id === b.id) return 0;
             else if (a.id > b.id) return 1;
-            else return 0;
+            else return -1;
         });
         // Add missing DayChange messages between existing messages
         for (i=0; i<messages.length; i++) {
