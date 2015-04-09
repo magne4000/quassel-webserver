@@ -115,18 +115,41 @@ angular.module('quassel')
         messageId = parseInt(messageId, 10);
         var buffer = $networks.get().findBuffer(bufferId);
         if (buffer !== null) {
+            // Fix networkStatusBuffer sync from server
+            if (buffer.isStatusBuffer()) {
+                var network = $networks.get().get(buffer.network);
+                network.setStatusBuffer(buffer);
+            }
+            
             var bufferLastMessage = buffer.getLastMessage();
             if (typeof bufferLastMessage !== 'undefined' && messageId < bufferLastMessage.id) {
                 var found = buffer.messages.forEach(function(val, key){
-                    if (key > messageId && typeof val.isHighlighted === 'function' && val.isHighlighted()) {
-                        if (buffer.highlight !== 2) {
-                            $scope.$apply(function(){
-                                buffer.highlight = 2;
-                                $favico.more();
-                            });
+                    if (key > messageId) {
+                        if (buffer.isStatusBuffer()) {
+                            if (!buffer.highlight) {
+                                $scope.$apply(function(){
+                                    buffer.highlight = 1;
+                                });
+                            }
+                            return false;
+                        } else if (!buffer.isChannel()) {
+                            if (buffer.highlight !== 2) {
+                                $scope.$apply(function(){
+                                    buffer.highlight = 2;
+                                    $favico.more();
+                                });
+                            }
+                            return false;
+                        } else if (typeof val.isHighlighted === 'function' && val.isHighlighted()) {
+                            if (buffer.highlight !== 2) {
+                                $scope.$apply(function(){
+                                    buffer.highlight = 2;
+                                    $favico.more();
+                                });
+                            }
+                            $desktop(buffer.name, val.content);
+                            return false;
                         }
-                        $desktop(buffer.name, val.content);
-                        return false;
                     }
                     return true;
                 }, undefined, true);
@@ -156,28 +179,44 @@ angular.module('quassel')
                 if ($scope.buffer !== null && buffer.id === $scope.buffer.id && $wfocus.isFocus()) {
                     $socket.emit('markBufferAsRead', bufferId, messageId);
                 } else {
-                    $reviver.afterReviving(message, function(obj2){
-                        if (!$wfocus.isFocus() && $scope.buffer !== null && buffer.id === $scope.buffer.id) {
-                            $wfocus.onNextFocus(function(){
-                                $socket.emit('markBufferAsRead', bufferId, messageId);
+                    if (buffer.isStatusBuffer()) {
+                        if (!buffer.highlight) {
+                            $scope.$apply(function(){
+                                buffer.highlight = 1;
                             });
                         }
-                        if (obj2.isHighlighted()) {
-                            if (buffer.highlight !== 2) {
-                                $scope.$apply(function(){
-                                    buffer.highlight = 2;
-                                    $favico.more();
-                                });
-                            }
-                            $desktop(buffer.name, obj2.content);
-                        } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
-                            if (buffer.highlight !== 2 && buffer.highlight !== 1) {
-                                $scope.$apply(function(){
-                                    buffer.highlight = 1;
-                                });
-                            }
+                    } else if (!buffer.isChannel()) {
+                        if (buffer.highlight !== 2) {
+                            $scope.$apply(function(){
+                                buffer.highlight = 2;
+                                $favico.more();
+                            });
                         }
-                    });
+                        $desktop(buffer.name, message.content);
+                    } else {
+                        $reviver.afterReviving(message, function(obj2){
+                            if (!$wfocus.isFocus() && $scope.buffer !== null && buffer.id === $scope.buffer.id) {
+                                $wfocus.onNextFocus(function(){
+                                    $socket.emit('markBufferAsRead', bufferId, messageId);
+                                });
+                            }
+                            if (obj2.isHighlighted()) {
+                                if (buffer.highlight !== 2) {
+                                    $scope.$apply(function(){
+                                        buffer.highlight = 2;
+                                        $favico.more();
+                                    });
+                                }
+                                $desktop(buffer.name, obj2.content);
+                            } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
+                                if (buffer.highlight !== 2 && buffer.highlight !== 1) {
+                                    $scope.$apply(function(){
+                                        buffer.highlight = 1;
+                                    });
+                                }
+                            }
+                        });
+                    }
                 }
             });
         }
