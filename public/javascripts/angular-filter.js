@@ -278,7 +278,6 @@ angular.module('quassel')
     return function(input) {
         if (!input) return null;
         var hash = 5381, i, chr, len;
-        if (input.length === 0) return hash;
         for (i = 0, len = input.length; i < len; i++) {
             chr   = input.charCodeAt(i);
             hash  = ((hash << 5) + hash) + chr;
