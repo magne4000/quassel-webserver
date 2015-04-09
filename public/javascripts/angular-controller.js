@@ -18,6 +18,7 @@ angular.module('quassel')
             flags: MF.ServerMsg
         });
         message.__s_done = true;
+        message.sid = id+timestamp;
         return message;
     }
     
@@ -32,6 +33,7 @@ angular.module('quassel')
         });
         // Add missing DayChange messages between existing messages
         for (i=0; i<messages.length; i++) {
+            messages[i].sid = messages[i].id;
             currentMessageDay = new Date(messages[i].datetime).setHours(0, 0, 0, 0);
             currentMessageId = messages[i].id;
             if (i > 0) {

@@ -127,7 +127,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     li
                       a.btn(ng-click="useDefault()", href="#") Use default
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
-                li.irc-message(markerline="buffer.markerline == message.id", ng-repeat="message in messages track by $index", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-show="!currentFilter2[message.type]", id="irc-message-{{message.id}}")
+                li.irc-message(markerline="buffer.markerline == message.id", ng-repeat="message in messages track by message.sid", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-show="!currentFilter2[message.type]", id="irc-message-{{message.id}}")
                   span.timestamp
                     span {{message.datetime | duration}}
                   span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
