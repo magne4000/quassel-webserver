@@ -51,8 +51,12 @@ html, body, .container {
     width: 16.6667%;
 }
 
-.pane.small {
-    width: 32px;
+#buffer-pane.small {
+    margin-left: ~"calc(-16.6667% + 32px)";
+}
+
+#nick-pane.small {
+    margin-right: ~"calc(-16.6667% + 32px)";
 }
 
 .pane.small .buffer-container {
