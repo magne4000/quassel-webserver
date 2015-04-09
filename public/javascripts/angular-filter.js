@@ -277,12 +277,11 @@ angular.module('quassel')
 .filter('hash', function() {
     return function(input) {
         if (!input) return null;
-        var hash = 0, i, chr, len;
+        var hash = 5381, i, chr, len;
         if (input.length === 0) return hash;
         for (i = 0, len = input.length; i < len; i++) {
             chr   = input.charCodeAt(i);
-            hash  = ((hash << 5) - hash) + chr;
-            hash |= 0; // Convert to 32bit integer
+            hash  = ((hash << 5) + hash) + chr;
         }
         return Math.abs(hash) % 16;
     };
