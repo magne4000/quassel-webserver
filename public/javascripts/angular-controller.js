@@ -27,9 +27,7 @@ angular.module('quassel')
             interval, today = new Date().setHours(0, 0, 0, 0);
         // Sort by id
         messages.sort(function(a, b){
-            if (a.id === b.id) return 0;
-            else if (a.id > b.id) return 1;
-            else return -1;
+            return a.id - b.id;
         });
         // Add missing DayChange messages between existing messages
         for (i=0; i<messages.length; i++) {
