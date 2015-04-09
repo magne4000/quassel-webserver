@@ -15,7 +15,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
     body.login-page
       script(type="text/ng-template", id="modalJoinChannel.html")
         .modal-header
-          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          button.close(type='button', ng-click='cancel()') ×
           h4#myModalLabel.modal-title
             | Join a channel on
             span#join-network-name  {{network.networkName}}

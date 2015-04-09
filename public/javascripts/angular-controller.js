@@ -307,15 +307,14 @@ angular.module('quassel')
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
         $theme.setClientTheme(theme);
-    }
+    };
 
     $scope.configTheme = function() {
         $modal.open({
             templateUrl: 'modalChangeTheme.html',
             scope: $scope,
         });
-    };   
-    
+    };
 }])
 .controller('SocketController', ['$scope', '$socket', '$er', '$timeout', '$window', '$alert', function($scope, $socket, $er, $timeout, $window, $alert) {
     $scope.disconnected = false;
