@@ -64,11 +64,26 @@ html, body, .container {
 }
 
 .animation, .animation .network, .animation .network-channels {
-    .transition(all 0.5s ease-in-out);
+    .transition(all 0.5s ease-in-out;);
 }
 
 .buffer-container  {
-    .transition(opacity 0.5s linear);
+    .transition(opacity 0.5s linear;);
+}
+
+@highlight-on-bottom: inset 0 -16px 16px -16px @highlight-on-bg;
+@highlight-on-top: inset 0 16px 16px -16px @highlight-on-bg;
+
+.buffer-container.highlight-on-bottom {
+    box-shadow: @highlight-on-bottom;
+}
+
+.buffer-container.highlight-on-top {
+    box-shadow: @highlight-on-top;
+}
+
+.buffer-container.highlight-on-bottom.highlight-on-top {
+    box-shadow: @highlight-on-bottom, @highlight-on-top;
 }
 
 #center {
@@ -108,7 +123,7 @@ html, body, .container {
     color: @header-text-color;
     height: @header-height;
     line-height: @header-height;
-    .transition(background-color 0.5s linear);
+    .transition(background-color 0.5s linear;);
 }
 
 #header small {
@@ -363,7 +378,7 @@ input {
 
 .backlog .markerline {
     height: 1px;
-    background-color: @highlight-bg;
+    background-color: @markerline-bg;
 }
 
 .backlog .markerline:last-child {
@@ -598,11 +613,11 @@ input {
 }
 
 .buffer-newmessage {
-    background: linear-gradient(to right, @brand-success 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+    background: linear-gradient(to right, @highlight-1-bg 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
 }
 
 .buffer-highlight {
-    background: linear-gradient(to right, @brand-warning 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+    background: linear-gradient(to right, @highlight-2-bg 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
 }
 
 .dropdown-network .glyphicon, .dropdown-channel .glyphicon {

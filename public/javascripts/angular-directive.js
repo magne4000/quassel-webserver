@@ -73,6 +73,46 @@ angular.module('quassel')
         }
     };
 })
+.directive('highlightContainer', function ($parse) {
+    function compareViewport(el, parent) {
+        var rect = el.getBoundingClientRect();
+        if (rect.top < 0) return rect.top;
+        else if ((rect.bottom - 80) > parent.clientHeight) return rect.bottom - 80 - parent.clientHeight;
+        return 0;
+    }
+    
+    return {
+        link: function (scope, element, attrs) {
+            
+            function updateHighlights() {
+                var parent = element[0], highlightTop = 0, highlightBottom = 0, val;
+                $('.buffer-highlight').each(function(){
+                    val = compareViewport(this, parent);
+                    if (val < highlightTop) highlightTop = val;
+                    if (val > highlightBottom) highlightBottom = val;
+                });
+                if (highlightBottom > 0) {
+                    if (!element.hasClass('highlight-on-bottom')) {
+                        element.addClass('highlight-on-bottom');
+                    }
+                } else {
+                    element.removeClass('highlight-on-bottom');
+                }
+                if (highlightTop < 0) {
+                    if (!element.hasClass('highlight-on-top')) {
+                        element.addClass('highlight-on-top');
+                    }
+                } else {
+                    element.removeClass('highlight-on-top');
+                }
+            }
+            
+            $(window).resize(updateHighlights);
+            element.on('scroll', updateHighlights);
+            scope.$on('highlight', updateHighlights);
+        }
+    };
+})
 .directive('caret', function() {
     var MT = require('message').Type;
     

@@ -70,7 +70,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
         
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
-              .buffer-container
+              .buffer-container(highlight-container)
                 .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id, 'buffer-newmessage': network.statusBuffer.highlight == 1}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
                   span.collapsable.expanded(toggle="{{network.networkName}}-channels")
                     span.glyphicon
