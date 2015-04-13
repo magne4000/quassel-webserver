@@ -201,7 +201,7 @@ angular.module('quassel')
                         $reviver.afterReviving(message, function(obj2){
                             if (obj2.isHighlighted()) {
                                 if (buffer.highlight !== 2) {
-                                    setHighlight(buffer, 1);
+                                    setHighlight(buffer, 2);
                                     incFavico(buffer);
                                 }
                                 $desktop(buffer.name, obj2.content);
