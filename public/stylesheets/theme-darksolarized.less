@@ -15,6 +15,7 @@
 @header-text-color: @text-color;
 @input-bg: @brand-primary;
 @input-color: @text-color;
+@input-color-placeholder: darken(@text-color, 50%);
 @button-primary-text-color: @text-color;
 @button-default-text-color: @text-color;
 @button-default-bg: #292929;
@@ -158,3 +159,6 @@ a.list-group-item:focus {
     background-color: #073642;
 }
 
+:-ms-input-placeholder { color: @input-color-placeholder; }
+::-moz-placeholder { color: @input-color-placeholder; }
+::-webkit-input-placeholder { color: @input-color-placeholder; }
