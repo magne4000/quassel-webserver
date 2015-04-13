@@ -96,7 +96,7 @@ html, body, .container {
 
 .topic {
     height: 32px;
-    line-height: 32px;
+    line-height: 22px;
     min-height: 32px;
     overflow: visible;
     text-overflow: ellipsis;
@@ -105,17 +105,25 @@ html, body, .container {
 }
 
 #topic {
+    font-family: @font-backlog;
     padding-left: 4px;
     padding-right: 36px;
     height: 32px;
     overflow: hidden;
+    color: @topic-color;
     background-color: @topic-bg;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 #topic:hover {
     position: absolute;
     z-index: 1;
     height: auto;
+    white-space: normal;
 }
 
 #header {
@@ -660,12 +668,17 @@ input {
 // Scrollbars customization
 ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
     background: transparent;
     border-radius: 4px;
     transition: box-shadow 400ms;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
 }
 
 ::-webkit-scrollbar-track:hover {

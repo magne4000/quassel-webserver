@@ -10,6 +10,7 @@
 @topic-bg: @brand-primary;
 @login-bg: @brand-primary;
 @text-color: #DDD;
+@topic-color: #888;
 @text-pane-color: @text-color;
 @header-text-color: @text-color;
 @input-bg: @brand-primary;
@@ -74,3 +75,86 @@
 .form-control, .form-control:focus, .form-control:active {
     border-color: @border-color;
 }
+
+.modal-content,
+.list-group-item,
+a.list-group-item {
+    color: @text-color;
+    background-color: @brand-primary;
+    border-color: darken(@border-color, 25%);
+}
+
+.modal-header,
+.modal-header .close,
+.modal-footer {
+    color: darken(@text-color, 25%);
+    background-color: lighten(@brand-primary, 1%);
+    border-color: darken(@border-color, 25%);
+}
+
+a.list-group-item:hover,
+a.list-group-item:focus {
+    color: @text-color;
+    background-color: lighten(@brand-primary, 5%);
+    border-color: darken(@border-color, 15%);
+}
+
+
+.list-group-item.active,
+.list-group-item.active:hover,
+.list-group-item.active:focus {
+    background-color: darken(#337ab7, 10%);
+    border-color:  darken(#337ab7, 20%)
+}
+
+.buffer-newmessage,
+.buffer-highlight {
+    background-image: none; // Remove the gradient on the left.
+}
+
+.network.off > span,
+.network.off + .network-channels .channel > span,
+.channel.off > span {
+    color: #555555;
+    opacity: 1;
+}
+.channel.on .channel-name { color: #888888; opacity: 1; }
+.channel.buffer-newmessage .channel-name { color: #268bd2; }
+.channel.buffer-highlight .channel-name { color: #FFAA00; }
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 0;
+    transition: box-shadow 0;
+    box-shadow: none;
+}
+
+::-webkit-scrollbar-track:hover {
+    background: #161616;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 2px;
+    box-shadow: none;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #444;
+}
+
+.backlog::-webkit-scrollbar-track,
+.backlog::-webkit-scrollbar-track:hover {
+    background: transparent;
+}
+
+.backlog::-webkit-scrollbar-thumb,
+.backlog::-webkit-scrollbar-thumb:hover {
+    background-color: #073642;
+}
+
