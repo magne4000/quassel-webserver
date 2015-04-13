@@ -261,7 +261,7 @@ angular.module('quassel')
         channel.messages.forEach(function(val, key) {
             if (val.id > id) id = val.id;
         });
-        
+        $('#messagebox').focus();
         $socket.emit('markBufferAsRead', channel.id, id);
     };
     
