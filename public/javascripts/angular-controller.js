@@ -458,7 +458,7 @@ angular.module('quassel')
         });
     };
 }])
-.controller('InputController', ['$scope', '$socket', function($scope, $socket) {
+.controller('InputController', ['$scope', '$socket', '$networks', function($scope, $socket, $networks) {
     var messagesHistory = [];
     var MT = require('message').Type;
     
@@ -575,6 +575,16 @@ angular.module('quassel')
             $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
             $scope.inputmessage = '';
         }
+    };
+
+    $scope.currentNick = function() {
+        if ($scope.buffer && typeof $scope.buffer.network === "number") {
+            var network = $networks.get().get($scope.buffer.network);
+            if (network) {
+                return network.nick;
+            }
+        }
+        return "";
     };
 }])
 .controller('FilterController', ['$scope', function($scope) {
