@@ -458,11 +458,12 @@ angular.module('quassel')
         });
     };
 }])
-.controller('InputController', ['$scope', '$socket', function($scope, $socket) {
+.controller('InputController', ['$scope', '$socket', '$networks', function($scope, $socket, $networks) {
     var messagesHistory = [];
     var MT = require('message').Type;
     
     $scope.inputmessage = '';
+    $scope.nick = null;
     
     var CircularBuffer = function(length){
         this.wpointer = 0;
@@ -576,6 +577,20 @@ angular.module('quassel')
             $scope.inputmessage = '';
         }
     };
+    
+    $scope.$watch('buffer', function(newValue, oldValue) {
+        var valid = false;
+        if (newValue !== null) {
+            if (typeof newValue.network === "number") {
+                var network = $networks.get().get(newValue.network);
+                if (network) {
+                    $scope.nick = network.nick;
+                    valid = true;
+                }
+            }
+        }
+        if (!valid) $scope.nick = null;
+    });
 }])
 .controller('FilterController', ['$scope', function($scope) {
     var filters = [
