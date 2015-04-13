@@ -255,17 +255,18 @@ angular.module('quassel')
                 }, 30000);
             }
             
-            function showme(messageId) {
+            function showme(messageId, count) {
                 var obj = $("#irc-message-"+messageId);
+                count = count || 0;
                 if (obj.length > 0) {
                     if (!obj.is(':hidden')) {
                         if (element[0].offsetHeight + element[0].scrollTop + obj.height() + 10 >= element[0].scrollHeight) {
                             element[0].scrollTop = element[0].scrollHeight;
                         }
                     }
-                } else {
+                } else if (count < 20) {
                     setTimeout(function(){
-                        showme(messageId);
+                        showme(messageId, count+1);
                     }, 10);
                 }
             }
