@@ -223,6 +223,18 @@ angular.module('quassel')
         }
     };
 })
+.directive('scrollme', [function () {
+    var parent = $("ul.backlog")[0];
+    return {
+        link: function (scope, element, attr) {
+            if (!element.is(':hidden')) {
+                if (parent.offsetHeight + parent.scrollTop + element.height() + 10 >= parent.scrollHeight) {
+                    parent.scrollTop = parent.scrollHeight;
+                }
+            }
+        }
+    };
+}])
 .directive('backlog', ['$timeout', '$compile', '$socket', function (timeout, $compile, $socket) {
     return {
         scope: {
@@ -255,36 +267,12 @@ angular.module('quassel')
                 }, 30000);
             }
             
-            function showme(messageId, count) {
-                var obj = $("#irc-message-"+messageId);
-                count = count || 0;
-                if (obj.length > 0) {
-                    if (!obj.is(':hidden')) {
-                        if (element[0].offsetHeight + element[0].scrollTop + obj.height() + 10 >= element[0].scrollHeight) {
-                            element[0].scrollTop = element[0].scrollHeight;
-                        }
-                    }
-                } else if (count < 20) {
-                    setTimeout(function(){
-                        showme(messageId, count+1);
-                    }, 10);
-                }
-            }
-            
             scope.$watch('currentFilter', function(newValue, oldValue) {
                 tryLaunchHandler();
             }, true);
             
             scope.$watch('buffer', function(newValue, oldValue){
                 tryLaunchHandler();
-            });
-            
-            $socket.on('buffer.message', function(bufferId, messageId) {
-                if (scope.buffer !== null && bufferId == scope.buffer.id) {
-                    setTimeout(function(){
-                        showme(messageId);
-                    }, 10);
-                }
             });
             
             $socket.on('buffer.backlog', function(bufferId, messageIds) {

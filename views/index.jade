@@ -117,19 +117,27 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     li.dropdown-header Hide events
                     li(ng-repeat="fil in currentFilter")
                       a(href="#")
-                        input(type="checkbox", id="filter-type-{{fil.type}}", data-message-type="{{fil.type}}", ng-model="fil.value")
-                        label(for="filter-type-{{fil.type}}") {{fil.label}}
+                        input(type="checkbox", id="filter-type-{{::fil.type}}", data-message-type="{{::fil.type}}", ng-model="fil.value")
+                        label(for="filter-type-{{::fil.type}}") {{::fil.label}}
                     li.divider
                     li
                       a.btn(ng-click="setAsDefault()", href="#") Set as default
                     li
                       a.btn(ng-click="useDefault()", href="#") Use default
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
-                li.irc-message(markerline="buffer.markerline == message.id", ng-repeat="message in messages track by message.sid", class="type-{{message.type}}", ng-class="{highlighted: message.isHighlighted()}", ng-show="!currentFilter2[message.type]", id="irc-message-{{message.id}}")
+                li.irc-message(
+                      markerline="buffer.markerline == message.id"
+                      scrollme
+                      ng-repeat="message in messages track by message.sid"
+                      class="type-{{::message.type}}"
+                      ng-class="{highlighted: message.isHighlighted()}"
+                      ng-show="!currentFilter2[message.type]"
+                      id="irc-message-{{::message.id}}"
+                  )
                   span.timestamp
-                    span {{message.datetime | duration}}
-                  span.nick(data-nickhash="{{message.sender | hash}}") {{message | decoratenick}}
-                  span.message(ng-bind-html="message | decoratecontent | color")
+                    span {{::message.datetime | duration}}
+                  span.nick(data-nickhash="{{::message.sender | hash}}") {{::message | decoratenick}}
+                  span.message(ng-bind-html="::message | decoratecontent | color")
               .input(ng-controller="InputController")
                 form#messageform(ng-submit="sendMessage()")
                   input#messagebox(type='text', ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)
