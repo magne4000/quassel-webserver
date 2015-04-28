@@ -223,15 +223,19 @@ angular.module('quassel')
         }
     };
 })
-.directive('scrollme', [function () {
+.directive('scrollme', ['$timeout', function ($timeout) {
     var parent = $("ul.backlog")[0];
+    var promise = null;
     return {
         link: function (scope, element, attr) {
-            if (!element.is(':hidden')) {
-                if (parent.offsetHeight + parent.scrollTop + element.height() + 10 >= parent.scrollHeight) {
-                    parent.scrollTop = parent.scrollHeight;
+            $timeout.cancel(promise);
+            promise = $timeout(function(){
+                if (!element.is(':hidden')) {
+                    if (parent.offsetHeight + parent.scrollTop + element.height() + 10 >= parent.scrollHeight) {
+                        parent.scrollTop = parent.scrollHeight;
+                    }
                 }
-            }
+            }, 50);
         }
     };
 }])
