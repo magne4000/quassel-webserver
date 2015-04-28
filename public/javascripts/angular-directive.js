@@ -223,13 +223,13 @@ angular.module('quassel')
         }
     };
 })
-.directive('scrollme', ['$timeout', function ($timeout) {
+.directive('scrollme', [function () {
     var parent = $("ul.backlog")[0];
     var promise = null;
     return {
         link: function (scope, element, attr) {
-            $timeout.cancel(promise);
-            promise = $timeout(function(){
+            clearTimeout(promise);
+            promise = setTimeout(function(){
                 if (!element.is(':hidden')) {
                     if (parent.offsetHeight + parent.scrollTop + element.height() + 10 >= parent.scrollHeight) {
                         parent.scrollTop = parent.scrollHeight;
