@@ -132,7 +132,6 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       class="type-{{::message.type}}"
                       ng-class="{highlighted: message.isHighlighted()}"
                       ng-show="!currentFilter2[message.type]"
-                      id="irc-message-{{::message.id}}"
                   )
                   span.timestamp
                     span {{::message.datetime | duration}}

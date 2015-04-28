@@ -9,21 +9,56 @@ angular.module('quassel')
     var IRCMessage = require('message').IRCMessage;
     var changesTimeout = [];
     var loadingMoreBacklogs = [];
+    var ignoreList = [];
+    var ignoreListRevision = 0;
     
-    function createDayChangeMessage(id, timestamp) {
+    function createDayChangeMessage(msg, timestamp) {
         var message = new IRCMessage({
-            id: id,
+            id: msg.id,
             timestamp: timestamp/1000,
             type: MT.DayChange,
-            flags: MF.ServerMsg
+            flags: MF.ServerMsg,
+            bufferInfo: {
+                network: msg.networkId,
+                id: msg.bufferId
+            }
         });
         message.__s_done = true;
-        message.sid = id+timestamp;
+        message.sid = msg.id+timestamp;
         return message;
     }
     
+    function updateMessages() {
+        if ($scope.buffer) {
+            var messages = $scope.buffer.messages.values();
+            messages = applyIgnoreList(messages, $scope.buffer);
+            $scope.messages = insertDayChangeMessages(messages);
+        }
+    }
+    
+    function applyIgnoreList(messages, buffer) {
+        var i = 0, shouldDelete = false;
+        for (; i<messages.length; i++) {
+            shouldDelete = false;
+            if (buffer.ignoreListRevision === ignoreListRevision && typeof messages[i].isIgnored === "boolean") {
+                shouldDelete = messages[i].isIgnored;
+            } else if (ignoreList.matches(messages[i], $networks.get())) {
+                messages[i].isIgnored = true;
+                shouldDelete = true;
+            } else {
+                messages[i].isIgnored = false;
+            }
+            if (shouldDelete) {
+                messages.splice(i, 1);
+                i--;
+            }
+        }
+        buffer.ignoreListRevision = ignoreListRevision;
+        return messages;
+    }
+    
     function insertDayChangeMessages(messages) {
-        var i, j, lastMessageDay, lastMessageId, currentMessageDay, currentMessageId,
+        var i, j, lastMessageDay, lastMessage, currentMessageDay, currentMessage,
             interval, today = new Date().setHours(0, 0, 0, 0);
         // Sort by id
         messages.sort(function(a, b){
@@ -33,20 +68,20 @@ angular.module('quassel')
         for (i=0; i<messages.length; i++) {
             messages[i].sid = messages[i].id;
             currentMessageDay = new Date(messages[i].datetime).setHours(0, 0, 0, 0);
-            currentMessageId = messages[i].id;
+            currentMessage = messages[i];
             if (i > 0) {
                 interval = (currentMessageDay - lastMessageDay) / 86400000;
                 for (j=interval; j>0; j--) {
-                    messages.splice(i++, 0, createDayChangeMessage(lastMessageId, currentMessageDay - ((j-1)*86400000)));
+                    messages.splice(i++, 0, createDayChangeMessage(lastMessage, currentMessageDay - ((j-1)*86400000)));
                 }
             }
             lastMessageDay = currentMessageDay;
-            lastMessageId = currentMessageId;
+            lastMessage = currentMessage;
         }
         interval = (today - lastMessageDay) / 86400000;
         // Add missing DayChange messages after last message
         for (j=0; j<interval; j++) {
-            messages.push(createDayChangeMessage(lastMessageId, lastMessageDay + ((j+1)*86400000)));
+            messages.push(createDayChangeMessage(lastMessage, lastMessageDay + ((j+1)*86400000)));
         }
         return messages;
     }
@@ -103,7 +138,7 @@ angular.module('quassel')
         } else if ($scope.buffer !== null) {
             loadingMoreBacklogs[''+bufferId] = false;
             if (bufferId === $scope.buffer.id) {
-                $scope.messages = insertDayChangeMessages($scope.buffer.messages.values());
+                updateMessages();
             }
         }
         next();
@@ -218,7 +253,7 @@ angular.module('quassel')
         if ($scope.buffer === null) {
             $scope.messages = [];
         } else if (bufferId === $scope.buffer.id) {
-            $scope.messages = insertDayChangeMessages($scope.buffer.messages.values());
+            updateMessages();
         }
         next();
     }).after('network.addbuffer');
@@ -254,9 +289,19 @@ angular.module('quassel')
         next();
     });
     
+    $er.on('ignorelist', function(next, list) {
+        $reviver.reviveAll(list);
+        ignoreList = list;
+        ignoreListRevision++;
+        $scope.$apply(function(){
+            updateMessages();
+        });
+        next();
+    });
+    
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
-        $scope.messages = insertDayChangeMessages(channel.messages.values());
+        updateMessages();
         var id = 0;
         channel.messages.forEach(function(val, key) {
             if (val.id > id) id = val.id;

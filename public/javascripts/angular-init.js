@@ -26,7 +26,9 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
     var IRCUser = require('user');
     var HashMap = require('serialized-hashmap');
     var Reviver = require('serializer').Reviver;
-    var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap, IRCMessage);
+    var IgnoreList = require('ignore').IgnoreList;
+    var IgnoreItem = require('ignore').IgnoreItem;
+    var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap, IRCMessage, IgnoreList, IgnoreItem);
     
     return reviver;
 }])
