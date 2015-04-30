@@ -226,6 +226,10 @@ io.on('connection', function(socket) {
             quassel.requestMergeBuffersPermanently(bufferId1, bufferId2);
         });
         
+        addListener(socket, 'requestUpdate', function(ignoreList) {
+            quassel.requestUpdate(ignoreList);
+        });
+        
         addListener(socket, 'markBufferAsRead', function(bufferId, lastMessageId) {
             quassel.requestSetLastMsgRead(bufferId, lastMessageId);
             quassel.requestMarkBufferAsRead(bufferId);

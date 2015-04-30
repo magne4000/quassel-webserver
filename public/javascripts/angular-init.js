@@ -17,6 +17,27 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         }
     };
 })
+.factory('$ignore', ['$socket', function($socket){
+    var ignoreList = [];
+    var ignoreListRevision = 0;
+    return {
+        getList: function() {
+            return ignoreList;
+        },
+        setList: function(obj) {
+            ignoreList = obj;
+        },
+        getRevision: function() {
+            return ignoreListRevision;
+        },
+        incRevision: function() {
+            ignoreListRevision++;
+        },
+        save: function() {
+            $socket.emit('requestUpdate', ignoreList.export());
+        }
+    };
+}])
 .factory('$reviver', [function(){
     var NetworkCollection = require('network').NetworkCollection;
     var Network = require('network').Network;

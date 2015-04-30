@@ -336,12 +336,12 @@ html, body, .container {
 .input input {
     width: 100%;
     border: 0;
-    height: @box-height;
     padding-left: 8px;
     outline: none;
 }
 
-input {
+:not(.tokenfield) > input {
+    height: @box-height !important;
     color: @input-color !important;
     background: @input-bg !important;
 }

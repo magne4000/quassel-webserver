@@ -32,6 +32,40 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .modal-body
           .list-group
             a.list-group-item(href="#", ng-repeat="theme in getAllThemes()", ng-class="{active: activeTheme == theme}", ng-click="setTheme(theme)") {{theme}}
+      script(type="text/ng-template", id="modalIgnoreList.html")
+        .modal-header
+          button.close(type='button', ng-click='$dismiss("close")') ×
+          h4#myModalLabel.modal-title Ignore list
+        .modal-body
+          tabset(type="pills")
+            tab(heading="{{ignoreItem.ignoreRule}}", ng-repeat="ignoreItem in ignoreList.list")
+              h4 Strictness
+              .btn-group
+                label.btn.btn-primary(ng-model="ignoreItem.strictness", btn-radio="1") Dynamic
+                label.btn.btn-primary(ng-model="ignoreItem.strictness", btn-radio="2") Permanent
+              h4 Rule type
+              .btn-group
+                label.btn.btn-primary(ng-model="ignoreItem.ignoreType", btn-radio="0") Sender
+                label.btn.btn-primary(ng-model="ignoreItem.ignoreType", btn-radio="1") Message
+                label.btn.btn-primary(ng-model="ignoreItem.ignoreType", btn-radio="2") CTCP
+              h4 Ignore rule
+              form.form-inline
+                .form-group
+                  .input-group
+                    input.form-control(type="text", ng-model="ignoreItem.ignoreRule")
+                    .input-group-btn
+                      button.btn.btn-primary(type="button", ng-model="ignoreItem.isRegEx", btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0") Regex ?
+              h4 Scope
+              .form-group
+                .input-group
+                  input(type="text", ng-model="ignoreItem.scopeRule", token-field)
+                  .input-group-btn
+                    label.btn.btn-primary(ng-model="ignoreItem.scope", btn-radio="0") Global
+                    label.btn.btn-primary(ng-model="ignoreItem.scope", btn-radio="1") Network
+                    label.btn.btn-primary(ng-model="ignoreItem.scope", btn-radio="2") Channel
+        .modal-footer
+          button.btn(ng-click="cancelIgnoreList()") Cancel
+          button.btn.btn-default(ng-click="saveIgnoreList()") Save
       #container(ng-controller="SocketController", ng-class="{connecting: connecting, disconnected: disconnected}")
         #header.dropdown(dropdown)
           span.quassel-logo
@@ -43,6 +77,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
           ul.dropdown-menu.dropdown-menu-right(role="menu")
             li
               a(href="#", ng-click="configTheme()") Change Theme
+              a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreList") Ignore List
           button.btn.btn-default.logout(type="button", ng-if="logged && !disconnected", ng-cloak, ng-click="reload()") Logout
           button.btn.btn-default.reconnect(type="button", ng-if="disconnected && !connecting", ng-cloak, ng-click="reload()") Reconnect
         .container.login(ng-if="!logged")
@@ -151,6 +186,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src='#{settings.prefixpath}/javascripts/jquery-2.1.3.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular.min.js')
       script(src='#{settings.prefixpath}/javascripts/ui-bootstrap-tpls-0.12.0.min.js')
+      script(src='#{settings.prefixpath}/javascripts/bootstrap-tokenfield.min.js')
       script(src='#{settings.prefixpath}/socket.io/socket.io.js')
       script(src='#{settings.prefixpath}/javascripts/favico-0.3.6.min.js')
       script(src='#{settings.prefixpath}/javascripts/ngSocket.js')

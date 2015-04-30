@@ -1,5 +1,7 @@
 angular.module('quassel')
-.controller('NetworkController', ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', '$alert', '$desktop', '$wfocus', function($scope, $networks, $socket, $er, $reviver, $modal, $favico, $alert, $desktop, $wfocus) {
+.controller('NetworkController',
+        ['$scope', '$networks', '$socket', '$er', '$reviver', '$modal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore',
+            function($scope, $networks, $socket, $er, $reviver, $modal, $favico, $alert, $desktop, $wfocus, $ignore) {
     $scope.networks = {};
     $scope.buffer = null;
     $scope.messages = [];
@@ -9,8 +11,6 @@ angular.module('quassel')
     var IRCMessage = require('message').IRCMessage;
     var changesTimeout = [];
     var loadingMoreBacklogs = [];
-    var ignoreList = [];
-    var ignoreListRevision = 0;
     
     function createDayChangeMessage(msg, timestamp) {
         var message = new IRCMessage({
@@ -40,9 +40,9 @@ angular.module('quassel')
         var i = 0, shouldDelete = false;
         for (; i<messages.length; i++) {
             shouldDelete = false;
-            if (buffer.ignoreListRevision === ignoreListRevision && typeof messages[i].isIgnored === "boolean") {
+            if (buffer.ignoreListRevision === $ignore.getRevision() && typeof messages[i].isIgnored === "boolean") {
                 shouldDelete = messages[i].isIgnored;
-            } else if (ignoreList.matches(messages[i], $networks.get())) {
+            } else if ($ignore.getList().matches(messages[i], $networks.get())) {
                 messages[i].isIgnored = true;
                 shouldDelete = true;
             } else {
@@ -53,7 +53,7 @@ angular.module('quassel')
                 i--;
             }
         }
-        buffer.ignoreListRevision = ignoreListRevision;
+        buffer.ignoreListRevision = $ignore.getRevision();
         return messages;
     }
     
@@ -291,8 +291,8 @@ angular.module('quassel')
     
     $er.on('ignorelist', function(next, list) {
         $reviver.reviveAll(list);
-        ignoreList = list;
-        ignoreListRevision++;
+        $ignore.setList(list);
+        $ignore.incRevision();
         $scope.$apply(function(){
             updateMessages();
         });
@@ -379,20 +379,49 @@ angular.module('quassel')
         $modalInstance.dismiss('cancel');
     };
 })
-.controller('ConfigController', ['$scope', '$modal', '$theme', function($scope, $modal, $theme) {
+.controller('ConfigController', ['$scope', '$modal', '$theme', '$ignore', '$socket', function($scope, $modal, $theme, $ignore, $socket) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
+    $scope.ignoreList = $ignore.getList();
+    $scope.displayIgnoreList = false;
+    var modal;
+    
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
         $theme.setClientTheme(theme);
     };
 
     $scope.configTheme = function() {
-        $modal.open({
+        modal = $modal.open({
             templateUrl: 'modalChangeTheme.html',
             scope: $scope,
         });
     };
+    
+    $scope.configIgnoreList = function() {
+        $scope.ignoreList = $ignore.getList();
+        modal = $modal.open({
+            templateUrl: 'modalIgnoreList.html',
+            scope: $scope,
+        });
+    };
+    
+    $scope.cancelIgnoreList = function() {
+        $scope.ignoreList = $ignore.getList();
+        modal.dismiss('close');
+    };
+    
+    $scope.saveIgnoreList = function() {
+        $ignore.setList($scope.ignoreList);
+        $ignore.save();
+        modal.dismiss('close');
+    };
+    
+    $socket.once('ignorelist', function(list) {
+        $scope.$apply(function(){
+            $scope.displayIgnoreList = true;
+        });
+    });
 }])
 .controller('SocketController', ['$scope', '$socket', '$er', '$timeout', '$window', '$alert', function($scope, $socket, $er, $timeout, $window, $alert) {
     $scope.disconnected = false;

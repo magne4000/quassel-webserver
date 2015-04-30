@@ -327,4 +327,16 @@ angular.module('quassel')
             });
         }
     };
+}])
+.directive('tokenField', ['$parse', function($parse) {
+    return {
+        require: '?ngModel',
+        link: function (scope, element, attr) {
+            element.tokenfield({
+                delimiter: ";",
+                createTokensOnBlur: true,
+                tokens: $parse(attr.ngModel)(scope)
+            });
+        }
+    };
 }]);
