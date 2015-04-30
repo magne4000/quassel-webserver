@@ -180,13 +180,12 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
 }])
 .factory('$wfocus', [function(){
     var focus = true;
-    var nextFocusCallbacks = [];
+    var nextFocusCallback = null;
     $(window).focus(function() {
         focus = true;
-        for (var i=0; i<nextFocusCallbacks.length; i++) {
-            nextFocusCallbacks[i]();
-        }
-        nextFocusCallbacks = [];
+        if (nextFocusCallback !== null)
+            nextFocusCallback();
+        nextFocusCallback = null;
     });
     
     $(window).blur(function() {
@@ -198,7 +197,7 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
             return focus;
         },
         onNextFocus: function(callback) {
-            nextFocusCallbacks.push(callback);
+            nextFocusCallback = callback;
         }
     };
 }])
