@@ -384,7 +384,7 @@ angular.module('quassel')
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
     $scope.displayIgnoreList = false;
-    var modal;
+    var modal, activeIndice = 0;
     
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
@@ -400,6 +400,7 @@ angular.module('quassel')
     
     $scope.configIgnoreList = function() {
         $scope.ignoreList = $ignore.getList();
+        $scope.activeIndice = 0;
         modal = $modal.open({
             templateUrl: 'modalIgnoreList.html',
             scope: $scope,
@@ -407,7 +408,7 @@ angular.module('quassel')
     };
     
     $scope.cancelIgnoreList = function() {
-        $scope.ignoreList = $ignore.getList();
+        $ignore.restoreSavedList();
         modal.dismiss('close');
     };
     
@@ -415,6 +416,20 @@ angular.module('quassel')
         $ignore.setList($scope.ignoreList);
         $ignore.save();
         modal.dismiss('close');
+    };
+    
+    $scope.createIgnoreItem = function() {
+        $ignore.createItem();
+        $scope.ignoreList = $ignore.getList();
+    };
+    
+    $scope.setActiveIndice = function(indice) {
+        activeIndice = indice;
+    };
+    
+    $scope.deleteSelectedIgnoreItem = function() {
+        $ignore.deleteItem(activeIndice);
+        $scope.ignoreList = $ignore.getList();
     };
     
     $socket.once('ignorelist', function(list) {

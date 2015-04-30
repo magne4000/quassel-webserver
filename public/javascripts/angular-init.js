@@ -18,14 +18,29 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
     };
 })
 .factory('$ignore', ['$socket', function($socket){
-    var ignoreList = [];
+    var IgnoreList = require('ignore').IgnoreList;
+    var IgnoreItem = require('ignore').IgnoreItem;
+    var ignoreList = new IgnoreList();
+    var savedIgnoreList = null;
     var ignoreListRevision = 0;
     return {
+        createItem: function() {
+            ignoreList.list.push(new IgnoreItem(1, '', 0, 0, 1, 0, 'rule'));
+        },
+        deleteItem: function(indice) {
+            if (ignoreList.list[indice]) {
+                ignoreList.list.splice(indice, 1);
+            }
+        },
         getList: function() {
             return ignoreList;
         },
+        restoreSavedList: function() {
+            ignoreList = angular.copy(savedIgnoreList);
+        },
         setList: function(obj) {
             ignoreList = obj;
+            savedIgnoreList = angular.copy(ignoreList);
         },
         getRevision: function() {
             return ignoreListRevision;
@@ -34,6 +49,7 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
             ignoreListRevision++;
         },
         save: function() {
+            savedIgnoreList = angular.copy(ignoreList);
             $socket.emit('requestUpdate', ignoreList.export());
         }
     };
