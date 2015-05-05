@@ -143,7 +143,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     ul.dropdown-menu.dropdown-menu-right(role="menu")
                       li(ng-if="channel.active && channel.isChannel()")
                         a(href="#", ng-click="channelPart(channel)") Part
-                      li(ng-if="!channel.active  && channel.isChannel()")
+                      li(ng-if="!channel.active && channel.isChannel()")
                         a(href="#", ng-click="channelJoin(channel)") Join
                       li(ng-if="!channel.active || !channel.isChannel()")
                         a(href="#", ng-confirm-click="Are you sure you want to delete this buffer permanently ?", ng-ok-click="channelDelete(channel)") Delete
@@ -198,7 +198,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src='#{settings.prefixpath}/javascripts/favico-0.3.6.min.js')
       script(src='#{settings.prefixpath}/javascripts/ngSocket.js')
       script(src='#{settings.prefixpath}/javascripts/events.js')
-      script(src='#{settings.prefixpath}/javascripts/angular-sanitize.min.js')
+      script(src='#{settings.prefixpath}/javascripts/angular-sanitize.js')
       script(src='#{settings.prefixpath}/javascripts/angular-dnd.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular-notify.min.js')
       script(src='#{settings.prefixpath}/javascripts/libquassel.js')
