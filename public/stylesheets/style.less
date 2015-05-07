@@ -340,7 +340,7 @@ html, body, .container {
     outline: none;
 }
 
-:not(.tokenfield) > input {
+:not(.tokenfield) > input[type="text"], :not(.tokenfield) > input[type="password"] {
     height: @box-height !important;
     color: @input-color !important;
     background: @input-bg !important;
