@@ -177,7 +177,9 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   )
                   span.timestamp
                     span {{::message.datetime | duration}}
+                  span.hiddenforcopy  <
                   span.nick(data-nickhash="{{::message.sender | hash}}") {{::message | decoratenick}}
+                  span.hiddenforcopy > 
                   span.message(ng-bind-html="::message | decoratecontent | color")
               .input(ng-controller="InputController")
                 form#messageform(ng-submit="sendMessage()")

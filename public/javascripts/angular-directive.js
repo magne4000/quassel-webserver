@@ -67,7 +67,7 @@ angular.module('quassel')
         link: function (scope, element, attrs) {
             if ($parse(attrs.markerline)(scope)) {
                 if (lastElement !== null) lastElement.remove();
-                lastElement = $('<li class="markerline irc-message"><span></span><span></span><span></span></li>');
+                lastElement = $('<li class="markerline irc-message"><span></span><span></span><span></span><span></span><span></span></li>');
                 element.after(lastElement);
             }
         }
