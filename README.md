@@ -1,13 +1,12 @@
 # quassel-webserver
+A web client for Quassel (requires a running quasselcore)
 
 :exclamation: Your node (NOT quasselcore) version should be at least v0.11.13 (**v0.12.x** recommended).
-To install node, you can run :
+To install node last version, you can run :
 ```
 npm -g install n
 n latest
 ```
-
-A web client for Quassel (requires a running quasselcore)
 
 ### Screenshots
 
