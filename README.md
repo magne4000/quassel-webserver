@@ -1,8 +1,11 @@
 # quassel-webserver
 
-:warning: Your node (NOT quassel core) version should be at least v0.11.13. (To install node, you can run `npm -g install n` and `n latest`.)
-
-:warning: Node v0.12 is now stable, so of course you can use it !
+:exclamation: Your node (NOT quasselcore) version should be at least v0.11.13 (**v0.12.x** recommended).
+To install node, you can run :
+```
+npm -g install n
+n latest
+```
 
 A web client for Quassel (requires a running quasselcore)
 
