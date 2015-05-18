@@ -10,6 +10,7 @@ body {
     background-color: @body-bg;
     font-family: "Roboto";
     color: @text-color;
+    overflow: hidden;
 }
 
 html, body, .container {
@@ -670,6 +671,63 @@ html, body, .container {
 
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
     background-color: @dropdown-bg-hover;
+}
+
+// Minimum width for the sidebars.
+#buffer-pane:not(.small),
+#nick-pane:not(.small) {
+    min-width: 240px;
+}
+
+@media (max-width: 767px) {
+    // Overlay the sidebars over the backlog.
+    #buffer-pane, #nick-pane {
+        position: absolute;
+        top: 48px;
+        bottom: 32px;
+        right: 10px;
+        z-index: 20;
+        box-shadow: 10px 0 10px -5px #000;
+
+        .buffer-container {
+            height: ~"calc(100% - 32px)";
+            position: static;
+        }
+
+        // Only show the expand button when sidebar is collapsed.
+        &.small {
+            background: none;
+            box-shadow: none;
+            height: 32px;
+            top: initial;
+
+            .buffer-container {
+                display: none;
+            }
+
+            .buffer-bottom-bar {
+                opacity: .25;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+    #buffer-pane {
+        left: 0;
+        box-shadow: 10px 0 10px -5px #000;
+    }
+    #nick-pane {
+        right: 0;
+        box-shadow: -10px 0 10px -5px #000;
+    }
+
+    // Hide timestamp
+    .backlog .irc-message > span.timestamp {
+        display: none;
+    }
+
 }
 
 // Scrollbars customization
