@@ -332,6 +332,8 @@ html, body, .container {
 
 .input {
     overflow-y: hidden;
+    height: @box-height;
+    min-height: @box-height;
 }
 
 .input input {
@@ -339,6 +341,7 @@ html, body, .container {
     border: 0;
     padding-left: 8px;
     outline: none;
+    min-height: @box-height;
 }
 
 :not(.tokenfield) > input[type="text"], :not(.tokenfield) > input[type="password"] {
