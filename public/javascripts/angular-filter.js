@@ -98,7 +98,7 @@ angular.module('quassel')
             default:
                 content = message.content;
         }
-        return content;
+        return content + '<br>';
     };
 }])
 .filter('channelsFilter', function() {
