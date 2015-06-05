@@ -514,6 +514,12 @@ angular.module('quassel')
             $scope.logged = true;
         });
     });
+
+    $socket.on('coreinfo', function(coreinfo) {
+        if (coreinfo.CoreFeatures && coreinfo.CoreFeatures < 4) {
+            $alert.error('Your quasselcore is not supported by quassel-webserver (version too old)');
+        }
+    });
     
     $socket.on('disconnect', function() {
         console.log('DISCONNECT');

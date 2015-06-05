@@ -1,3 +1,8 @@
+if (!Object.observe) {
+    console.log("Your nodejs version is too old, you need at least 0.12, and you have", process.version);
+    process.exit(1);
+}
+
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -138,7 +143,7 @@ server.listen(app.get('port'), app.get('host'), function() {
 var io = require('socket.io')(server, {path: settings.prefixpath + '/socket.io'});
 
 io.on('connection', function(socket) {
-    var registerEvents = ['login', 'loginfailed'], ee, quassel, isConnected = false, socketListeners = [];
+    var registerEvents = ['login', 'loginfailed', 'coreinfo'], ee, quassel, isConnected = false, socketListeners = [];
     
     function addListener(sckt, evt, cb) {
         sckt.on(evt, cb);
