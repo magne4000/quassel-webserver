@@ -22,6 +22,11 @@ var routes = require('./routes/index');
 var settings = require('./lib/utils').settings(true);
 
 var opts = require("nomnom")
+    .option('listen', {
+        abbr: 'l',
+        'default': null,
+        help: 'Listening address'
+    })
     .option('port', {
         abbr: 'p',
         'default': null,
@@ -63,6 +68,8 @@ if (opts.mode === 'http'){
     server = require('https').createServer(options, app);
     if (opts.port === null) opts.port = 64443;
 }
+
+if (opts.listen === null) opts.listen = process.env.HOST || '';
 
 // check that prefixpath do not contains ../, and it starts with / if not empty
 if (settings.prefixpath.length > 0) {
@@ -134,7 +141,7 @@ app.use(function(err, req, res, next) {
 var loggerqw = debug('quassel-webserver');
 
 app.set('port', opts.port);
-app.set('host', process.env.HOST || '');
+app.set('host', opts.listen);
 
 server.listen(app.get('port'), app.get('host'), function() {
     loggerqw('Express server listening on port ' + server.address().port);
