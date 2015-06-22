@@ -1,0 +1,12 @@
+[Service]
+ExecStart=/usr/bin/node /home/quassel-webserver/quassel-webserver/app.js -l 127.0.0.1 -m http
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=quassel-webserver
+User=quassel-webserver
+Group=quassel-webserver
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
