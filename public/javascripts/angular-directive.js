@@ -170,6 +170,9 @@ angular.module('quassel')
                             var nick = message.getNick();
                             if (nick.length <= token.length)
                                 continue;
+                            
+                            if (!(nick in scope.buffer.nickUserMap))
+                                continue;
         
                             if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
                                 return nick;
@@ -188,6 +191,9 @@ angular.module('quassel')
                         for (var i = 0; i < nicks.length; i++) {
                             var nick = nicks[i];
                             if (nick.length <= token.length)
+                                continue;
+                            
+                            if (!(nick in scope.buffer.nickUserMap))
                                 continue;
         
                             if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
