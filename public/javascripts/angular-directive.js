@@ -192,9 +192,6 @@ angular.module('quassel')
                             var nick = nicks[i];
                             if (nick.length <= token.length)
                                 continue;
-                            
-                            if (!(nick in scope.buffer.nickUserMap))
-                                continue;
         
                             if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
                                 return nick;
