@@ -188,7 +188,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   span.timestamp
                     span {{::message.datetime | duration}}
                   span.hiddenforcopy  <
-                  span.nick(data-nickhash="{{::message.sender | hash}}") {{::message | decoratenick}}
+                  span.nick(data-nickhash="{{message.type == 1 ? message.sender : '' | hash}}") {{::message | decoratenick}}
                   span.hiddenforcopy > 
                   irc-message.message(message="::message")
                 irc-markerline(ng-if="buffer.markerline == message.id")

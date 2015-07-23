@@ -26,10 +26,11 @@ angular.module('quassel')
     
     function nickplaceholder(val) {
         if (typeof val != 'undefined') {
+            var nickhash=$filter('hash')(val);
             val = val.replace('"', '\\"');
-            return '<span ng-nick="'+val+'"></span>';
+            return '<span data-nickhash="'+nickhash+'" ng-nick="'+val+'"></span>';
         }
-        return '<span ng-nick="{{::message.sender}}"></span>';
+        return '<span data-nickhash="{{::message.sender | hash}}" ng-nick="{{::message.sender}}"></span>';
     }
     
     function getmessagetemplate(scope, message) {
@@ -170,7 +171,6 @@ angular.module('quassel')
         link: function (scope, element, attrs) {
             if (lastElement !== null) lastElement.remove();
             lastElement = element;
-            console.log('MARKERLINE');
         },
         template: '<li class="markerline irc-message"><span></span><span></span><span></span><span></span><span></span></li>'
     };
