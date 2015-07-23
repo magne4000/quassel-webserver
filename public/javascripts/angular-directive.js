@@ -10,6 +10,108 @@ angular.module('quassel')
         }
     };
 })
+.directive('ircMessage', ['$compile', '$filter', function($compile, $filter){
+    
+    var MT = require('message').Type;
+    var dateFormat;
+    if (Intl && Intl.DateTimeFormat) {
+        dateFormat = new Intl.DateTimeFormat(undefined, {weekday: "long", year: "numeric", month: "long", day: "numeric"});
+    } else {
+        dateFormat = {
+            format: function(date) {
+                return date.toDateString();
+            }
+        };
+    }
+    
+    function nickplaceholder(val) {
+        if (typeof val != 'undefined') {
+            val = val.replace('"', '\\"');
+            return '<span ng-nick="'+val+'"></span>';
+        }
+        return '<span ng-nick="{{::message.sender}}"></span>';
+    }
+    
+    function getmessagetemplate(scope, message) {
+        var content, arr, servers;
+        switch(message.type) {
+            case MT.Plain:
+                content = $filter('color')($filter('linky')(message.content, '_blank'));
+                break;
+            case MT.Nick:
+                content = nickplaceholder() + " is now known as {{::message.content}}";
+                break;
+            case MT.Mode:
+                content = "Mode {{::message.content}} by " + nickplaceholder();
+                break;
+            case MT.Join:
+                content = nickplaceholder() + " has joined";
+                break;
+            case MT.Part:
+                content = nickplaceholder() + " has left";
+                break;
+            case MT.Quit:
+                content = nickplaceholder() + " has quit";
+                break;
+            case MT.Kick:
+                var ind = message.content.indexOf(" ");
+                content = nickplaceholder() + " has kicked " + message.content.slice(0, ind) + " (" + message.content.slice(ind+1) + ")";
+                break;
+            case MT.NetsplitJoin:
+                arr = message.content.split("#:#");
+                servers = arr.pop().split(" ");
+                content = "Netsplit between " + servers[0] + " and " + servers[1] + " ended. Users joined: " + arr.map(nickplaceholder).join(', ');
+                break;
+            case MT.NetsplitQuit:
+                arr = message.content.split("#:#");
+                servers = arr.pop().split(" ");
+                content = "Netsplit between " + servers[0] + " and " + servers[1] + ". Users quit: " + arr.map(nickplaceholder).join(', ');
+                break;
+            case MT.DayChange:
+                content = "{Day changed to " + dateFormat.format(message.datetime) + "}";
+                break;
+            default:
+                content = "{{::message.content}}";
+        }
+        return content + '<br>';
+    }
+    
+    return {
+        scope: {
+            message: "="
+        },
+        restrict: 'E',
+        require: '?message',
+        link: function (scope, element, attrs) {
+            var msg = getmessagetemplate(scope, scope.message);
+            element.html(msg);
+            $compile(element.contents())(scope);
+        }
+    };
+}])
+.directive('ngNick', ['$filter', '$compile', '$rootScope', '$config', function ($filter, $compile, $rootScope, $config) {
+    return {
+        scope: {},
+        link: function (scope, element, attrs) {
+            if ($config.get('displayfullhostmask')) {
+                scope.nick = attrs.ngNick;
+            } else {
+                scope.nick = $filter('stripnick')(attrs.ngNick);
+            }
+            
+            var deregister = $rootScope.$on('config.displayfullhostmask', function(evt, newValue) {
+                if (!newValue) {
+                    scope.nick = $filter('stripnick')(attrs.ngNick);
+                } else {
+                    scope.nick = attrs.ngNick;
+                }
+            });
+            
+            scope.$on('$destroy', deregister);
+        },
+        template: "{{nick}}"
+    };
+}])
 .directive('theme', ['$theme', '$parse', function ($theme, $parse) {
     var regex = /(.*theme-).*\.css$/;
     
@@ -61,16 +163,16 @@ angular.module('quassel')
         }
     };
 })
-.directive('markerline', function ($parse) {
+.directive('ircMarkerline', function ($parse) {
     var lastElement = null;
     return {
+        restrict: 'E',
         link: function (scope, element, attrs) {
-            if ($parse(attrs.markerline)(scope)) {
-                if (lastElement !== null) lastElement.remove();
-                lastElement = $('<li class="markerline irc-message"><span></span><span></span><span></span><span></span><span></span></li>');
-                element.after(lastElement);
-            }
-        }
+            if (lastElement !== null) lastElement.remove();
+            lastElement = element;
+            console.log('MARKERLINE');
+        },
+        template: '<li class="markerline irc-message"><span></span><span></span><span></span><span></span><span></span></li>'
     };
 })
 .directive('highlightContainer', function ($parse) {
@@ -300,8 +402,8 @@ angular.module('quassel')
                 if (promiseFetching !== null) timeout.cancel(promiseFetching);
                 scope.fetching = false;
                 lastBottom = 0;
-                element[0].scrollTop = element[0].scrollHeight;
                 timeout(function () {
+                    element[0].scrollTop = element[0].scrollHeight;
                     if (element[0].scrollTop < lengthThreshold) {
                         launchHandler();
                     }

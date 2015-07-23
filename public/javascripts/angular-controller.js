@@ -381,7 +381,7 @@ angular.module('quassel')
         $modalInstance.dismiss('cancel');
     };
 })
-.controller('ConfigController', ['$scope', '$modal', '$theme', '$ignore', '$socket', function($scope, $modal, $theme, $ignore, $socket) {
+.controller('ConfigController', ['$scope', '$modal', '$theme', '$ignore', '$socket', '$config', function($scope, $modal, $theme, $ignore, $socket, $config) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
@@ -405,6 +405,20 @@ angular.module('quassel')
         $scope.activeIndice = 0;
         modal = $modal.open({
             templateUrl: 'modalIgnoreList.html',
+            scope: $scope,
+        });
+    };
+    
+    $scope.gsdisplayfullhostmask = function(newValue) {
+        if (arguments.length > 0) {
+            $config.set('displayfullhostmask', newValue);
+        }
+        return $config.get('displayfullhostmask');
+    };
+    
+    $scope.configGeneral = function() {
+        modal = $modal.open({
+            templateUrl: 'modalGeneralConfig.html',
             scope: $scope,
         });
     };

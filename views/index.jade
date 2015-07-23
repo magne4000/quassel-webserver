@@ -26,6 +26,15 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .modal-footer
           button.btn.btn-default(type='button', ng-click='cancel()') Cancel
           button.btn.btn-default(type='button', ng-click='ok()') Join channel
+      script(type="text/ng-template", id="modalGeneralConfig.html")
+        .modal-header
+          button.close(type='button', ng-click='$dismiss("close")') ×
+          h4#myModalLabel.modal-title General configuration
+        .modal-body
+          .form-group.checkbox
+            label
+              input(type="checkbox", ng-model="gsdisplayfullhostmask", ng-model-options="{ getterSetter: true }")
+              | Display full hostmask on join/part/quit ?
       script(type="text/ng-template", id="modalChangeTheme.html")
         .modal-header
           button.close(type='button', ng-click='$dismiss("close")') ×
@@ -84,6 +93,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
             span.glyphicon.glyphicon-cog
           ul.dropdown-menu.dropdown-menu-right(role="menu")
             li
+              a(href="#", ng-click="configGeneral()") General Configuration
               a(href="#", ng-click="configTheme()") Change Theme
               a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreList") Ignore List
           button.btn.btn-default.logout(type="button", ng-if="logged && !disconnected", ng-cloak, ng-click="reload()") Logout
@@ -169,19 +179,19 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       a.btn(ng-click="useDefault()", href="#") Use default
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
                 li.irc-message(
-                      markerline="buffer.markerline == message.id"
                       scrollme
                       ng-repeat="message in messages track by message.sid"
                       class="type-{{::message.type}}"
                       ng-class="{highlighted: message.isHighlighted()}"
-                      ng-show="!currentFilter2[message.type]"
+                      ng-if="!currentFilter2[message.type]"
                   )
                   span.timestamp
                     span {{::message.datetime | duration}}
                   span.hiddenforcopy  <
                   span.nick(data-nickhash="{{::message.sender | hash}}") {{::message | decoratenick}}
                   span.hiddenforcopy > 
-                  span.message(ng-bind-html="::message | decoratecontent | color")
+                  irc-message.message(message="::message")
+                irc-markerline(ng-if="buffer.markerline == message.id")
               .input(ng-controller="InputController")
                 form#messageform(ng-submit="sendMessage()")
                   input#messagebox(type='text', ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)

@@ -44,63 +44,6 @@ angular.module('quassel')
         return sender;
     };
 }])
-.filter('decoratecontent', ['stripnickFilter', 'linkyFilter', function(stripnick, linky) {
-    var MT = require('message').Type;
-    var dateFormat;
-    if (Intl && Intl.DateTimeFormat) {
-        dateFormat = new Intl.DateTimeFormat(undefined, {weekday: "long", year: "numeric", month: "long", day: "numeric"});
-    } else {
-        dateFormat = {
-            format: function(date) {
-                return date.toDateString();
-            }
-        };
-    }
-    
-    return function(message) {
-        var content, arr, servers;
-        switch(message.type) {
-            case MT.Plain:
-                content = linky(message.content, '_blank');
-                break;
-            case MT.Nick:
-                content = stripnick(message.sender) + " is now known as " + message.content;
-                break;
-            case MT.Mode:
-                content = "Mode " + message.content + " by " + stripnick(message.sender);
-                break;
-            case MT.Join:
-                content = stripnick(message.sender) + " has joined";
-                break;
-            case MT.Part:
-                content = stripnick(message.sender) + " has left";
-                break;
-            case MT.Quit:
-                content = stripnick(message.sender) + " has quit";
-                break;
-            case MT.Kick:
-                var ind = message.content.indexOf(" ");
-                content = stripnick(message.sender) + " has kicked " + message.content.slice(0, ind) + " (" + message.content.slice(ind+1) + ")";
-                break;
-            case MT.NetsplitJoin:
-                arr = message.content.split("#:#");
-                servers = arr.pop().split(" ");
-                content = "Netsplit between " + servers[0] + " and " + servers[1] + " ended. Users joined: " + arr.map(stripnick).join(', ');
-                break;
-            case MT.NetsplitQuit:
-                arr = message.content.split("#:#");
-                servers = arr.pop().split(" ");
-                content = "Netsplit between " + servers[0] + " and " + servers[1] + ". Users quit: " + arr.map(stripnick).join(', ');
-                break;
-            case MT.DayChange:
-                content = "{Day changed to " + dateFormat.format(message.datetime) + "}";
-                break;
-            default:
-                content = message.content;
-        }
-        return content + '<br>';
-    };
-}])
 .filter('channelsFilter', function() {
     return function(input) {
         input = input || [];

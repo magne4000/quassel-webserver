@@ -54,6 +54,25 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         }
     };
 }])
+.factory('$config', ['$rootScope', function($rootScope){
+    
+    var keys = {};
+    
+    return {
+        set: function(key, val) {
+            localStorage.setItem(key, JSON.stringify(val));
+            if (keys[key]) {
+                for (var x in keys[key]) {
+                    keys[key][x](val);
+                }
+            }
+            $rootScope.$emit('config.'+key, val);
+        },
+        get: function(key) {
+            return JSON.parse(localStorage.getItem(key));
+        }
+    };
+}])    
 .factory('$reviver', [function(){
     var NetworkCollection = require('network').NetworkCollection;
     var Network = require('network').Network;
