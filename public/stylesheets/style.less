@@ -632,11 +632,21 @@ html, body, .container {
 }
 
 .buffer-newmessage {
-    background: linear-gradient(to right, @highlight-1-bg 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+    .channel-name, .network-name {
+        color: @highlight-1-color;
+    }
 }
 
 .buffer-highlight {
-    background: linear-gradient(to right, @highlight-2-bg 0%, rgba(57, 56, 62, 0) 10%, rgba(57, 56, 62, 0) 100%) repeat scroll 0% 0% transparent;
+    .channel-name, .network-name {
+        color: @highlight-2-color;
+    }
+}
+
+.buffer-activity {
+    .channel-name, .network-name {
+        color: @highlight-3-color;
+    }
 }
 
 .dropdown-network .glyphicon, .dropdown-channel .glyphicon {

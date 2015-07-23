@@ -27,9 +27,10 @@
 @markerline-bg: #073642;
 @dropdown-bg: #232323;
 @dropdown-bg-hover: #333;
-@highlight-1-bg: @brand-success;
-@highlight-2-bg: @brand-warning;
-@highlight-on-bg: lighten(@highlight-2-bg, 10%);
+@highlight-1-color: #268bd2;
+@highlight-2-color: #FFAA00;
+@highlight-3-color: whitesmoke;
+@highlight-on-bg: lighten(@highlight-2-color, 10%);
 
 @font-side: consolas, "Roboto Condensed";
 @font-backlog: consolas, "Droid Sans Mono", monospace;
@@ -109,11 +110,6 @@ a.list-group-item:focus {
     border-color:  darken(#337ab7, 20%)
 }
 
-.buffer-newmessage,
-.buffer-highlight {
-    background-image: none; // Remove the gradient on the left.
-}
-
 .network.off > span,
 .network.off + .network-channels .channel > span,
 .channel.off > span {
@@ -123,6 +119,7 @@ a.list-group-item:focus {
 .channel.on .channel-name { color: #888888; opacity: 1; }
 .channel.buffer-newmessage .channel-name { color: #268bd2; }
 .channel.buffer-highlight .channel-name { color: #FFAA00; }
+.channel.buffer-activity .channel-name { color: whitesmoke; }
 
 ::-webkit-scrollbar {
     width: 4px;

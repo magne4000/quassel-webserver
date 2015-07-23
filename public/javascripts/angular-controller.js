@@ -194,7 +194,7 @@ angular.module('quassel')
                     return true;
                 }, undefined, true);
                 if (!found) {
-                    setHighlight(buffer, 1);
+                    setHighlight(buffer, 3);
                 }
             }
         }
@@ -244,6 +244,8 @@ angular.module('quassel')
                                 if (buffer.highlight !== 2 && buffer.highlight !== 1) {
                                     setHighlight(buffer, 1);
                                 }
+                            } else {
+                                setHighlight(buffer, 3);
                             }
                         });
                     }

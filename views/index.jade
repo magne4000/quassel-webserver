@@ -132,7 +132,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                         ng-model="channel"
                         drag
                         drop="onDropComplete"
-                        ng-class="{on: channel.active, off: !channel.active, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}"
+                        ng-class="{on: channel.active, off: !channel.active, 'buffer-activity': channel.highlight == 3, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}"
                         ng-repeat="channel in network._buffers | channelsFilter track by channel.id"
                         ng-if="!channel.isHidden()"
                         dropdown
