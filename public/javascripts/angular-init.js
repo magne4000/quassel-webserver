@@ -163,11 +163,18 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         });
     }
     
-    return function(title, body){
+    return function(title, body, timeout){
         if (granted) {
             var options = {};
+            timeout = timeout || 5000;
             if (body) options.body = body;
-            return new Notification(title, options);
+            var notif = new Notification(title, options);
+            setTimeout(function(){
+                if (notif) {
+                    notif.close();
+                }
+            }, timeout);
+            return notif;
         }
     };
 }])
