@@ -65,7 +65,17 @@ if (opts.mode === 'http'){
         key: fs.readFileSync(keypath, {encoding: 'utf8'}),
         cert: fs.readFileSync(certpath, {encoding: 'utf8'})
     };
-    server = require('https').createServer(options, app);
+    try {
+        server = require('httpolyglot').createServer(options, app);
+        app.use(function(req, res, next) {
+            if (!req.secure) {
+                return res.redirect('https://' + req.headers.host + req.url);
+            }
+            next();
+        });
+    } catch(e) {
+        server = require('https').createServer(options, app);
+    }
     if (opts.port === null) opts.port = 64443;
 }
 
