@@ -145,10 +145,17 @@ angular.module('quassel')
     });
     
     function setHighlight(buffer, value) {
-        $scope.$apply(function(){
-            buffer.highlight = value;
-        });
-        $scope.$emit('highlight');
+        if ((value === 0) ||
+            (value == 'high' && buffer.highlight != 'high') ||
+            (value == 'medium' && buffer.highlight != 'high' && buffer.highlight != 'medium') ||
+            (value == 'low' && !buffer.highlight)) {
+            $scope.$apply(function(){
+                buffer.highlight = value;
+            });
+            $scope.$emit('highlight');
+            return true;
+        }
+        return false;
     }
     
     function incFavico(buffer) {
@@ -172,19 +179,15 @@ angular.module('quassel')
                 var found = buffer.messages.forEach(function(val, key){
                     if (key > messageId) {
                         if (buffer.isStatusBuffer()) {
-                            if (!buffer.highlight) {
-                                setHighlight(buffer, 1);
-                            }
+                            setHighlight(buffer, 'low');
                             return false;
                         } else if (!buffer.isChannel()) {
-                            if (buffer.highlight !== 2) {
-                                setHighlight(buffer, 2);
+                            if (setHighlight(buffer, 'high')) {
                                 incFavico(buffer);
                             }
                             return false;
                         } else if (typeof val.isHighlighted === 'function' && val.isHighlighted()) {
-                            if (buffer.highlight !== 2) {
-                                setHighlight(buffer, 2);
+                            if (setHighlight(buffer, 'high')) {
                                 incFavico(buffer);
                             }
                             $desktop(buffer.name, val.content);
@@ -194,7 +197,7 @@ angular.module('quassel')
                     return true;
                 }, undefined, true);
                 if (!found) {
-                    setHighlight(buffer, 3);
+                    setHighlight(buffer, 'low');
                 }
             }
         }
@@ -223,29 +226,23 @@ angular.module('quassel')
                         });
                     }
                     if (buffer.isStatusBuffer()) {
-                        if (!buffer.highlight) {
-                            setHighlight(buffer, 1);
-                        }
+                        setHighlight(buffer, 'low');
                     } else if (!buffer.isChannel()) {
-                        if (buffer.highlight !== 2) {
-                            setHighlight(buffer, 2);
+                        if (setHighlight(buffer, 'high')) {
                             incFavico(buffer);
                         }
                         $desktop(buffer.name, message.content);
                     } else {
                         $reviver.afterReviving(message, function(obj2){
                             if (obj2.isHighlighted()) {
-                                if (buffer.highlight !== 2) {
-                                    setHighlight(buffer, 2);
+                                if (setHighlight(buffer, 'high')) {
                                     incFavico(buffer);
                                 }
                                 $desktop(buffer.name, obj2.content);
                             } else if (obj2.type == MT.Plain || obj2.type == MT.Action) {
-                                if (buffer.highlight !== 2 && buffer.highlight !== 1) {
-                                    setHighlight(buffer, 1);
-                                }
+                                setHighlight(buffer, 'medium');
                             } else {
-                                setHighlight(buffer, 3);
+                                setHighlight(buffer, 'low');
                             }
                         });
                     }

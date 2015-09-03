@@ -27,10 +27,10 @@
 @markerline-bg: #073642;
 @dropdown-bg: #232323;
 @dropdown-bg-hover: #333;
-@highlight-1-color: #268bd2;
-@highlight-2-color: #FFAA00;
-@highlight-3-color: whitesmoke;
-@highlight-on-bg: lighten(@highlight-2-color, 10%);
+@highlight-low-color: whitesmoke;
+@highlight-medium-color: #268bd2;
+@highlight-high-color: #FFAA00;
+@highlight-on-bg: lighten(@highlight-high-color, 10%);
 
 @font-side: consolas, "Roboto Condensed";
 @font-backlog: consolas, "Droid Sans Mono", monospace;
@@ -116,10 +116,6 @@ a.list-group-item:focus {
     color: #555555;
     opacity: 1;
 }
-.channel.on .channel-name { color: #888888; opacity: 1; }
-.channel.buffer-newmessage .channel-name { color: #268bd2; }
-.channel.buffer-highlight .channel-name { color: #FFAA00; }
-.channel.buffer-activity .channel-name { color: whitesmoke; }
 
 ::-webkit-scrollbar {
     width: 4px;

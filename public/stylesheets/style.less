@@ -385,7 +385,7 @@ html, body, .container {
     white-space: pre-wrap;
 }
 
-.backlog .irc-message > span {
+.backlog .irc-message > span, .backlog .irc-message > .message {
     display: table-cell;
     
     &.hiddenforcopy {
@@ -631,21 +631,24 @@ html, body, .container {
     background-color: black;
 }
 
-.buffer-newmessage {
+.buffer-highlight-low {
     .channel-name, .network-name {
-        color: @highlight-1-color;
+        color: @highlight-low-color;
+        opacity: 1;
     }
 }
 
-.buffer-highlight {
+.buffer-highlight-medium {
     .channel-name, .network-name {
-        color: @highlight-2-color;
+        color: @highlight-medium-color;
+        opacity: 1;
     }
 }
 
-.buffer-activity {
+.buffer-highlight-high {
     .channel-name, .network-name {
-        color: @highlight-3-color;
+        color: @highlight-high-color;
+        opacity: 1;
     }
 }
 

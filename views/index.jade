@@ -124,7 +124,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container(highlight-container)
-                .network(id="network-{{network.networkName}}", ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id, 'buffer-newmessage': network.statusBuffer.highlight == 1}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
+                .network(id="network-{{network.networkName}}", class="buffer-highlight-{{network.statusBuffer.highlight}}", ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
                   span.collapsable.expanded(toggle="{{network.networkName}}-channels")
                     span.glyphicon
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
@@ -142,7 +142,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
                         ng-model="channel"
                         drag
                         drop="onDropComplete"
-                        ng-class="{on: channel.active, off: !channel.active, 'buffer-activity': channel.highlight == 3, 'buffer-highlight': channel.highlight == 2, 'buffer-newmessage': channel.highlight == 1, active: buffer.id == channel.id}"
+                        class="buffer-highlight-{{channel.highlight}}"
+                        ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
                         ng-repeat="channel in network._buffers | channelsFilter track by channel.id"
                         ng-if="!channel.isHidden()"
                         dropdown
