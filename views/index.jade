@@ -105,13 +105,12 @@ html(ng-app="quassel", ng-controller="ConfigController")
                 alert(ng-if="alert != ''", ng-cloak) {{alert}}
                 form#logonform(role='form', ng-submit="login()")
                   h1 Connect to Quassel Core
-                  unless settings.forcedefault
-                    .form-group
-                      label(for='host') Server address
-                      input#host.form-control(type='text', value='#{settings.default.host}', ng-model="$parent.host")
-                    .form-group
-                      label(for='port') Server port
-                      input#port.form-control(type='text', value='#{settings.default.port}', ng-model="$parent.port")
+                  .form-group(ng-hide='#{settings.forcedefault}')
+                    label(for='host') Server address
+                    input#host.form-control(type='text', value='#{settings.default.host}', ng-model="$parent.host")
+                  .form-group(ng-hide='#{settings.forcedefault}')
+                    label(for='port') Server port
+                    input#port.form-control(type='text', value='#{settings.default.port}', ng-model="$parent.port")
                   .form-group
                     label(for='user') User name
                     input#user.form-control(type='text', ng-model="$parent.user")

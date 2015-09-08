@@ -75,7 +75,12 @@ if (opts.mode === 'http'){
     }
     if (opts.port === null) opts.port = 64443;
 }
-app.use(netBrowserify({server: server}));
+
+var nboptions = {server: server};
+if (settings.forcedefault) {
+    nboptions.to = [{host: settings.default.host, port: settings.default.port}];
+}
+app.use(netBrowserify(nboptions));
 
 if (opts.listen === null) opts.listen = process.env.HOST || '';
 
