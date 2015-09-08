@@ -10,12 +10,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
-//var jsonpatch = require('fast-json-patch');
-var patch = require('./lib/patch');
 var fs = require('fs');
-var O = require('observed');
 var debug = require('debug');
-var Quassel = require('libquassel');
+var netBrowserify = require('net-browserify');
 
 var routes = require('./routes/index');
 
@@ -78,6 +75,7 @@ if (opts.mode === 'http'){
     }
     if (opts.port === null) opts.port = 64443;
 }
+app.use(netBrowserify({server: server}));
 
 if (opts.listen === null) opts.listen = process.env.HOST || '';
 
@@ -155,154 +153,6 @@ app.set('host', opts.listen);
 
 server.listen(app.get('port'), app.get('host'), function() {
     loggerqw('Express server listening on port ' + server.address().port);
-});
-
-var io = require('socket.io')(server, {path: settings.prefixpath + '/socket.io'});
-
-io.on('connection', function(socket) {
-    var registerEvents = ['login', 'loginfailed', 'coreinfo'], ee, quassel, isConnected = false, socketListeners = [];
-    
-    function addListener(sckt, evt, cb) {
-        sckt.on(evt, cb);
-        socketListeners.push(evt);
-    }
-    
-    function removeAllListeners(sckt) {
-        for (var i=0; i<socketListeners.length; i++) {
-            sckt.removeAllListeners(socketListeners[i]);
-        }
-        socketListeners = [];
-    }
-    
-    var disconnected = function() {
-        if (ee) {
-            ee.removeAllListeners();
-        }
-        if (quassel) {
-            quassel.removeAllListeners();
-            quassel.disconnect();
-        }
-        removeAllListeners(socket);
-        quassel = null;
-        ee = null;
-        isConnected = false;
-    };
-    
-    socket.on('logout', disconnected);
-    
-    socket.on('register', function(event) {
-        if (Array.isArray(event)) {
-            for (var ind in event) {
-                if (registerEvents.indexOf(event[ind]) === -1) {
-                    registerEvents.push(event[ind]);
-                }
-            }
-        } else {
-            if (registerEvents.indexOf(event) === -1) {
-                registerEvents.push(event);
-            }
-        }
-    });
-
-    socket.on('credentials', function(data) {
-        if (isConnected) return;
-        // If the client send a new connection,
-        // the old one must be closed
-        disconnected();
-        isConnected = true;
-
-        if (settings.forcedefault) {
-            data.server = settings.default.host;
-            data.port = settings.default.port;
-        }
-        
-        quassel = new Quassel(data.server, data.port, {
-            nobacklogs: settings.default.initialBacklogLimit === 0,
-            backloglimit: settings.default.initialBacklogLimit || 50,
-            unsecurecore: opts.unsecurecore
-        }, function(next) {
-            next(data.user, data.password);
-        });
-        
-        addListener(socket, 'sendMessage', function(bufferId, message) {
-            quassel.sendMessage(bufferId, message);
-        });
-        
-        addListener(socket, 'moreBacklogs', function(bufferId, firstMessageId) {
-            quassel.requestBacklog(bufferId, -1, firstMessageId, settings.default.backlogLimit || 50);
-        });
-        
-        addListener(socket, 'requestDisconnectNetwork', function(networkId) {
-            quassel.requestDisconnectNetwork(networkId);
-        });
-        
-        addListener(socket, 'requestConnectNetwork', function(networkId) {
-            quassel.requestConnectNetwork(networkId);
-        });
-        
-        addListener(socket, 'requestRemoveBuffer', function(bufferId) {
-            quassel.requestRemoveBuffer(bufferId);
-        });
-        
-        addListener(socket, 'requestMergeBuffersPermanently', function(bufferId1, bufferId2) {
-            quassel.requestMergeBuffersPermanently(bufferId1, bufferId2);
-        });
-        
-        addListener(socket, 'requestUpdate', function(ignoreList) {
-            quassel.requestUpdate(ignoreList);
-        });
-        
-        addListener(socket, 'markBufferAsRead', function(bufferId, lastMessageId) {
-            quassel.requestSetLastMsgRead(bufferId, lastMessageId);
-            quassel.requestMarkBufferAsRead(bufferId);
-            quassel.requestSetMarkerLine(bufferId, lastMessageId);
-        });
-
-        quassel.on('init', function() {
-            // Internal lib use, send NetworkCollection (empty) object
-            var networks = quassel.getNetworks();
-            socket.emit('_init', networks);
-        });
-
-        quassel.on('network.init', function(networkId) {
-            var networks = quassel.getNetworks();
-            var network = networks.get(networkId);
-            // Internal lib use, send Network object
-            socket.emit('network._init', networkId, network);
-            // Keep in sync NetworkCollection object
-            ee = O(network);
-            ee.on('change', function(op) {
-                socket.emit.call(socket, 'change', networkId, patch(op));
-            });
-            /*
-            jsonpatch.observe(network, function(op) {
-                socket.emit.call(socket, 'change', networkId, op);
-            });*/
-            socket.emit('network.init', networkId);
-        });
-        
-        quassel.on('loginfailed', function() {
-            disconnected();
-        });
-        
-        quassel.on('**', function() {
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift(this.event);
-            if (this.event !== 'register' && this.event !== 'network.init' && registerEvents.indexOf(this.event) !== -1) {
-                setTimeout(function() {
-                    socket.emit.apply(socket, args);
-                }, 10);
-            }
-        });
-
-        quassel.connect();
-    });
-
-    socket.on('disconnect', function() {
-        disconnected();
-    });
-
-    socket.emit('connected');
 });
 
 module.exports = app;

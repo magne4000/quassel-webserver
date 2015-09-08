@@ -83,7 +83,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .modal-footer
           button.btn(ng-click="cancelIgnoreList()") Cancel
           button.btn.btn-default(ng-click="saveIgnoreList()") Save
-      #container(ng-controller="SocketController", ng-class="{connecting: connecting, disconnected: disconnected}")
+      #container(ng-controller="QuasselController", ng-class="{connecting: connecting, disconnected: disconnected}")
         #header.dropdown(dropdown)
           span.quassel-logo
           span Quassel Web App
@@ -118,7 +118,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   .form-group
                     label(for='password') Password
                     input#password.form-control(type='password', ng-model="$parent.password")
-                  button.btn.btn-primary.btn-connect(type='submit', ng-disabled="!firstconnected || disconnected", disabled) Connect
+                  button.btn.btn-primary.btn-connect(type='submit') Connect
             .col-md-3
         
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
@@ -208,15 +208,12 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src='#{settings.prefixpath}/javascripts/angular.min.js')
       script(src='#{settings.prefixpath}/javascripts/ui-bootstrap-tpls-0.12.0.min.js')
       script(src='#{settings.prefixpath}/javascripts/bootstrap-tokenfield.min.js')
-      script(src='#{settings.prefixpath}/socket.io/socket.io.js')
       script(src='#{settings.prefixpath}/javascripts/favico-0.3.6.min.js')
       script(src='#{settings.prefixpath}/javascripts/ngSocket.js')
-      script(src='#{settings.prefixpath}/javascripts/events.js')
       script(src='#{settings.prefixpath}/javascripts/angular-sanitize.js')
       script(src='#{settings.prefixpath}/javascripts/angular-dnd.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular-notify.min.js')
       script(src='#{settings.prefixpath}/javascripts/libquassel.js')
-      script(src='#{settings.prefixpath}/javascripts/json-patch.js')
       script(src='#{settings.prefixpath}/javascripts/angular-init.js')
       script(src='#{settings.prefixpath}/javascripts/angular-directive.js')
       script(src='#{settings.prefixpath}/javascripts/angular-filter.js')

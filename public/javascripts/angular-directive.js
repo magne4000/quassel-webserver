@@ -344,7 +344,7 @@ angular.module('quassel')
         }
     };
 }])
-.directive('backlog', ['$timeout', '$compile', '$socket', function (timeout, $compile, $socket) {
+.directive('backlog', ['$timeout', '$compile', '$quassel', function (timeout, $compile, $quassel) {
     return {
         scope: {
             backlog: "=",
@@ -384,7 +384,7 @@ angular.module('quassel')
                 tryLaunchHandler();
             });
             
-            $socket.on('buffer.backlog', function(bufferId, messageIds) {
+            $quassel.on('buffer.backlog', function(bufferId, messageIds) {
                 if (scope.buffer !== null && bufferId == scope.buffer.id) {
                     timeout(function () {
                         element[0].scrollTop = element[0].scrollHeight - lastBottom;

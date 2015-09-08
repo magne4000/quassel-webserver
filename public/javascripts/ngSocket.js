@@ -13,55 +13,67 @@
 (function () {
   'use strict';
 
-  angular.module('ngSocket', [])
-    .provider('$socket', socketProvider);
+  angular.module('ngQuassel', []).provider('$quassel', socketProvider);
 
   function socketProvider() {
-    var url = '';
-    var options;
-
-    this.setUrl = setUrl;
-    this.getUrl = getUrl;
-    this.setOptions = setOptions;
+    var Quassel = require('quassel');
+    
     this.$get = [socketFactory];
 
-    function setUrl(value) {
-      url = value;
-    }
-
-    function getUrl() {
-      return url;
-    }
-    
-    function setOptions(value) {
-      options = value;
-    }
-
     function socketFactory() {
-      var socket;
-
+      this.quassel = null;
+      this.server = '';
+      this.port = '';
+      this.login = '';
+      this.password = '';
+      var self = this;
+      
       var service = {
         addListener: addListener,
         on: addListener,
         once: addListenerOnce,
         removeListener: removeListener,
         removeAllListeners: removeAllListeners,
-        emit: emit
+        emit: emit,
+        setServer: setServer,
+        'get': getQuassel,
+        markBufferAsRead: markBufferAsRead,
+        moreBacklogs: moreBacklogs,
+        sendMessage: sendMessage,
+        requestDisconnectNetwork: requestDisconnectNetwork,
+        requestConnectNetwork: requestConnectNetwork,
+        requestRemoveBuffer: requestRemoveBuffer,
+        requestMergeBuffersPermanently: requestMergeBuffersPermanently,
+        requestUpdate: requestUpdate
       };
 
       return service;
+      
+      function setServer(_server, _port, _login, _password) {
+        self.server = _server;
+        self.port = _port;
+        self.login = _login;
+        self.password = _password;
+        self.quassel.server = self.server;
+        self.quassel.port = self.port;
+      }
+      
+      function getQuassel() {
+        return self.quassel;
+      }
+      
       ////////////////////////////////
 
       function initializeSocket() {
         //Check if socket is undefined
-        if (typeof socket === 'undefined') {
-          if (typeof options !== 'undefined') {
-            socket = io(url, options);
-          }else if (typeof url !== 'undefined') {
-            socket = io.connect(url);
-          } else {
-            socket = io.connect();
-          }
+        if (self.quassel === null) {
+          self.quassel = new Quassel(self.server, self.port, {
+              nobacklogs: 0,
+              backloglimit: 50,
+              unsecurecore: true // tls-browserify module doesn't respect tls API of nodejs
+          }, function(next) {
+              next(self.login, self.password);
+          });
         }
       }
 
@@ -69,7 +81,7 @@
         return function () {
           if (callback) {
             var args = arguments;
-              callback.apply(socket, args);
+            callback.apply(self.quassel, args);
           }
         };
       }
@@ -82,7 +94,7 @@
           callback = arguments[1];
         }
 
-        socket.on(name, angularCallback(callback));
+        self.quassel.on(name, angularCallback(callback));
 
         if (scope !== null) {
           scope.$on('$destroy', function () {
@@ -93,26 +105,60 @@
 
       function addListenerOnce(name, callback) {
         initializeSocket();
-        socket.once(name, angularCallback(callback));
+        self.quassel.once(name, angularCallback(callback));
       }
 
       function removeListener(name, callback) {
         initializeSocket();
-        socket.removeListener(name, angularCallback(callback));
+        self.quassel.removeListener(name, angularCallback(callback));
       }
 
       function removeAllListeners(name) {
         initializeSocket();
-        socket.removeAllListeners(name);
+        self.quassel.removeAllListeners(name);
       }
 
       function emit(name, data, callback) {
         initializeSocket();
         if (typeof callback === 'function') {
-            socket.emit(name, data, angularCallback(callback));
+            self.quassel.emit(name, data, angularCallback(callback));
         } else {
-            socket.emit.apply(socket, Array.prototype.slice.call(arguments));
+            self.quassel.emit.apply(self.quassel, Array.prototype.slice.call(arguments));
         }
+      }
+      
+      function markBufferAsRead(bufferId, lastMessageId) {
+        self.quassel.requestSetLastMsgRead(bufferId, lastMessageId);
+        self.quassel.requestMarkBufferAsRead(bufferId);
+        self.quassel.requestSetMarkerLine(bufferId, lastMessageId);
+      }
+      
+      function moreBacklogs(bufferId, firstMessageId) {
+        self.quassel.requestBacklog(bufferId, -1, firstMessageId, 50);
+      }
+      
+      function sendMessage(bufferId, message) {
+        self.quassel.sendMessage(bufferId, message);
+      }
+      
+      function requestDisconnectNetwork(networkId) {
+        self.quassel.requestDisconnectNetwork(networkId);
+      }
+      
+      function requestConnectNetwork(networkId) {
+        self.quassel.requestConnectNetwork(networkId);
+      }
+      
+      function requestRemoveBuffer(bufferId) {
+        self.quassel.requestRemoveBuffer(bufferId);
+      }
+      
+      function requestMergeBuffersPermanently(bufferId1, bufferId2) {
+        self.quassel.requestMergeBuffersPermanently(bufferId1, bufferId2);
+      }
+      
+      function requestUpdate(ignoreList) {
+        self.quassel.requestUpdate(ignoreList);
       }
     }
   }

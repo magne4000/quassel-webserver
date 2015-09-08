@@ -1,23 +1,5 @@
-angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
-.config(["$socketProvider", function ($socketProvider) {
-    $socketProvider.setOptions({
-        timeout: 6000,
-        reconnectionAttempts: 5,
-        path: location.pathname + 'socket.io'
-    });
-}])
-.factory('$networks', function(){
-    var networks = null;
-    return {
-        get: function() {
-            return networks;
-        },
-        set: function(obj) {
-            networks = obj;
-        }
-    };
-})
-.factory('$ignore', ['$socket', function($socket){
+angular.module('quassel', ['ngQuassel', 'ngSanitize', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
+.factory('$ignore', ['$quassel', function($quassel){
     var IgnoreList = require('ignore').IgnoreList;
     var IgnoreItem = require('ignore').IgnoreItem;
     var ignoreList = new IgnoreList();
@@ -50,7 +32,7 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
         },
         save: function() {
             savedIgnoreList = angular.copy(ignoreList);
-            $socket.emit('requestUpdate', ignoreList.export());
+            $quassel.requestUpdate(ignoreList.export());
         }
     };
 }])
@@ -72,21 +54,6 @@ angular.module('quassel', ['ngSocket', 'ngSanitize', 'er', 'ui.bootstrap', 'drag
             return JSON.parse(localStorage.getItem(key));
         }
     };
-}])    
-.factory('$reviver', [function(){
-    var NetworkCollection = require('network').NetworkCollection;
-    var Network = require('network').Network;
-    var IRCMessage = require('message').IRCMessage;
-    var IRCBufferCollection = require('buffer').IRCBufferCollection;
-    var IRCBuffer = require('buffer').IRCBuffer;
-    var IRCUser = require('user');
-    var HashMap = require('serialized-hashmap');
-    var Reviver = require('serializer').Reviver;
-    var IgnoreList = require('ignore').IgnoreList;
-    var IgnoreItem = require('ignore').IgnoreItem;
-    var reviver = new Reviver(NetworkCollection, Network, IRCBufferCollection, IRCBuffer, IRCUser, HashMap, IRCMessage, IgnoreList, IgnoreItem);
-    
-    return reviver;
 }])
 .factory('$favico', [function() {
     var num = 0;
