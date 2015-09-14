@@ -331,16 +331,21 @@ angular.module('quassel')
 .directive('scrollme', [function () {
     var parent = $("ul.backlog")[0];
     var promise = null;
+    var heightsum = 0;
     return {
         link: function (scope, element, attr) {
             clearTimeout(promise);
-            promise = setTimeout(function(){
-                if (!element.is(':hidden')) {
-                    if (parent.offsetHeight + parent.scrollTop + element.height() + 10 >= parent.scrollHeight) {
-                        parent.scrollTop = parent.scrollHeight;
+            if (element.is(':last-child')) {
+                heightsum += element.height();
+                promise = setTimeout(function(){
+                    if (!element.is(':hidden')) {
+                        if (parent.offsetHeight + parent.scrollTop + heightsum + 10 >= parent.scrollHeight) {
+                            parent.scrollTop = parent.scrollHeight;
+                            heightsum = 0;
+                        }
                     }
-                }
-            }, 50);
+                }, 50);
+            }
         }
     };
 }])
@@ -356,6 +361,7 @@ angular.module('quassel')
             var lengthThreshold = attr.scrollThreshold || 20;
             var handler = scope.backlog;
             var promiseFetching = null;
+            var promiseScroll = null;
             var lastScrolled = -9999;
             var lastBottom = 0;
             scope.fetching = false;
@@ -387,12 +393,13 @@ angular.module('quassel')
             $quassel.on('buffer.backlog', function(bufferId, messageIds) {
                 if (scope.buffer !== null && bufferId == scope.buffer.id) {
                     timeout(function () {
-                        element[0].scrollTop = element[0].scrollHeight - lastBottom;
-                        if (element[0].scrollTop < lengthThreshold) {
-                            // If no scrollbar (or scrollTop to small), load more backlogs
-                            launchHandler();
-                        }
-                    }, 10);
+                        timeout(function () { // Wait for 2 ticks
+                            element[0].scrollTop = element[0].scrollHeight - lastBottom;
+                            if (element[0].scrollTop < lengthThreshold) {
+                                launchHandler();
+                            }
+                        }, 5);
+                    }, 5);
                 }
                 if (promiseFetching !== null) timeout.cancel(promiseFetching);
                 scope.fetching = false;
@@ -401,7 +408,6 @@ angular.module('quassel')
             function tryLaunchHandler() {
                 if (promiseFetching !== null) timeout.cancel(promiseFetching);
                 scope.fetching = false;
-                lastBottom = 0;
                 timeout(function () {
                     element[0].scrollTop = element[0].scrollHeight;
                     if (element[0].scrollTop < lengthThreshold) {
@@ -412,7 +418,7 @@ angular.module('quassel')
             
             function launchHandler() {
                 if (!scope.fetching) {
-                    lastBottom = element[0].scrollHeight;
+                    lastBottom = element[0].scrollHeight - element[0].scrollTop;
                 }
                 timeout(function () {
                     if (handler() === true) {
@@ -423,12 +429,15 @@ angular.module('quassel')
             }
 
             element.bind('scroll', function(){
-                var scrolled = element[0].scrollTop;
-                // if we have reached the threshold and we scroll up
-                if (scrolled < lengthThreshold && (scrolled - lastScrolled) < 0) {
-                    launchHandler();
-                }
-                lastScrolled = scrolled;
+                if (promiseScroll !== null) timeout.cancel(promiseScroll);
+                promiseScroll = timeout(function () {
+                    var scrolled = element[0].scrollTop;
+                    // if we have reached the threshold and we scroll up
+                    if (scrolled < lengthThreshold && (scrolled - lastScrolled) < 0) {
+                        launchHandler();
+                    }
+                    lastScrolled = scrolled;
+                }, 10);
             });
         }
     };
