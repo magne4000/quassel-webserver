@@ -7,5 +7,6 @@ module.exports = {
     },
     forcedefault: false,
     prefixpath: '',
+    unsecurecore: false,
     theme: 'default'
 };

@@ -12,8 +12,12 @@ html(ng-app="quassel", ng-controller="ConfigController")
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/bootstrap.min.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/fonts.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/theme-#{settings.theme}.css', default-theme="#{settings.theme}", theme)
-      
     body.login-page
+      script(type="text/javascript").
+        quasselconf = {};
+        quasselconf.initialBacklogLimit = #{settings.default.initialBacklogLimit};
+        quasselconf.backlogLimit = #{settings.default.backlogLimit};
+        quasselconf.unsecurecore = #{settings.unsecurecore};
       script(type="text/ng-template", id="modalJoinChannel.html")
         .modal-header
           button.close(type='button', ng-click='cancel()') ×

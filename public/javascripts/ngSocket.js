@@ -68,9 +68,9 @@
         //Check if socket is undefined
         if (self.quassel === null) {
           self.quassel = new Quassel(self.server, self.port, {
-              nobacklogs: 0,
-              backloglimit: 50,
-              unsecurecore: true // tls-browserify module doesn't respect tls API of nodejs
+              nobacklogs: quasselconf.initialBacklogLimit || 0,
+              backloglimit: quasselconf.backlogLimit || 50,
+              unsecurecore: quasselconf.unsecurecore || false // tls-browserify module doesn't respect tls API of nodejs
           }, function(next) {
               next(self.login, self.password);
           });
