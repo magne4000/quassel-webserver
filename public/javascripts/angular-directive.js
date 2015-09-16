@@ -167,12 +167,10 @@ angular.module('quassel')
 .directive('ircMarkerline', function ($parse) {
     var lastElement = null;
     return {
-        restrict: 'E',
         link: function (scope, element, attrs) {
             if (lastElement !== null) lastElement.remove();
             lastElement = element;
-        },
-        template: '<li class="markerline irc-message"><span></span><span></span><span></span><span></span><span></span></li>'
+        }
     };
 })
 .directive('highlightContainer', function ($parse) {

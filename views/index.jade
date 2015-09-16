@@ -180,7 +180,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
               ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
                 li.irc-message(
                       scrollme
-                      ng-repeat="message in messages track by message.sid"
+                      ng-repeat-start="message in messages track by message.sid"
                       class="type-{{::message.type}}"
                       ng-class="{highlighted: message.isHighlighted()}"
                       ng-if="!currentFilter2[message.type]"
@@ -191,7 +191,12 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   span.nick(data-nickhash="{{message.type == 1 ? message.sender : '' | hash}}") {{::message | decoratenick}}
                   span.hiddenforcopy > 
                   irc-message.message(message="::message")
-                irc-markerline(ng-if="buffer.markerline == message.id")
+                li.markerline.irc-message(irc-markerline, ng-if="buffer.markerline == message.id", ng-repeat-end)
+                  span
+                  span
+                  span
+                  span
+                  span
               .input(ng-controller="InputController")
                 form#messageform(ng-submit="sendMessage()")
                   input#messagebox(type='text', ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)
