@@ -1,7 +1,7 @@
 {
   "name": "quassel-webserver",
   "description": "Quassel web interface",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/magne4000/quassel-webserver",
   "author": {
     "name": "Joël Charles",
@@ -41,7 +41,7 @@
     "less-middleware": "~2.0.1",
     "libquassel": "*",
     "morgan": "~1.5.1",
-    "net-browserify": "^0.2.1",
+    "net-browserify": "git@github.com:magne4000/net-browserify.git",
     "nomnom": "~1.8.1",
     "serve-favicon": "~2.2.0"
   },

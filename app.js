@@ -35,11 +35,6 @@ var opts = require("nomnom")
         choices: ['http', 'https'],
         help: 'Use HTTP or HTTPS'
     })
-    .option('unsecurecore', {
-        abbr: 'u',
-        flag: true,
-        help: 'Connect to the core without using SSL'
-    })
     .parse();
 
 var app = express();
@@ -76,12 +71,6 @@ if (opts.mode === 'http'){
     if (opts.port === null) opts.port = 64443;
 }
 
-var nboptions = {server: server};
-if (settings.forcedefault) {
-    nboptions.to = [{host: settings.default.host, port: settings.default.port}];
-}
-app.use(netBrowserify(nboptions));
-
 if (opts.listen === null) opts.listen = process.env.HOST || '';
 
 // check that prefixpath do not contains ../, and it starts with / if not empty
@@ -95,6 +84,15 @@ if (settings.prefixpath.length > 0) {
         process.exit(4);
     }
 }
+
+var nboptions = {
+    server: server,
+    urlRoot: settings.prefixpath + '/p'
+};
+if (settings.forcedefault) {
+    nboptions.to = [{host: settings.default.host, port: settings.default.port}];
+}
+app.use(netBrowserify(nboptions));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
