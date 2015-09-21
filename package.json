@@ -41,7 +41,7 @@
     "less-middleware": "~2.0.1",
     "libquassel": "*",
     "morgan": "~1.5.1",
-    "net-browserify": "git@github.com:magne4000/net-browserify.git",
+    "net-browserify": "git://github.com/magne4000/net-browserify",
     "nomnom": "~1.8.1",
     "serve-favicon": "~2.2.0"
   },
