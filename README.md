@@ -53,12 +53,29 @@ You can generate a new self signed certificate with the following command:
 ```
 openssl req -x509 -newkey rsa:2048 -keyout ssl/key.pem -out ssl/cert.pem -nodes
 ```
-#### Init script
+
+### Init script
 You can use a startup script to the app at system startup.
 ```
 cp scripts/startup /etc/init.d/quasselweb
 ```
 and then edit the file /etc/init.d/quasselweb and change `BASEDIR`, `RUNASUSER` and `RUNASGROUP` vars.
+
+### Reverse proxy snippets
+#### nginx
+```nginx
+# rewrite ^[/]quassel$ /quassel/ permanent;
+location /quassel {
+    proxy_pass http://127.0.0.1:64080/quassel;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_http_version 1.1;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_redirect off;
+}
+```
 
 ## License
 Copyright (c) 2014-2015 Joël Charles  
