@@ -69,7 +69,7 @@
         if (self.quassel === null) {
           var net = require('net');
           net.setProxy({
-              url: window.location.pathname + 'p',
+              path: window.location.pathname + 'p',
           });
           self.quassel = new Quassel(self.server, self.port, {
               nobacklogs: quasselconf.initialBacklogLimit || 0,
