@@ -14,8 +14,7 @@ angular.module('quassel')
     
     var MT = require('message').Type;
     var dateFormat;
-    var isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
-    if (!isSafari && Intl && Intl.DateTimeFormat) {
+    if (typeof Intl != "undefined" && Intl.DateTimeFormat) {
         dateFormat = new Intl.DateTimeFormat(undefined, {weekday: "long", year: "numeric", month: "long", day: "numeric"});
     } else {
         dateFormat = {
