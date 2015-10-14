@@ -109,10 +109,10 @@ html(ng-app="quassel", ng-controller="ConfigController")
                 alert(ng-if="alert != ''", ng-cloak) {{alert}}
                 form#logonform(role='form', ng-submit="login()")
                   h1 Connect to Quassel Core
-                  .form-group(ng-hide='#{settings.forcedefault}')
+                  .form-group(ng-cloak, ng-hide='#{settings.forcedefault}')
                     label(for='host') Server address
                     input#host.form-control(type='text', value='#{settings.default.host}', ng-model="$parent.host")
-                  .form-group(ng-hide='#{settings.forcedefault}')
+                  .form-group(ng-cloak, ng-hide='#{settings.forcedefault}')
                     label(for='port') Server port
                     input#port.form-control(type='text', value='#{settings.default.port}', ng-model="$parent.port")
                   .form-group
@@ -217,7 +217,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src='#{settings.prefixpath}/javascripts/ui-bootstrap-tpls-0.12.0.min.js')
       script(src='#{settings.prefixpath}/javascripts/bootstrap-tokenfield.min.js')
       script(src='#{settings.prefixpath}/javascripts/favico-0.3.6.min.js')
-      script(src='#{settings.prefixpath}/javascripts/ngSocket.js')
+      script(src='#{settings.prefixpath}/javascripts/ng-quassel.js')
       script(src='#{settings.prefixpath}/javascripts/angular-sanitize.js')
       script(src='#{settings.prefixpath}/javascripts/angular-dnd.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular-notify.min.js')

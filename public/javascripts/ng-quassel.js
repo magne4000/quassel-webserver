@@ -10,6 +10,9 @@
 
 // Module for provide Socket.io support
 
+/* global quasselconf */
+/* global angular */
+
 (function () {
   'use strict';
 
@@ -26,6 +29,8 @@
       this.port = '';
       this.login = '';
       this.password = '';
+      this.ws = null;
+      this._ws_cb = [];
       var self = this;
       
       var service = {
@@ -44,7 +49,10 @@
         requestConnectNetwork: requestConnectNetwork,
         requestRemoveBuffer: requestRemoveBuffer,
         requestMergeBuffersPermanently: requestMergeBuffersPermanently,
-        requestUpdate: requestUpdate
+        requestUpdate: requestUpdate,
+        connect: connect,
+        disconnect: disconnect,
+        login: login
       };
 
       return service;
@@ -77,6 +85,13 @@
               unsecurecore: quasselconf.unsecurecore || false // tls-browserify module doesn't respect tls API of nodejs
           }, function(next) {
               next(self.login, self.password);
+              var istls = !quasselconf.unsecurecore;
+              if (istls) {
+                self.ws = self.quassel.qtsocket.socket._socket._ws;
+              } else {
+                self.ws = self.quassel.qtsocket.socket._ws;
+              }
+              triggerWebsocketBindings();
           });
         }
       }
@@ -97,12 +112,17 @@
           scope = null;
           callback = arguments[1];
         }
-
-        self.quassel.on(name, angularCallback(callback));
+        
+        if (name.substr(0, 3) == "ws.") {
+          self._ws_cb.push({name: name.substr(3), callback: callback, active: false});
+          triggerWebsocketBindings();
+        } else {
+          self.quassel.on(name, angularCallback(callback));
+        }
 
         if (scope !== null) {
           scope.$on('$destroy', function () {
-            removeListener(name, callback);
+            removeListener(name);
           });
         }
       }
@@ -112,9 +132,13 @@
         self.quassel.once(name, angularCallback(callback));
       }
 
-      function removeListener(name, callback) {
+      function removeListener(name) {
         initializeSocket();
-        self.quassel.removeListener(name, angularCallback(callback));
+        if (name.substr(0, 3) == "ws.") {
+          self.ws.removeEventListener(name.substr(3));
+        } else {
+          self.quassel.removeListener(name);
+        }
       }
 
       function removeAllListeners(name) {
@@ -163,6 +187,30 @@
       
       function requestUpdate(ignoreList) {
         self.quassel.requestUpdate(ignoreList);
+      }
+      
+      function connect() {
+        self.quassel.connect();
+      }
+      
+      function disconnect() {
+        self.quassel.disconnect();
+      }
+      
+      function login() {
+        self.quassel.login();
+      }
+      
+      function triggerWebsocketBindings() {
+        if (self.ws !== null) {
+          var i = 0;
+          for (; i<self._ws_cb.length; i++) {
+            if (self._ws_cb[i].active === false) {
+              self.ws.addEventListener(self._ws_cb[i].name, self._ws_cb[i].callback);
+              self._ws_cb[i].active = true;
+            }
+          }
+        }
       }
     }
   }

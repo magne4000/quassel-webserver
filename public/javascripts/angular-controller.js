@@ -410,7 +410,6 @@ angular.module('quassel')
 .controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', function($scope, $quassel, $timeout, $window, $alert) {
     $scope.disconnected = false;
     $scope.connecting = false;
-    $scope.firstconnected = false;
     $scope.logged = false;
     $scope.host = "";
     $scope.port = "";
@@ -470,6 +469,15 @@ angular.module('quassel')
         });
     });
     */
+    $quassel.on('ws.close', function() {
+        console.log('DISCONNECTED');
+        $quassel.disconnect();
+        $scope.$apply(function(){
+            $scope.connecting = false;
+            $scope.disconnected = true;
+        });
+    });
+    
     $quassel.on('loginfailed', function() {
         console.log('loginfailed');
         $scope.$apply(function(){
@@ -513,7 +521,7 @@ angular.module('quassel')
     
     $scope.login = function(){
         $quassel.setServer($scope.host, $scope.port, $scope.user, $scope.password);
-        $quassel.get().connect();
+        $quassel.connect();
         console.log('Connecting to quasselcore');
     };
 }])
