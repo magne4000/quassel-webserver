@@ -1,4 +1,4 @@
-angular.module('quassel', ['ngQuassel', 'ngSanitize', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
+angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
 .factory('$ignore', ['$quassel', function($quassel){
     var IgnoreList = require('ignore').IgnoreList;
     var IgnoreItem = require('ignore').IgnoreItem;
