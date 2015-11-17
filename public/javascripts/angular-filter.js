@@ -97,6 +97,7 @@ angular.module('quassel')
         },
         i = 0,
         match;
+        input = input || '';
     
         var openSpan = function (classes) {
             nbSpan += 1;
