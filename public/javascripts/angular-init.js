@@ -41,8 +41,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     var keys = {};
     
     return {
-        set: function(key, val) {
-            localStorage.setItem(key, JSON.stringify(val));
+        set: function(key, val, raw) {
+            localStorage.setItem(key, raw ? val : JSON.stringify(val));
             if (keys[key]) {
                 for (var x in keys[key]) {
                     keys[key][x](val);
@@ -50,8 +50,10 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             }
             $rootScope.$emit('config.'+key, val);
         },
-        get: function(key) {
-            return JSON.parse(localStorage.getItem(key));
+        get: function(key, defval, raw) {
+            var myitem = localStorage.getItem(key);
+            if (myitem === null) return defval;
+            return raw ? myitem : JSON.parse(myitem);
         }
     };
 }])

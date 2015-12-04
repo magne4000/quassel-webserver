@@ -339,7 +339,7 @@ angular.module('quassel')
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
     $scope.displayIgnoreList = false;
-    var modal, activeIndice = 0;
+    var modal, activeIndice = 0, dbg = require("debug");
     
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
@@ -366,7 +366,18 @@ angular.module('quassel')
         if (arguments.length > 0) {
             $config.set('displayfullhostmask', newValue);
         }
-        return $config.get('displayfullhostmask');
+        return $config.get('displayfullhostmask', false);
+    };
+    
+    $scope.gsdebug = function(newValue) {
+        if (arguments.length > 0) {
+            if (newValue) {
+                dbg.enable("*");
+            } else {
+                dbg.disable();
+            }
+        }
+        return $config.get('debug', false, true) ? true : false;
     };
     
     $scope.configGeneral = function() {
