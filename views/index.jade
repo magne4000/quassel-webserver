@@ -203,7 +203,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   span
               .input(ng-controller="InputController")
                 form#messageform(ng-submit="sendMessage()")
-                  input#messagebox(type='text', ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)
+                  input#messagebox(type='text', autocomplete='off' ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)
             #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
               .buffer-container
                 .user(ng-repeat="user in buffer.nickUserMap | ordernicks:buffer track by user.nick")
