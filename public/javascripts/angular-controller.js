@@ -637,7 +637,7 @@ angular.module('quassel')
     };
     
     $scope.sendMessage = function() {
-        if (typeof $scope.buffer.id === "number" && $scope.inputmessage.length > 0) {
+        if (typeof $scope.buffer !== 'undefined' && typeof $scope.buffer.id === "number" && $scope.inputmessage.length > 0) {
             $scope.clearMessageHistory($scope.buffer.id);
             $quassel.sendMessage($scope.buffer.id, $scope.inputmessage);
             $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
