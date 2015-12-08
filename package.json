@@ -1,7 +1,7 @@
 {
   "name": "quassel-webserver",
   "description": "Quassel web interface",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "homepage": "https://github.com/magne4000/quassel-webserver",
   "author": {
     "name": "Joël Charles",

@@ -1,3 +1,6 @@
+/* global quasselconf */
+/* global angular */
+
 angular.module('quassel')
 .controller('NetworkController',
         ['$scope', '$quassel', '$modal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore',
@@ -10,6 +13,7 @@ angular.module('quassel')
     var MF = require('message').Flag;
     var IRCMessage = require('message').IRCMessage;
     var loadingMoreBacklogs = [];
+    var initialLastSeenList = [];
     
     function createDayChangeMessage(msg, timestamp) {
         var message = new IRCMessage({
@@ -110,6 +114,11 @@ angular.module('quassel')
                 updateMessages();
             }
         }
+        if (typeof initialLastSeenList[bufferId] !== 'undefined') {
+            // Call lastseen again after backlogs are received the first time
+            $quassel.emit('buffer.lastseen', bufferId, initialLastSeenList[bufferId]);
+            delete initialLastSeenList[bufferId];
+        }
     });
     
     function setHighlight(buffer, value) {
@@ -143,6 +152,9 @@ angular.module('quassel')
             }
             
             var bufferLastMessage = buffer.getLastMessage();
+            if (typeof bufferLastMessage === 'undefined' && quasselconf.initialBacklogLimit !== 0) {
+                initialLastSeenList[bufferId] = messageId;
+            }
             if (typeof bufferLastMessage !== 'undefined' && messageId < bufferLastMessage.id) {
                 var found = buffer.messages.forEach(function(val, key){
                     if (key > messageId) {

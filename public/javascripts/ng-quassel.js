@@ -80,7 +80,8 @@
               path: window.location.pathname + 'p',
           });
           self.quassel = new Quassel(self.server, self.port, {
-              nobacklogs: quasselconf.initialBacklogLimit || 0,
+              nobacklogs: quasselconf.initialBacklogLimit === 0,
+              initialbackloglimit: quasselconf.initialBacklogLimit || 20,
               backloglimit: quasselconf.backlogLimit || 50,
               unsecurecore: quasselconf.unsecurecore || false // tls-browserify module doesn't respect tls API of nodejs
           }, function(next) {
