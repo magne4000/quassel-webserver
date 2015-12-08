@@ -151,7 +151,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                         class="buffer-highlight-{{channel.highlight}}"
                         ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
                         ng-repeat="channel in network._buffers | channelsFilter track by channel.id"
-                        ng-if="!channel.isHidden()"
+                        ng-if="!channel.isPermanentlyRemoved && !channel.isTemporarilyRemoved"
                         dropdown
                     )
                     span.channel-icon
