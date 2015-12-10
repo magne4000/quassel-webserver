@@ -9,6 +9,13 @@ html(ng-app="quassel", ng-controller="ConfigController")
       meta(name='author', content='Johannes Siipola')
       meta(name="viewport", content="width=device-width, initial-scale=1")
       link(rel='icon', href='favicon.ico')
+      style.
+        [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak, .splash {
+          display: none !important;
+        }
+        .ng-cloak.splash {
+          display: block !important;
+        }
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/bootstrap.min.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/fonts.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/theme-#{settings.theme}.css', default-theme="#{settings.theme}", theme)
@@ -103,10 +110,10 @@ html(ng-app="quassel", ng-controller="ConfigController")
               a(href="#", ng-click="configGeneral()") General Configuration
               a(href="#", ng-click="configTheme()") Change Theme
               a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreList") Ignore List
-          button.btn.btn-default.logout(type="button", ng-if="logged && !disconnected", ng-cloak, ng-click="reload()") Logout
+          button.btn.btn-default.logout(type="button", ng-if="logged && !disconnected", ng-cloak, ng-click="logout()") Logout
           button.btn.btn-default.reconnect(type="button", ng-if="disconnected && !connecting", ng-cloak, ng-click="reload()") Reconnect
         .container.login(ng-if="!logged")
-          .row
+          .row.ng-cloak(ng-class="{'ng-cloak': connecting}")
             .col-md-3
             .col-md-6.row.login-container
                 alert(ng-if="alert != ''", ng-cloak) {{alert}}
@@ -124,9 +131,21 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   .form-group
                     label(for='password') Password
                     input#password.form-control(type='password', ng-model="$parent.password")
+                  .checkbox
+                    label(for='remember')
+                      input#remember(type='checkbox', ng-model="$parent.remember")
+                      | Auto login
                   button.btn.btn-primary.btn-connect(type='submit') Connect
             .col-md-3
-        
+          .row.ng-cloak.splash(ng-class="{'ng-cloak': connecting}")
+            .col-md-3
+            .col-md-6
+              p.lead.ng-cloak(ng-if="connecting") Connecting
+              p.lead(ng-if="!connecting") Loading
+              .progress
+                .progress-bar.progress-bar-striped.active(role='progressbar', aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%")
+                  span.sr-only Loading
+            .col-md-3
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container(highlight-container)

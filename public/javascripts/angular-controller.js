@@ -430,14 +430,15 @@ angular.module('quassel')
         });
     });
 }])
-.controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', function($scope, $quassel, $timeout, $window, $alert) {
+.controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', '$config', function($scope, $quassel, $timeout, $window, $alert, $config) {
     $scope.disconnected = false;
     $scope.connecting = false;
     $scope.logged = false;
-    $scope.host = "";
-    $scope.port = "";
-    $scope.user = "";
-    $scope.password = "";
+    $scope.remember = $config.get('remember') || false;
+    $scope.host = $scope.remember ? $config.get('host') || "" : "";
+    $scope.port = $scope.remember ? $config.get('port') || "" : "";
+    $scope.user = $config.get('user') || "";
+    $scope.password = $config.get('password') || "";
     $scope.alert = "";
     
     $scope.$watch('alert', function(newValue, oldValue) {
@@ -447,6 +448,15 @@ angular.module('quassel')
             }, 8000);
         }
     });
+    
+    $scope.$watch('remember', function(newValue, oldValue) {
+        $config.set('remember', newValue);
+        if (!newValue) {
+            $config.del('host');
+            $config.del('port');
+        }
+    });
+    
     /*
     $socket.on('_error', function(e) {
         console.log(e);
@@ -504,6 +514,7 @@ angular.module('quassel')
     $quassel.on('loginfailed', function() {
         console.log('loginfailed');
         $scope.$apply(function(){
+            $scope.connecting = false;
             $scope.alert = "Invalid username or password.";
         });
     });
@@ -511,6 +522,7 @@ angular.module('quassel')
     $quassel.on('login', function() {
         console.log('Logged in');
         $scope.$apply(function(){
+            $scope.connecting = false;
             $scope.logged = true;
         });
     });
@@ -542,11 +554,27 @@ angular.module('quassel')
         $window.location.reload();
     };
     
+    $scope.logout = function(){
+        $scope.remember = false;
+        $scope.reload();
+    };
+    
     $scope.login = function(){
+        $scope.connecting = true;
         $quassel.setServer($scope.host, $scope.port, $scope.user, $scope.password);
         $quassel.connect();
+        if ($scope.remember) {
+            $config.set('user', $scope.user);
+            $config.set('password', $scope.password);
+            $config.set('host', $scope.host);
+            $config.set('port', $scope.port);
+        }
         console.log('Connecting to quasselcore');
     };
+    
+    if ($scope.remember && $scope.user && $scope.password) {
+        $scope.login();
+    }
 }])
 .controller('InputController', ['$scope', '$quassel', function($scope, $quassel) {
     var messagesHistory = [];

@@ -50,6 +50,9 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             }
             $rootScope.$emit('config.'+key, val);
         },
+        del: function(key) {
+            localStorage.removeItem(key);
+        },
         get: function(key, defval, raw) {
             var myitem = localStorage.getItem(key);
             if (myitem === null) return defval;
