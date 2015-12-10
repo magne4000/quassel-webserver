@@ -166,7 +166,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       li(ng-if="!channel.active || !channel.isChannel()")
                         a(href="#", ng-confirm-click="Are you sure you want to delete this buffer permanently ?", ng-ok-click="channelDelete(channel)") Delete
               .buffer-bottom-bar
-                a.showhide.right(href="#", ng-click="shown = !shown")
+                a.showhide.right(href="javascript:void(0)", ng-click="shown = !shown")
             #center.animation(ng-controller="FilterController")
               .topic
                 #topic {{buffer.topic}}
@@ -213,7 +213,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                   span.user-name(ng-class="{'user-op': buffer.isOp(user.nick), 'user-voiced': buffer.isVoiced(user.nick)}") {{user.nick}}
               .buffer-bottom-bar
-                a.showhide.left(href="#", ng-click="shown2 = !shown2")
+                a.showhide.left(href="javascript:void(0)", ng-click="shown2 = !shown2")
 
       script(src='#{settings.prefixpath}/javascripts/jquery-2.1.3.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular.min.js')
