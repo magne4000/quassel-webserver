@@ -216,6 +216,21 @@ angular.module('quassel')
 .directive('caret', function() {
     var MT = require('message').Type;
     
+    function uniq(a) {
+        var seen = {};
+        var out = [];
+        var len = a.length;
+        var j = 0;
+        for (var i = 0; i < len; i++) {
+             var item = a[i];
+             if (seen[item] !== 1) {
+                   seen[item] = 1;
+                   out[j++] = item;
+             }
+        }
+        return out;
+    }
+    
     function setCaretPosition(elem, caretPos) {
         if (elem !== null) {
             if (elem.createTextRange) {
@@ -231,95 +246,122 @@ angular.module('quassel')
             }
         }
     }
+    
+    // Find the most recent nick who has talked.
+    function getMostRecentNick(scope, token) {
+        if (!scope.buffer) return;
+
+        var keys = scope.buffer.messages.keys(), nicks = [];
+        keys.sort();
+        keys.reverse();
+
+        for (var i = 0; i < keys.length; i++) {
+            var messageId = keys[i];
+            var message = scope.buffer.messages.get(messageId);
+
+            // Only check Plain and Action messages for nicks.
+            if (!(message.type == MT.Plain || message.type == MT.Action))
+                continue;
+
+            var nick = message.getNick();
+            if (nick.length <= token.length)
+                continue;
+            
+            if (!(nick in scope.buffer.nickUserMap))
+                continue;
+
+            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length)) {
+                nicks.push(nick);
+            }
+        }
+        return uniq(nicks);
+    }
+    
+    // Find the closet nick alphabetically from the current buffer's nick list.
+    function getNickAlphabetically(scope, token) {
+        if (!scope.buffer) return;
+
+        var subjects = Object.keys(scope.buffer.nickUserMap), nicks = [];
+        subjects.sort(function(a, b) {
+            return a.toLowerCase().localeCompare(b.toLowerCase());
+        });
+
+        for (var i = 0; i < subjects.length; i++) {
+            var nick = subjects[i];
+            if (nick.length <= token.length)
+                continue;
+
+            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length)) {
+                nicks.push(nick);
+            }
+        }
+        return uniq(nicks);
+    }
+    
+    function getTokenCompletion(scope, token, tokenStart) {
+        var nicks = getMostRecentNick(scope, token), pos = 0;
+        if (nicks.length === 0)
+            nicks = getNickAlphabetically(scope, token);
+        if (nicks.length === 0)
+            return null;
+        return function() {
+            var nick = nicks[pos];
+            pos = (pos + 1) % nicks.length;
+            return tokenStart === 0 ? nick + ': ' : nick;
+        };
+    }
 
     return {
         link: function(scope, element, attrs) {
-
+            var lastTokens = null, lastTokenStart = null, lastTokenEnd = null;
+            
+            // Nick completion
+            element.on('blur', function(){
+                lastTokens = null;
+                lastTokenStart = null;
+                lastTokenEnd = null;
+            });
             element.on('keydown', function($event) {
-                if ($event.keyCode == 38) { // Arrow up
+                if ($event.keyCode == 9) { // Tab
                     $event.preventDefault();
-                    scope.showPreviousMessage(scope.buffer.id);
-                } else if ($event.keyCode == 40) { // Arrow down
-                    $event.preventDefault();
-                    scope.showNextMessage(scope.buffer.id);
-                } else if ($event.keyCode == 9) { // Tab
-                    $event.preventDefault();
-                    var tokenEnd = element[0].selectionEnd;
+                    var newTokens = null, tokenStart = null, tokenEnd = null;
                     var message = scope.inputmessage;
-                    var messageLeft = message.substr(0, tokenEnd);
-                    var tokenStart = messageLeft.lastIndexOf(' ');
-                    tokenStart += 1; // -1 (not found) => 0 (start)
-                    var token = messageLeft.substr(tokenStart);
-        
-                    // Find the most recent nick who has talked.
-                    var getMostRecentNick = function(token) {
-                        if (!scope.buffer) return;
-        
-                        var keys = scope.buffer.messages.keys();
-                        keys.sort();
-                        keys.reverse();
-        
-                        for (var i = 0; i < keys.length; i++) {
-                            var messageId = keys[i];
-                            var message = scope.buffer.messages.get(messageId);
-        
-                            // Only check Plain and Action messages for nicks.
-                            if (!(message.type == MT.Plain || message.type == MT.Action))
-                                continue;
-        
-                            var nick = message.getNick();
-                            if (nick.length <= token.length)
-                                continue;
-                            
-                            if (!(nick in scope.buffer.nickUserMap))
-                                continue;
-        
-                            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
-                                return nick;
-                        }
-                    };
-        
-                    // Find the closet nick alphabetically from the current buffer's nick list.
-                    var getNickAlphabetically = function(token) {
-                        if (!scope.buffer) return;
-        
-                        var nicks = Object.keys(scope.buffer.nickUserMap);
-                        nicks.sort(function(a, b) {
-                            return a.toLowerCase().localeCompare(b.toLowerCase());
-                        });
-        
-                        for (var i = 0; i < nicks.length; i++) {
-                            var nick = nicks[i];
-                            if (nick.length <= token.length)
-                                continue;
-        
-                            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length))
-                                return nick;
-                        }
-                    };
+                    var messageLength = message.length;
+                    if (lastTokens !== null) {
+                        newTokens = lastTokens;
+                        tokenStart = lastTokenStart;
+                        tokenEnd = lastTokenEnd;
+                    } else {
+                        tokenEnd = element[0].selectionEnd;
+                        var messageLeft = message.substr(0, tokenEnd);
+                        tokenStart = messageLeft.lastIndexOf(' ') + 1;
+                        var token = messageLeft.substr(tokenStart);
+                        newTokens = getTokenCompletion(scope, token, tokenStart);
+                    }
 
-                    var getTokenCompletion = function(token) {
-                        var nick = getMostRecentNick(token);
-                        if (!nick)
-                            nick = getNickAlphabetically(token);
-                        if (nick) {
-                            if (tokenStart === 0) {
-                                return nick + ': ';
-                            } else {
-                                return nick;
-                            }
-                        }
-                    };
-        
-                    var newToken = getTokenCompletion(token);
-        
-                    if (newToken) {
+                    if (newTokens) {
+                        var newToken = newTokens();
                         var newMessage = message.substr(0, tokenStart) + newToken + message.substr(tokenEnd);
                         scope.$apply(function(){
                             scope.inputmessage = newMessage;
                         });
-                        var newTokenEnd = tokenEnd + newToken.length - token.length;
+                        var newTokenEnd = tokenEnd + newMessage.length - messageLength;
                         setCaretPosition(element[0], newTokenEnd);
+                        
+                        lastTokens = newTokens;
+                        lastTokenStart = tokenStart;
+                        lastTokenEnd = newTokenEnd;
+                    }
+                } else {
+                    lastTokens = null;
+                    lastTokenStart = null;
+                    lastTokenEnd = null;
+                    if ($event.keyCode == 38) { // Arrow up
+                        $event.preventDefault();
+                        scope.showPreviousMessage(scope.buffer.id);
+                    } else if ($event.keyCode == 40) { // Arrow down
+                        $event.preventDefault();
+                        scope.showNextMessage(scope.buffer.id);
                     }
                 }
             });
