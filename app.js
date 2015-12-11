@@ -12,7 +12,7 @@ var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
 var fs = require('fs');
 var debug = require('debug');
-var netBrowserify = require('net-browserify');
+var netBrowserify = require('net-browserify-alt');
 
 var routes = require('./routes/index');
 
@@ -92,7 +92,6 @@ var nboptions = {
 if (settings.forcedefault) {
     nboptions.to = [{host: settings.default.host, port: settings.default.port}];
 }
-app.use(netBrowserify(nboptions));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -117,6 +116,7 @@ if (settings.prefixpath.length > 0) {
 }
 
 app.use(settings.prefixpath+'/', routes);
+netBrowserify(app, nboptions);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -130,24 +130,24 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
+    app.use(function(err, req, res) {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
             error: err
         });
     });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
+} else {
+    // production error handler
+    // no stacktraces leaked to user
+    app.use(function(err, req, res) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: {}
+        });
     });
-});
+}
 
 var loggerqw = debug('quassel-webserver');
 
