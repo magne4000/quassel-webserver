@@ -11,31 +11,18 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
 var fs = require('fs');
-var debug = require('debug');
+var opts = require('commander');
 var netBrowserify = require('net-browserify-alt');
 
 var routes = require('./routes/index');
 
 var settings = require('./lib/utils').settings(true);
-
-var opts = require("nomnom")
-    .option('listen', {
-        abbr: 'l',
-        'default': null,
-        help: 'Listening address'
-    })
-    .option('port', {
-        abbr: 'p',
-        'default': null,
-        help: 'HTTP(S) port to use'
-    })
-    .option('mode', {
-        abbr: 'm',
-        'default': 'https',
-        choices: ['http', 'https'],
-        help: 'Use HTTP or HTTPS'
-    })
-    .parse();
+opts
+  .version('1.1.2')
+  .option('-l, --listen <value>', 'listening address', undefined, null)
+  .option('-p, --port <value>', 'HTTP(S) port to use', parseInt, null)
+  .option('-m, --mode <value>', 'HTTP mode (http|https) [https]', undefined, 'https')
+  .parse(process.argv);
 
 var app = express();
 var server = null;
@@ -149,13 +136,11 @@ if (app.get('env') === 'development') {
     });
 }
 
-var loggerqw = debug('quassel-webserver');
-
 app.set('port', opts.port);
 app.set('host', opts.listen);
 
 server.listen(app.get('port'), app.get('host'), function() {
-    loggerqw('Express server listening on port ' + server.address().port);
+    console.log('Express server listening on port', server.address().port);
 });
 
 module.exports = app;

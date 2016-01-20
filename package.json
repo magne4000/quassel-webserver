@@ -1,8 +1,9 @@
 {
   "name": "quassel-webserver",
   "description": "Quassel web interface",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "homepage": "https://github.com/magne4000/quassel-webserver",
+  "license": "MIT",
   "author": {
     "name": "Joël Charles",
     "email": "joel.charles91@gmail.com"
@@ -33,8 +34,8 @@
   ],
   "dependencies": {
     "body-parser": "~1.14.1",
+    "commander": "^2.9.0",
     "cookie-parser": "~1.4.0",
-    "debug": "~2.2.0",
     "express": "^4.13.3",
     "jade": "~1.11.0",
     "less": "~2.5.3",
@@ -42,7 +43,6 @@
     "libquassel": "*",
     "morgan": "~1.6.1",
     "net-browserify-alt": "^0.6.1",
-    "nomnom": "~1.8.1",
     "serve-favicon": "~2.3.0"
   },
   "optionalDependencies": {
