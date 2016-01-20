@@ -384,7 +384,7 @@ angular.module('quassel')
     $scope.gsdebug = function(newValue) {
         if (arguments.length > 0) {
             if (newValue) {
-                dbg.enable("*");
+                dbg.enable("qtdatastream:*,libquassel:*");
             } else {
                 dbg.disable();
             }

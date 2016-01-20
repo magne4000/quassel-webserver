@@ -249,7 +249,7 @@ angular.module('quassel')
     
     // Find the most recent nick who has talked.
     function getMostRecentNick(scope, token) {
-        if (!scope.buffer) return;
+        if (!scope.buffer) return [];
 
         var keys = scope.buffer.messages.keys(), nicks = [];
         keys.sort();
@@ -279,7 +279,7 @@ angular.module('quassel')
     
     // Find the closet nick alphabetically from the current buffer's nick list.
     function getNickAlphabetically(scope, token) {
-        if (!scope.buffer) return;
+        if (!scope.buffer) return [];
 
         var subjects = Object.keys(scope.buffer.nickUserMap), nicks = [];
         subjects.sort(function(a, b) {
