@@ -157,7 +157,7 @@ html, body, .container {
     }
 }
 
-.network.off > span, .network.off + .network-channels .channel > span, .channel.off > span {
+.network.off > span, .network.off + .network-channels .channel > .channel-name {
     opacity: 0.5;
 }
 
@@ -247,6 +247,7 @@ html, body, .container {
 .channel-icon {
     .icon;
     display: inline-block;
+    padding: 6px;
 }
 
 .channel-name {
@@ -662,7 +663,7 @@ html, body, .container {
     font-size: 1.3em;
 }
 
-.network .dropdown-menu li, .network-channels .dropdown-menu li {
+.network .dropdown-menu li, .network-channels .dropdown-menu li:not(.dropdown-header) {
     color: black;
 }
 

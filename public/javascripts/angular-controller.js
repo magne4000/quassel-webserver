@@ -8,6 +8,7 @@ angular.module('quassel')
     $scope.networks = [];
     $scope.buffer = null;
     $scope.messages = [];
+    $scope.showhidden = false;
     
     var MT = require('message').Type;
     var MF = require('message').Flag;
@@ -265,6 +266,14 @@ angular.module('quassel')
             updateMessages();
         });
     });
+
+    $quassel.on('buffer.hidden', function() {
+        $scope.$apply();
+    });
+
+    $quassel.on('buffer.unhide', function() {
+        $scope.$apply();
+    });
     
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
@@ -332,6 +341,18 @@ angular.module('quassel')
                 $quassel.requestMergeBuffersPermanently(dropped.id, dragged.id);
             }
         }
+    };
+
+    $scope.channelHidePermanently = function(channel) {
+        $quassel.requestHideBufferPermanently(channel.id);
+    };
+
+    $scope.channelHideTemporarily = function(channel) {
+        $quassel.requestHideBufferTemporarily(channel.id);
+    };
+
+    $scope.channelUnhide = function(channel) {
+        $quassel.requestUnhideBuffer(channel.id);
     };
 }])
 .controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance, network) {

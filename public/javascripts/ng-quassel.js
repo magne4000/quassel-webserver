@@ -52,7 +52,10 @@
         requestUpdate: requestUpdate,
         connect: connect,
         disconnect: disconnect,
-        login: login
+        login: login,
+        requestUnhideBuffer: requestUnhideBuffer,
+        requestHideBufferPermanently: requestHideBufferPermanently,
+        requestHideBufferTemporarily: requestHideBufferTemporarily
       };
 
       return service;
@@ -184,6 +187,18 @@
       
       function requestMergeBuffersPermanently(bufferId1, bufferId2) {
         self.quassel.requestMergeBuffersPermanently(bufferId1, bufferId2);
+      }
+      
+      function requestUnhideBuffer(bufferId) {
+        self.quassel.requestUnhideBuffer(bufferId);
+      }
+      
+      function requestHideBufferTemporarily(bufferId) {
+        self.quassel.requestHideBufferTemporarily(bufferId);
+      }
+      
+      function requestHideBufferPermanently(bufferId) {
+        self.quassel.requestHideBufferPermanently(bufferId);
       }
       
       function requestUpdate(ignoreList) {

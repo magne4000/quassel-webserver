@@ -149,7 +149,13 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
             #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
               .buffer-container(highlight-container)
-                .network(id="network-{{network.networkName}}", class="buffer-highlight-{{network.statusBuffer.highlight}}", ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id}", ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId", dropdown)
+                .network(
+                      id="network-{{network.networkName}}"
+                      class="buffer-highlight-{{network.statusBuffer.highlight}}"
+                      ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id}"
+                      ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId"
+                      dropdown
+                  )
                   span.collapsable.expanded(toggle="{{network.networkName}}-channels")
                     span.glyphicon
                   span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
@@ -161,7 +167,9 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     li(ng-if="network.isConnected")
                       a(href="#", ng-click="disconnect(network)") Disconnect
                     li(ng-if="!network.isConnected")
-                      a(href="#",  ng-click="connect(network)") Connect
+                      a(href="#", ng-click="connect(network)") Connect
+                    li
+                      a(href="#", ng-click="showhidden = !showhidden") Show / Hide chats
                 .network-channels.clearfix(id="{{network.networkName}}-channels", ng-repeat-end)
                   .channel(
                         ng-model="channel"
@@ -170,10 +178,15 @@ html(ng-app="quassel", ng-controller="ConfigController")
                         class="buffer-highlight-{{channel.highlight}}"
                         ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
                         ng-repeat="channel in network._buffers | channelsFilter track by channel.id"
-                        ng-if="!channel.isPermanentlyRemoved && !channel.isTemporarilyRemoved"
+                        ng-if="showhidden || (!channel.isPermanentlyRemoved && !channel.isTemporarilyRemoved)"
                         dropdown
                     )
                     span.channel-icon
+                      span.glyphicon(
+                          ng-show="showhidden"
+                          ng-class="channel.isPermanentlyRemoved || channel.isTemporarilyRemoved ? 'glyphicon-eye-close' : 'glyphicon-eye-open'"
+                          title="{{channel.isPermanentlyRemoved ? 'Permanently hidden' : channel.isTemporarilyRemoved ? 'Temporarily hidden' : 'Unhidden'}}"
+                        )
                     span.channel-name(ng-click="showBuffer(channel)") {{channel.name}}
                     a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
                       span.glyphicon.glyphicon-menu-hamburger
@@ -184,6 +197,13 @@ html(ng-app="quassel", ng-controller="ConfigController")
                         a(href="#", ng-click="channelJoin(channel)") Join
                       li(ng-if="!channel.active || !channel.isChannel()")
                         a(href="#", ng-confirm-click="Are you sure you want to delete this buffer permanently ?", ng-ok-click="channelDelete(channel)") Delete
+                      li(class="dropdown-header") Show / Hide
+                      li(ng-if="!channel.isPermanentlyRemoved")
+                        a(href="#", ng-click="channelHidePermanently(channel)") Hide permanently
+                      li(ng-if="!channel.isTemporarilyRemoved")
+                        a(href="#", ng-click="channelHideTemporarily(channel)") Hide temporarily
+                      li(ng-if="channel.isPermanentlyRemoved || channel.isTemporarilyRemoved")
+                        a(href="#", ng-click="channelUnhide(channel)") Unhide
               .buffer-bottom-bar
                 a.showhide.right(href="javascript:void(0)", ng-click="shown = !shown")
             #center.animation(ng-controller="FilterController")
