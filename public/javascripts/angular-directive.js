@@ -49,10 +49,10 @@ angular.module('quassel')
                 content = nickplaceholder() + " has joined";
                 break;
             case MT.Part:
-                content = nickplaceholder() + " has left";
+                content = nickplaceholder() + " has left (" + message.content + ")";
                 break;
             case MT.Quit:
-                content = nickplaceholder() + " has quit";
+                content = nickplaceholder() + " has quit (" + message.content + ")";
                 break;
             case MT.Kick:
                 var ind = message.content.indexOf(" ");
