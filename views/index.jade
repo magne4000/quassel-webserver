@@ -248,9 +248,14 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   input#messagebox(type='text', autocomplete='off', ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)
             #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
               .buffer-container
-                .user(ng-repeat="user in buffer.nickUserMap | ordernicks:buffer track by user.nick")
+                .user(ng-repeat="user in buffer.nickUserMap | ordernicks:buffer track by user.nick", dropdown)
                   span.user-icon(ng-class="{'user-icon-away': user.away, 'user-icon-active': !user.away}")
                   span.user-name(ng-class="{'user-op': buffer.isOp(user.nick), 'user-voiced': buffer.isVoiced(user.nick)}") {{user.nick}}
+                  a.dropdown-user.dropdown-toggle(data-toggle="dropdown", dropdown-toggle)
+                    span.glyphicon.glyphicon-menu-hamburger
+                  ul.dropdown-menu.dropdown-menu-right(role="menu")
+                    li
+                      a(href="#", ng-click="userQuery(user)") Query
               .buffer-bottom-bar
                 a.showhide.left(href="javascript:void(0)", ng-click="shown2 = !shown2")
 

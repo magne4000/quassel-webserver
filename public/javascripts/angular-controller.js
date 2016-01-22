@@ -354,6 +354,28 @@ angular.module('quassel')
     $scope.channelUnhide = function(channel) {
         $quassel.requestUnhideBuffer(channel.id);
     };
+    
+    $scope.userQuery = function(user) {
+        var network = $quassel.get().getNetworks().get($scope.buffer.network);
+        var buffer;
+        if (network !== null) {
+            buffer = network.getBuffer(user.nick);
+            if (buffer !== null) {
+                $scope.showBuffer(buffer);
+            } else {
+                $quassel.once('network.addbuffer', function(networkId, bufferId) {
+                    network = $quassel.get().getNetworks().get(networkId);
+                    buffer = network.getBuffer(bufferId);
+                    if (buffer !== null) {
+                        $scope.$apply(function(){
+                            $scope.showBuffer(buffer);
+                        });
+                    }
+                });
+                $quassel.sendMessage($scope.buffer.id, '/query ' + user.nick);
+            }
+        }
+    };
 }])
 .controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance, network) {
     $scope.name = '';

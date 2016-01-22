@@ -151,6 +151,8 @@ html, body, .container {
     height: 32px;
     cursor: default;
     white-space: nowrap;
+    display: flex;
+    position: relative;
 
     &:hover, &.active {
         background-color: darken(@pane-color, 5);
@@ -159,15 +161,6 @@ html, body, .container {
 
 .network.off > span, .network.off + .network-channels .channel > .channel-name {
     opacity: 0.5;
-}
-
-.network, .channel {
-    display: flex;
-    position: relative;
-}
-
-.user {
-    display: block;
 }
 
 .network-name, .group-name {
@@ -241,6 +234,7 @@ html, body, .container {
     display: inline-block;
     line-height: 32px;
     opacity: 0.75;
+    flex: 1;
     font-family: @font-side;
 }
 
@@ -316,7 +310,7 @@ html, body, .container {
     .animation(spin 1s linear infinite);
 }
 
-.channel:hover .dropdown-channel, .dropdown-network {
+.channel:hover .dropdown-channel, .user:hover .dropdown-user, .dropdown-network {
     .icon;
     opacity: 0.5;
     display: inline-block;
@@ -327,7 +321,7 @@ html, body, .container {
     }
 }
 
-.dropdown-channel {
+.dropdown-channel, .dropdown-user {
     display: none;
 }
 
@@ -656,7 +650,7 @@ html, body, .container {
     }
 }
 
-.dropdown-network .glyphicon, .dropdown-channel .glyphicon {
+.dropdown-network .glyphicon, .dropdown-channel .glyphicon, .dropdown-user .glyphicon {
     color: @text-pane-color;
     top: 6px;
     left: 5px;
