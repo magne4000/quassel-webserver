@@ -3,8 +3,8 @@
 
 angular.module('quassel')
 .controller('NetworkController',
-        ['$scope', '$quassel', '$modal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore',
-            function($scope, $quassel, $modal, $favico, $alert, $desktop, $wfocus, $ignore) {
+        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore',
+            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore) {
     $scope.networks = [];
     $scope.buffer = null;
     $scope.messages = [];
@@ -306,7 +306,7 @@ angular.module('quassel')
     };
     
     $scope.openModalJoinChannel = function(network) {
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'modalJoinChannel.html',
             controller: 'ModalJoinChannelInstanceCtrl',
             resolve: {
@@ -389,7 +389,7 @@ angular.module('quassel')
         $modalInstance.dismiss('cancel');
     };
 })
-.controller('ConfigController', ['$scope', '$modal', '$theme', '$ignore', '$quassel', '$config', function($scope, $modal, $theme, $ignore, $quassel, $config) {
+.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
@@ -402,7 +402,7 @@ angular.module('quassel')
     };
 
     $scope.configTheme = function() {
-        modal = $modal.open({
+        modal = $uibModal.open({
             templateUrl: 'modalChangeTheme.html',
             scope: $scope,
         });
@@ -411,7 +411,7 @@ angular.module('quassel')
     $scope.configIgnoreList = function() {
         $scope.ignoreList = $ignore.getList();
         $scope.activeIndice = 0;
-        modal = $modal.open({
+        modal = $uibModal.open({
             templateUrl: 'modalIgnoreList.html',
             scope: $scope,
         });
@@ -436,7 +436,7 @@ angular.module('quassel')
     };
     
     $scope.configGeneral = function() {
-        modal = $modal.open({
+        modal = $uibModal.open({
             templateUrl: 'modalGeneralConfig.html',
             scope: $scope,
         });
@@ -625,6 +625,7 @@ angular.module('quassel')
     
     $scope.inputmessage = '';
     $scope.nick = null;
+    $scope.formattervisible = false;
     
     var CircularBuffer = function(length){
         this.wpointer = 0;
@@ -731,12 +732,71 @@ angular.module('quassel')
     };
     
     $scope.sendMessage = function() {
-        if (typeof $scope.buffer !== 'undefined' && typeof $scope.buffer.id === "number" && $scope.inputmessage.length > 0) {
-            $scope.clearMessageHistory($scope.buffer.id);
-            $quassel.sendMessage($scope.buffer.id, $scope.inputmessage);
-            $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
-            $scope.inputmessage = '';
+        if ($scope.buffer && typeof $scope.buffer.id === "number" && $scope.inputmessage.length > 0) {
+            var message = cleanMessage($scope.inputmessage);
+            if (message) {
+                $scope.clearMessageHistory($scope.buffer.id);
+                $quassel.sendMessage($scope.buffer.id, message);
+                $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
+                $scope.inputmessage = '';
+            }
         }
+    };
+    
+    var decodeEntities = (function() {
+        var element = document.createElement('div');
+        function decodeHTMLEntities(str) {
+            if (str && typeof str === 'string') {
+                // strip script/html tags
+                str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+                str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+                element.innerHTML = str;
+                str = element.textContent;
+                element.textContent = '';
+            }
+            return str;
+        }
+        return decodeHTMLEntities;
+    })();
+    
+    function cleanMessage(value) {
+        // Replace html tags with IRC formatting chars
+        var message = '', modifiersMap = {'bold': '\x02', 'italic': '\x1D', 'underline': '\x1F'}, prop;
+        var contextualModifiers = {
+            'bold': false,
+            'italic': false,
+            'underline': false
+        };
+        function nodesProcessor(){
+            if (this.nodeType === 3) {  // Text Node
+                message += this.textContent;
+            } else if (this.nodeType === 1) {  // Element Node
+                var cs = $(this).css(['font-weight', 'font-style', 'text-decoration']);
+                var closingModifiers = '';
+                var currentModifiers = {
+                    'bold': cs['font-weight'].indexOf('bold') !== -1,
+                    'italic': cs['font-style'].indexOf('italic') !== -1,
+                    'underline': cs['text-decoration'].indexOf('underline') !== -1
+                };
+                for (prop in contextualModifiers) {
+                    if (contextualModifiers[prop] !== currentModifiers[prop]) {
+                        message += modifiersMap[prop];
+                        closingModifiers = modifiersMap[prop] + closingModifiers;
+                    }
+                }
+                var parentModifiers = contextualModifiers;
+                contextualModifiers = currentModifiers;
+                $(this).contents().each(nodesProcessor);
+                contextualModifiers = parentModifiers;
+                message += closingModifiers;
+            }
+        }
+        $('#messagebox').contents().each(nodesProcessor);
+        return decodeEntities(message);
+    }
+    
+    $scope.execCommand = function(value) {
+        document.execCommand(value, false, null);
     };
     
     $scope.$watch('buffer', function(newValue, oldValue) {

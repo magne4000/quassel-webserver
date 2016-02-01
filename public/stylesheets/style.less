@@ -178,14 +178,6 @@ html, body, .container {
     padding: 6px;
 }
 
-.collapsable .glyphicon:before{
-    content:"\e114"
-}
-
-.collapsable.collapsed .glyphicon:before{
-    content:"\e080"
-}
-
 .network-channels, .group-users {
     display: block;
     overflow: visible;
@@ -195,6 +187,9 @@ html, body, .container {
     .icon;
     display: inline-block;
     float: left;
+    padding: 5px;
+    font-size: 12px;
+    line-height: 1.5;
 }
 
 .channel.selected {
@@ -205,18 +200,18 @@ html, body, .container {
     opacity: 1;
 }
 
-.user-icon-active {
-    background-image: url(../images/icon-active.png)
+.user-away {
+    color: grey;
 }
 
-.user-icon-away {
-    background-image: url(../images/icon-away.png)
+.user-not-away {
+    color: green;
 }
 
 .user-voiced:before {
-    content: '\e038 ';
+    content: '\e810 ';
     font-size: 0.9em;
-    font-family: "Glyphicons Halflings";
+    font-family: "quassel-webserver";
     position: relative;
     top: 2px;
     display: inline-block;
@@ -268,6 +263,7 @@ html, body, .container {
     position: absolute;
     cursor: pointer;
     opacity: 0.5;
+    padding: 6px;
 
     &:hover {
         opacity: 1;
@@ -275,22 +271,17 @@ html, body, .container {
     }
 }
 
-.buffer-bottom-bar .showhide.left {
-    left: 0;
-    background-image: url(../images/hide-pane-right.png);
+.showhide .icon-qws {
+    color: @text-pane-color;
+    font-size: 1.2em;
 }
 
-.small .buffer-bottom-bar .showhide.left {
-    background-image: url(../images/hide-pane-left.png);
+.buffer-bottom-bar .showhide.left {
+    left: 0;
 }
 
 .buffer-bottom-bar .showhide.right {
     right: 0;
-    background-image: url(../images/hide-pane-left.png);
-}
-
-.small .buffer-bottom-bar .showhide.right {
-    background-image: url(../images/hide-pane-right.png);
 }
 
 .quassel-logo {
@@ -326,17 +317,44 @@ html, body, .container {
 }
 
 .input {
-    overflow-y: hidden;
     height: @box-height;
+    min-height: @box-height;
+    width: 100%;
+    background: @input-bg;
+}
+
+.input form {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+}
+
+#messagebox {
+    flex: 1;
+    border: 0;
+    padding: 5px 8px;
+    outline: none;
     min-height: @box-height;
 }
 
-.input input {
-    width: 100%;
-    border: 0;
-    padding-left: 8px;
-    outline: none;
+[contenteditable]:empty:not(:focus):before{
+    content: attr(placeholder);
+    color: gray;
+    position: relative;
+    cursor: text;
+}
+
+.input .formatter {
     min-height: @box-height;
+    display: flex;
+    
+    .formatter-content {
+        display: flex;
+    }
+    
+    .btn {
+        border-radius: 0;
+    }
 }
 
 :not(.tokenfield) > input[type="text"], :not(.tokenfield) > input[type="password"] {
@@ -650,7 +668,7 @@ html, body, .container {
     }
 }
 
-.dropdown-network .glyphicon, .dropdown-channel .glyphicon, .dropdown-user .glyphicon {
+.dropdown-network .icon-qws, .dropdown-channel .icon-qws, .dropdown-user .icon-qws {
     color: @text-pane-color;
     top: 6px;
     left: 5px;

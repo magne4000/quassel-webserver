@@ -10,6 +10,25 @@ angular.module('quassel')
         }
     };
 })
+.directive('formattable', function ($parse) {
+    return {
+        link: function (scope, element, attrs) {
+            var formatter = $('<div class="formattable" style="display: none">blublu</div>');
+            formatter.insertAfter(element);
+            
+            element.on('select', function(e){
+                formatter.show();
+            });
+            
+            element.on("blur click change keyup", function (event) {
+                var selection = window.getSelection();
+                if (selection.getRangeAt(0).collapsed) {
+                    formatter.hide();
+                }
+            });
+        }
+    };
+})
 .directive('ircMessage', ['$compile', '$filter', function($compile, $filter){
     
     var MT = require('message').Type;
@@ -143,22 +162,6 @@ angular.module('quassel')
             element.on('click', function (event) {
                 if (window.confirm(msg)) {
                     scope.$apply(clickAction);
-                }
-            });
-        }
-    };
-})
-.directive('toggle', function () {
-    return {
-        link: function (scope, element, attrs) {
-            element.on('click', function(){
-                var eltToToggle = $('#'+attrs.toggle), self = $(this);
-                if (self.hasClass('expanded')) {
-                    eltToToggle.css("max-height", "0").css("overflow", "hidden");
-                    self.removeClass("expanded").addClass("collapsed");
-                } else {
-                    eltToToggle.css("max-height", "").css("overflow", "");
-                    self.removeClass("collapsed").addClass("expanded");
                 }
             });
         }
@@ -491,6 +494,51 @@ angular.module('quassel')
                 createTokensOnBlur: true,
                 tokens: $parse(attr.ngModel)(scope)
             });
+        }
+    };
+}])
+.directive('contenteditable', ['$sce', function($sce) {
+    return {
+        restrict: 'A', // only activate on element attribute
+        require: '?ngModel', // get a hold of NgModelController
+        link: function(scope, element, attrs, ngModel) {
+            if (!ngModel) return; // do nothing if no ng-model
+
+            // Specify how UI should be updated
+            ngModel.$render = function() {
+                element.html($sce.getTrustedHtml(ngModel.$viewValue || ''));
+            };
+
+            if (attrs.mimicInput) {
+                element.on('keydown', function(e) {
+                    if (e.which == 13 && e.shiftKey == false) {
+                        setTimeout(submit, 0);
+                        return false;
+                    }
+                });
+            }
+
+            // Listen for change events to enable binding
+            element.on('blur keyup change', function() {
+                scope.$evalAsync(read);
+            });
+            read(); // initialize
+
+            // Write data to the model
+            function read() {
+                var html = element.html();
+                // When we clear the content editable the browser leaves a <br> behind
+                // If strip-br attribute is provided then we strip this out
+                if (attrs.mimicInput && html == '<br>') {
+                    html = '';
+                }
+                ngModel.$setViewValue(html);
+            }
+            
+            function submit() {
+                read();
+                element.trigger('submit');
+            }
         }
     };
 }]);
