@@ -531,6 +531,18 @@ angular.module('quassel')
         }
     };
 }])
+.directive('focusonfocus', [function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            $(window).focus(function() {
+                setTimeout(function() {
+                    element.focus();
+                }, 15);
+            });
+        }
+    };
+}])
 .directive('contenteditable', ['$sce', function($sce) {
     return {
         restrict: 'A', // only activate on element attribute
