@@ -252,6 +252,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     button.btn.btn-default.btn-xs.handle(type="button", ng-click="formattervisible = !formattervisible", title="Format")
                       i.icon-qws.icon-brush
                     .formatter-content.btn-group(ng-show="formattervisible", role="group")
+                      button.btn.btn-default.btn-sm(ng-click="execCommand('removeFormat')", type="button", title="Remove format")
+                        i.icon-qws.icon-eraser
                       button.btn.btn-default.btn-sm(ng-click="execCommand('bold')", type="button", title="Bold")
                         i.icon-qws.icon-bold
                       button.btn.btn-default.btn-sm(ng-click="execCommand('italic')", type="button", title="Italic")

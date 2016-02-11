@@ -783,6 +783,7 @@ angular.module('quassel')
         if (pendingModifiers.color[0] !== currentContextModifier.color[0] || pendingModifiers.color[1] !== currentContextModifier.color[1]) {
             // Background or foreground color changed
             var tmpModifier = modifiersMap.color;
+            var tmpColorModifier;
             if (pendingModifiers.color[0] === rootModifiers.color[0] && pendingModifiers.color[1] !== rootModifiers.color[1] ||
                 pendingModifiers.color[0] !== rootModifiers.color[0] && pendingModifiers.color[1] === rootModifiers.color[1]) {
                 tmpModifier += modifiersMap.color; // Close then open a new one
@@ -792,12 +793,14 @@ angular.module('quassel')
             } else {
                 if (pendingModifiers.color[0] !== currentContextModifier.color[0]) {
                     // Foreground color changed
-                    tmpModifier += $mirc.getMIRCIndByColor(pendingModifiers.color[0]);
+                    tmpColorModifier = $mirc.getMIRCIndByColor(pendingModifiers.color[0]);
+                    tmpModifier += tmpColorModifier !== false ? tmpColorModifier : '1';
                     contextModifiers.color[0] = pendingModifiers.color[0];
                 } else {
                     if (pendingModifiers.color[1] !== currentContextModifier.color[1]) {
                         // background changed but not foreground, so use parents foreground if possible
-                        tmpModifier += $mirc.getMIRCIndByColor(currentContextModifier.color[0]);
+                        tmpColorModifier = $mirc.getMIRCIndByColor(currentContextModifier.color[0]);
+                        tmpModifier += tmpColorModifier !== false ? tmpColorModifier : '1';
                     } else {
                         tmpModifier += '1';
                         contextModifiers.color[0] = '1';

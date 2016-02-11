@@ -19,7 +19,7 @@ angular.module('quassel')
         template: '<span ng-transclude></span>' +
         '<ul class="colors">' +
             '<li ng-repeat="color in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]">' +
-                '<a class="btn btn-xs mirc-bg-{{color}}" ng-click="setColor(color)"></a>' +
+                '<button type="button" class="btn btn-xs mirc-bg-{{color}}" ng-click="setColor(color)"></button>' +
             '</li>' +
         '</ul>',
         link: function (scope, element, attrs) {
