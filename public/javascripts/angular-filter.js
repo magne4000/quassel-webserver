@@ -1,7 +1,7 @@
 angular.module('quassel')
 .filter('decoratenick', ['stripnickFilter', function(stripnick) {
     var MT = require('message').Type;
-    
+
     return function(message) {
         var sender;
         switch(message.type) {
@@ -53,7 +53,7 @@ angular.module('quassel')
         out.sort(function(a, b){
             return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         });
-        
+
         return out;
     };
 })
@@ -88,41 +88,26 @@ angular.module('quassel')
     var COLOR = new RegExp("^" + String.fromCharCode(3) + "(([0-9]{1,2})(,([0-9]{1,2}))?)");
     return function(input) {
         var out = '',
-        nbSpan = 0,
-        nbSpanColor = 0,
-        spanAttributes = {
+        contextAttributes = {
             bold: false,
             italic: false,
-            underline: false
+            underline: false,
+            bgcolor: false,
+            fgcolor: false
         },
         i = 0,
+        tagOpened = false,
         match;
         input = input || '';
-    
+
         var openSpan = function (classes) {
-            nbSpan += 1;
             return '<span class="' + classes + '">';
         };
-    
-        var openColorSpan = function (fgclass, bgclass) {
-            nbSpanColor += 1;
-            var classes = fgclass;
-            if (bgclass) {
-                classes += ' ' + bgclass;
-            }
-            return openSpan(classes);
-        };
-    
+
         var closeSpan = function () {
-            nbSpan -= 1;
             return '</span>';
         };
-    
-        var closeColorSpan = function () {
-            nbSpanColor -= 1;
-            return closeSpan();
-        };
-        
+
         var unescapeColorTags = function(str) {
             var tagsToReplace = {
                 '&#2;': '\x02',
@@ -136,65 +121,71 @@ angular.module('quassel')
                 return tagsToReplace[tag] || tag;
             });
         };
-        
+
+        var getClasses = function () {
+            var prop, ret = [];
+            for (prop in contextAttributes) {
+                if (contextAttributes[prop] !== false) {
+                    ret.push(contextAttributes[prop]);
+                }
+            }
+            return ret;
+        };
+
+        var getTags = function() {
+            var ret = "", classes = getClasses();
+            if (tagOpened) {
+                ret += closeSpan();
+                tagOpened = false;
+            }
+            if (classes.length > 0) {
+                ret += openSpan(classes.join(" "));
+                tagOpened = true;
+            }
+            return ret;
+        };
+
         input = unescapeColorTags(input);
-    
+
         for (i = 0; i < input.length; i++) {
             switch (input[i]) {
                 case '\x02':
-                    if (spanAttributes.bold) {
-                        out += closeSpan();
-                    } else {
-                        out += openSpan('mirc-bold');
-                    }
-                    spanAttributes.bold = !spanAttributes.bold;
+                    contextAttributes.bold = contextAttributes.bold ? false : 'mirc-bold';
+                    out += getTags();
                     break;
                 case '\x1D':
-                    if (spanAttributes.italic) {
-                        out += closeSpan();
-                    } else {
-                        out += openSpan('mirc-italic');
-                    }
-                    spanAttributes.italic = !spanAttributes.italic;
+                    contextAttributes.italic = contextAttributes.italic ? false : 'mirc-italic';
+                    out += getTags();
                     break;
                 case '\x1F':
-                    if (spanAttributes.underline) {
-                        out += closeSpan();
-                    } else {
-                        out += openSpan('mirc-underline');
-                    }
-                    spanAttributes.underline = !spanAttributes.underline;
+                    contextAttributes.underline = contextAttributes.underline ? false : 'mirc-underline';
+                    out += getTags();
                     break;
                 case '\x03':
                     match = input.substr(i, 6).match(COLOR);
-                    var classfg = false,
-                        classbg = false;
                     if (match) {
                         i += match[1].length;
                         // 2 & 4
-                        classfg = "mirc-fg-" + parseInt(match[2], 10);
+                        contextAttributes.fgcolor = "mirc-fg-" + parseInt(match[2], 10);
                         if (match[4]) {
-                            classbg = "mirc-bg-" + parseInt(match[4], 10);
+                            contextAttributes.bgcolor = "mirc-bg-" + parseInt(match[4], 10);
                         }
-                        out += openColorSpan(classfg, classbg);
                     } else {
-                        while (nbSpanColor > 0) {
-                            out += closeColorSpan();
-                        }
+                        contextAttributes.bgcolor = false;
+                        contextAttributes.fgcolor = false;
                     }
+                    out += getTags();
                     break;
                 case '\x0F':
-                    while (nbSpan > 0) {
-                        out += closeSpan();
-                    }
-                    spanAttributes.bold = spanAttributes.italic = spanAttributes.underline = spanAttributes.colour = false;
+                    contextAttributes.bold = contextAttributes.italic = contextAttributes.underline = contextAttributes.fgcolor = contextAttributes.bgcolor = false;
+                    out += getTags();
                     break;
                 default:
                     out += input[i];
                     break;
             }
         }
-        while (nbSpan > 0) {
+        if (tagOpened) {
             out += closeSpan();
         }
         return out;
@@ -233,17 +224,17 @@ angular.module('quassel')
     return function(users, buffer) {
         if (!users || buffer === null) return users;
         var op = [], voiced = [], other = [];
-        
+
         angular.forEach(users, function(value) {
             if (buffer.isOp(value.nick)) op.push(value);
             else if (buffer.isVoiced(value.nick)) voiced.push(value);
             else other.push(value);
         });
-        
+
         function sortNicks(a, b){
             return a.nick.toLowerCase().localeCompare(b.nick.toLowerCase());
         }
-        
+
         op.sort(sortNicks);
         voiced.sort(sortNicks);
         other.sort(sortNicks);

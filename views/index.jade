@@ -252,20 +252,22 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     button.btn.btn-default.btn-xs.handle(type="button", ng-click="formattervisible = !formattervisible", title="Format")
                       i.icon-qws.icon-brush
                     .formatter-content.btn-group(ng-show="formattervisible", role="group")
-                      button.btn.btn-default.btn-sm(ng-click="execCommand('bold')", type="button")
+                      button.btn.btn-default.btn-sm(ng-click="execCommand('bold')", type="button", title="Bold")
                         i.icon-qws.icon-bold
-                      button.btn.btn-default.btn-sm(ng-click="execCommand('italic')", type="button")
+                      button.btn.btn-default.btn-sm(ng-click="execCommand('italic')", type="button", title="Italic")
                         i.icon-qws.icon-italic
-                      button.btn.btn-default.btn-sm(ng-click="execCommand('underline')", type="button")
+                      button.btn.btn-default.btn-sm(ng-click="execCommand('underline')", type="button", title="Underline")
                         i.icon-qws.icon-underline
-                      .btn-group.formatter-content.dropup(role="group", uib-dropdown)
-                        button.btn.btn-default.btn-sm.dropdown-toggle(ng-click="execCommand('bold')", type="button", data-toggle="dropdown", uib-dropdown-toggle)
+                      .btn-group.formatter-content.formatter-color.dropup(role="group", uib-dropdown)
+                        button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown", uib-dropdown-toggle)
                           i.icon-qws.icon-tint
-                        ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
-                          li
-                            a Foreground color
-                          li
-                            a Background color
+                        ul.dropdown-menu.dropdown-menu-right.list-group(role="menu", uib-dropdown-menu)
+                          li.list-group-item
+                            h4.list-group-item-heading Foreground color
+                            colorpicker.list-group-item-text(colopicker-mode="foreColor")
+                          li.list-group-item
+                            h4.list-group-item-heading Background color
+                            colorpicker.list-group-item-text(colopicker-mode="backColor")
             #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
               .buffer-container
                 .user(ng-repeat="user in buffer.nickUserMap | ordernicks:buffer track by user.nick", uib-dropdown)

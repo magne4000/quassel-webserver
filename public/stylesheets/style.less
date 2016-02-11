@@ -347,13 +347,21 @@ html, body, .container {
 .input .formatter {
     min-height: @box-height;
     display: flex;
-    
+
     .formatter-content {
         display: flex;
     }
-    
+
     .btn {
         border-radius: 0;
+    }
+
+    .formatter-color .list-group-item {
+        width: 410px;
+    }
+
+    ul {
+        padding: 0 !important;
     }
 }
 
@@ -400,7 +408,7 @@ html, body, .container {
 
 .backlog .irc-message > span, .backlog .irc-message > .message {
     display: table-cell;
-    
+
     &.hiddenforcopy {
         width: 0px;
         display: inline-block;
@@ -462,7 +470,7 @@ html, body, .container {
     padding: 3px 7px;
     font-size: 1em;
     cursor: pointer;
-    
+
     &:hover {
         opacity: 0.8;
     }
@@ -530,6 +538,8 @@ html, body, .container {
 .mirc-italic {font-style: italic;}
 .mirc-underline {text-decoration:underline !important;}
 
+.mirc-bg-transparent {background-color:transparent;}
+
 // Notifications
 .cg-notify-message {
     position: fixed;
@@ -540,7 +550,7 @@ html, body, .container {
     text-align: center;
     font-size: 14px;
     padding: 10px 15px 10px 10px;
-    
+
     background-color: @state-info-bg;
     color: @state-info-text;
     border: 1px solid @state-info-border;
@@ -556,7 +566,7 @@ html, body, .container {
 .cg-notify-message a {
     font-weight: bold;
     color: inherit;
-    
+
     &:hover {
         color: inherit;
     }
@@ -585,8 +595,8 @@ html, body, .container {
     position: absolute;
     top: 0px;
     right: 3px;
-    line-height: 15px; 
-    
+    line-height: 15px;
+
     background: 0 0;
     border: 0;
     color: black;
@@ -825,3 +835,21 @@ html, body, .container {
 [ng-nick][data-nickhash="14"], .nick[data-nickhash="14"] { color: @nichkash-14-color; }
 [ng-nick][data-nickhash="15"], .nick[data-nickhash="15"] { color: @nichkash-15-color; }
 [ng-nick][data-nickhash] { font-weight: bold; }
+
+// Colorpicker
+.colors li {
+    display: inline-block;
+    padding: 0;
+    margin: 2px;
+    box-shadow: 0 0 1px white;
+    border-radius: 50%;
+}
+.colors li:hover {
+    opacity: 0.5;
+}
+.colors a {
+    display: inline-block;
+    width: 21px;
+    height: 21px;
+    border-radius: inherit !important;
+}

@@ -9,13 +9,13 @@ angular.module('quassel')
     $scope.buffer = null;
     $scope.messages = [];
     $scope.showhidden = false;
-    
+
     var MT = require('message').Type;
     var MF = require('message').Flag;
     var IRCMessage = require('message').IRCMessage;
     var loadingMoreBacklogs = [];
     var initialLastSeenList = [];
-    
+
     function createDayChangeMessage(msg, timestamp) {
         var message = new IRCMessage({
             id: msg.id,
@@ -31,7 +31,7 @@ angular.module('quassel')
         message.sid = msg.id+timestamp;
         return message;
     }
-    
+
     function updateMessages() {
         if ($scope.buffer) {
             var messages = $scope.buffer.messages.values();
@@ -39,7 +39,7 @@ angular.module('quassel')
             $scope.messages = insertDayChangeMessages(messages);
         }
     }
-    
+
     function applyIgnoreList(messages, buffer) {
         var i = 0, shouldDelete = false;
         for (; i<messages.length; i++) {
@@ -60,7 +60,7 @@ angular.module('quassel')
         buffer.ignoreListRevision = $ignore.getRevision();
         return messages;
     }
-    
+
     function insertDayChangeMessages(messages) {
         var i, j, lastMessageDay, lastMessage, currentMessageDay, currentMessage,
             interval, today = new Date().setHours(0, 0, 0, 0);
@@ -89,22 +89,22 @@ angular.module('quassel')
         }
         return messages;
     }
-    
+
     $quassel.on('init', function(networkId) {
         $scope.networks = [];
     });
-    
+
     $quassel.on('network.init', function(networkId) {
         var networks = this.getNetworks();
         var network = networks.get(networkId);
         $scope.networks.push(network);
     });
-    
+
     $quassel.on('network.addbuffer', function(networkId, bufferId) {
         var network = this.getNetworks().get(networkId);
         network._buffers = network.getBufferHashMap().values();
     });
-    
+
     $quassel.on('buffer.backlog', function(bufferId, messageIds) {
         if (messageIds.length === 0) {
             // No more backlogs to receive for this buffer
@@ -121,7 +121,7 @@ angular.module('quassel')
             delete initialLastSeenList[bufferId];
         }
     });
-    
+
     function setHighlight(buffer, value) {
         if ((value === 0) ||
             (value == 'high' && buffer.highlight != 'high') ||
@@ -135,13 +135,13 @@ angular.module('quassel')
         }
         return false;
     }
-    
+
     function incFavico(buffer) {
         if (buffer.favico === undefined) buffer.favico = 0;
         buffer.favico++;
         $favico.more();
     }
-    
+
     $quassel.on('buffer.lastseen', function(bufferId, messageId) {
         messageId = parseInt(messageId, 10);
         var buffer = this.getNetworks().findBuffer(bufferId);
@@ -151,7 +151,7 @@ angular.module('quassel')
                 var network = this.getNetworks().get(buffer.network);
                 network.setStatusBuffer(buffer);
             }
-            
+
             var bufferLastMessage = buffer.getLastMessage();
             if (typeof bufferLastMessage === 'undefined' && quasselconf.initialBacklogLimit !== 0) {
                 initialLastSeenList[bufferId] = messageId;
@@ -183,14 +183,14 @@ angular.module('quassel')
             }
         }
     });
-    
+
     $quassel.on('buffer.markerline', function(bufferId, messageId) {
         var buffer = this.getNetworks().findBuffer(bufferId);
         if (buffer !== null) {
             buffer.markerline = parseInt(messageId, 10);
         }
     });
-    
+
     $quassel.on('buffer.message', function(bufferId, messageId) {
         var buffer = this.getNetworks().findBuffer(bufferId);
         if (buffer !== null) {
@@ -230,7 +230,7 @@ angular.module('quassel')
             updateMessages();
         }
     });
-    
+
     $quassel.on('buffer.read', function(bufferId) {
         var buffer = this.getNetworks().findBuffer(bufferId);
         if (buffer !== null) {
@@ -241,7 +241,7 @@ angular.module('quassel')
             setHighlight(buffer, 0);
         }
     });
-    
+
     $quassel.on('buffer.remove', function(bufferId) {
         var networks = this.getNetworks().all();
         $scope.$apply(function(){
@@ -250,7 +250,7 @@ angular.module('quassel')
             }
         });
     });
-    
+
     $quassel.on('buffer.merge', function(bufferId1, bufferId2) {
         var buffer1 = this.getNetworks().findBuffer(bufferId1);
         var network = this.getNetworks().get(buffer1.network);
@@ -258,7 +258,7 @@ angular.module('quassel')
             network._buffers = network.getBufferHashMap().values();
         });
     });
-    
+
     $quassel.on('ignorelist', function(list) {
         $ignore.setList(list);
         $ignore.incRevision();
@@ -274,7 +274,7 @@ angular.module('quassel')
     $quassel.on('buffer.unhide', function() {
         $scope.$apply();
     });
-    
+
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
         updateMessages();
@@ -285,7 +285,7 @@ angular.module('quassel')
         $('#messagebox').focus();
         $quassel.markBufferAsRead(channel.id, id);
     };
-    
+
     $scope.loadMore = function() {
         if ($scope.buffer !== null && (typeof loadingMoreBacklogs[''+$scope.buffer.id] === 'undefined' || loadingMoreBacklogs[''+$scope.buffer.id] === false) && loadingMoreBacklogs[''+$scope.buffer.id] !== 'stop') {
             var firstMessage = Math.min.apply(null, $scope.buffer.messages.keys());
@@ -296,15 +296,15 @@ angular.module('quassel')
         }
         return false;
     };
-    
+
     $scope.connect = function(network) {
         $quassel.requestConnectNetwork(network.networkId);
     };
-    
+
     $scope.disconnect = function(network) {
        $quassel.requestDisconnectNetwork(network.networkId);
     };
-    
+
     $scope.openModalJoinChannel = function(network) {
         var modalInstance = $uibModal.open({
             templateUrl: 'modalJoinChannel.html',
@@ -313,24 +313,24 @@ angular.module('quassel')
                 network: function(){return network;}
             }
         });
-    
+
         modalInstance.result.then(function (name) {
             $quassel.sendMessage(network.getStatusBuffer().id, '/join ' + name);
         });
     };
-    
+
     $scope.channelPart = function(channel) {
         $quassel.sendMessage(channel.id, '/part');
     };
-    
+
     $scope.channelJoin = function(channel) {
         $quassel.sendMessage(channel.id, '/join ' + channel.name);
     };
-    
+
     $scope.channelDelete = function(channel) {
         $quassel.requestRemoveBuffer(channel.id);
     };
-    
+
     $scope.onDropComplete = function(dragged, dropped) {
         if (dragged.isChannel() || dropped.isChannel()) {
             $alert.warn("Merging non-query buffers is not supported");
@@ -354,7 +354,7 @@ angular.module('quassel')
     $scope.channelUnhide = function(channel) {
         $quassel.requestUnhideBuffer(channel.id);
     };
-    
+
     $scope.userQuery = function(user) {
         var network = $quassel.get().getNetworks().get($scope.buffer.network);
         var buffer;
@@ -380,11 +380,11 @@ angular.module('quassel')
 .controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance, network) {
     $scope.name = '';
     $scope.network = network;
-    
+
     $scope.ok = function () {
         $modalInstance.close($scope.name);
     };
-    
+
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
@@ -395,7 +395,7 @@ angular.module('quassel')
     $scope.ignoreList = $ignore.getList();
     $scope.displayIgnoreList = false;
     var modal, activeIndice = 0, dbg = require("debug");
-    
+
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
         $theme.setClientTheme(theme);
@@ -407,7 +407,7 @@ angular.module('quassel')
             scope: $scope,
         });
     };
-    
+
     $scope.configIgnoreList = function() {
         $scope.ignoreList = $ignore.getList();
         $scope.activeIndice = 0;
@@ -416,14 +416,14 @@ angular.module('quassel')
             scope: $scope,
         });
     };
-    
+
     $scope.gsdisplayfullhostmask = function(newValue) {
         if (arguments.length > 0) {
             $config.set('displayfullhostmask', newValue);
         }
         return $config.get('displayfullhostmask', false);
     };
-    
+
     $scope.gsdebug = function(newValue) {
         if (arguments.length > 0) {
             if (newValue) {
@@ -434,39 +434,39 @@ angular.module('quassel')
         }
         return $config.get('debug', false, true) ? true : false;
     };
-    
+
     $scope.configGeneral = function() {
         modal = $uibModal.open({
             templateUrl: 'modalGeneralConfig.html',
             scope: $scope,
         });
     };
-    
+
     $scope.cancelIgnoreList = function() {
         $ignore.restoreSavedList();
         modal.dismiss('close');
     };
-    
+
     $scope.saveIgnoreList = function() {
         $ignore.setList($scope.ignoreList);
         $ignore.save();
         modal.dismiss('close');
     };
-    
+
     $scope.createIgnoreItem = function() {
         $ignore.createItem();
         $scope.ignoreList = $ignore.getList();
     };
-    
+
     $scope.setActiveIndice = function(indice) {
         activeIndice = indice;
     };
-    
+
     $scope.deleteSelectedIgnoreItem = function() {
         $ignore.deleteItem(activeIndice);
         $scope.ignoreList = $ignore.getList();
     };
-    
+
     $quassel.once('ignorelist', function(list) {
         $scope.$apply(function(){
             $scope.displayIgnoreList = true;
@@ -483,7 +483,7 @@ angular.module('quassel')
     $scope.user = $config.get('user') || "";
     $scope.password = $config.get('password') || "";
     $scope.alert = "";
-    
+
     $scope.$watch('alert', function(newValue, oldValue) {
         if (newValue !== "") {
             $timeout(function(){
@@ -491,7 +491,7 @@ angular.module('quassel')
             }, 8000);
         }
     });
-    
+
     $scope.$watch('remember', function(newValue, oldValue) {
         $config.set('remember', newValue);
         if (!newValue) {
@@ -499,7 +499,7 @@ angular.module('quassel')
             $config.del('port');
         }
     });
-    
+
     /*
     $socket.on('_error', function(e) {
         console.log(e);
@@ -513,7 +513,7 @@ angular.module('quassel')
             $alert.error('Error received from server. See Javascript console for details.');
         }
     });
-    
+
     $socket.on("connected", function() {
         console.log('CONNECTED');
         $scope.$apply(function(){
@@ -522,21 +522,21 @@ angular.module('quassel')
             $scope.firstconnected = true;
         });
     });
-    
+
     $socket.on('reconnect_attempt', function() {
         console.log('RECONNECTING');
         $scope.$apply(function(){
             $scope.connecting = true;
         });
     });
-    
+
     $socket.on('reconnect_error', function() {
         console.log('RECONNECTING_ERROR');
         $scope.$apply(function(){
             $scope.connecting = false;
         });
     });
-    
+
     $socket.on('reconnect_failed', function() {
         console.log('RECONNECTING_FAILED');
         $scope.$apply(function(){
@@ -553,7 +553,7 @@ angular.module('quassel')
             $scope.disconnected = true;
         });
     });
-    
+
     $quassel.on('loginfailed', function() {
         console.log('loginfailed');
         $scope.$apply(function(){
@@ -561,7 +561,7 @@ angular.module('quassel')
             $scope.alert = "Invalid username or password.";
         });
     });
-    
+
     $quassel.on('login', function() {
         console.log('Logged in');
         $scope.$apply(function(){
@@ -575,14 +575,14 @@ angular.module('quassel')
             $alert.error('Your quasselcore is not supported by quassel-webserver (version too old)');
         }
     });
-    
+
     $quassel.on('disconnect', function() {
         console.log('DISCONNECT');
         $scope.$apply(function(){
             $scope.disconnected = true;
         });
     });
-    
+
     $quassel.on('reconnect', function() {
         console.log('RECONNECT');
         if ($scope.logged) {
@@ -592,16 +592,16 @@ angular.module('quassel')
             $scope.disconnected = false;
         });
     });
-    
+
     $scope.reload = function(){
         $window.location.reload();
     };
-    
+
     $scope.logout = function(){
         $scope.remember = false;
         $scope.reload();
     };
-    
+
     $scope.login = function(){
         $scope.connecting = true;
         $quassel.setServer($scope.host, $scope.port, $scope.user, $scope.password);
@@ -614,19 +614,19 @@ angular.module('quassel')
         }
         console.log('Connecting to quasselcore');
     };
-    
+
     if ($scope.remember && $scope.user && $scope.password) {
         $scope.login();
     }
 }])
-.controller('InputController', ['$scope', '$quassel', function($scope, $quassel) {
+.controller('InputController', ['$scope', '$quassel', '$hiddendiv', '$mirc', function($scope, $quassel, $hiddendiv, $mirc) {
     var messagesHistory = [];
     var MT = require('message').Type;
-    
+
     $scope.inputmessage = '';
     $scope.nick = null;
     $scope.formattervisible = false;
-    
+
     var CircularBuffer = function(length){
         this.wpointer = 0;
         this.rpointer = 0;
@@ -634,13 +634,13 @@ angular.module('quassel')
         this.buffer = [];
         this.max = length;
     };
-    
+
     CircularBuffer.prototype.push = function(item){
         this.buffer[this.wpointer] = item;
         this.wpointer = (this.max + this.wpointer + 1) % this.max;
         this.rpointer = this.wpointer;
     };
-    
+
     CircularBuffer.prototype._previous = function(){
         if (this.buffer.length === this.max) {
             if (this.wpointer === this.max - 1) {
@@ -654,7 +654,7 @@ angular.module('quassel')
         if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
         return true;
     };
-    
+
     CircularBuffer.prototype.previous = function(){
         if (this.buffer.length === 0) return null;
         if (this._previous()) {
@@ -662,7 +662,7 @@ angular.module('quassel')
         }
         return null;
     };
-    
+
     CircularBuffer.prototype._next = function(key){
         var ret = true;
         if (this.buffer.length === this.max) {
@@ -683,7 +683,7 @@ angular.module('quassel')
         if (this.rpointer >= this.buffer.length) this.rpointer = 0;
         return true;
     };
-    
+
     CircularBuffer.prototype.next = function(){
         if (this.buffer.length === 0) return null;
         if (this._next()) {
@@ -691,13 +691,13 @@ angular.module('quassel')
         }
         return null;
     };
-    
+
     CircularBuffer.prototype.clearReadPointer = function(){
         this.rpointer = this.wpointer - 1;
         if (this.rpointer < 0) this.rpointer = this.buffer.length - 1;
         this.lrpointer = null;
     };
-    
+
     $scope.addMessageHistory = function(message, bufferId) {
         if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
         messagesHistory[''+bufferId].push(message);
@@ -708,7 +708,7 @@ angular.module('quassel')
             messagesHistory[''+bufferId].clearReadPointer();
         }
     };
-    
+
     $scope.showPreviousMessage = function(bufferId) {
         if (typeof messagesHistory[''+bufferId] !== 'undefined') {
             var msg = messagesHistory[''+bufferId].previous();
@@ -730,10 +730,13 @@ angular.module('quassel')
             }
         }
     };
-    
+
     $scope.sendMessage = function() {
         if ($scope.buffer && typeof $scope.buffer.id === "number" && $scope.inputmessage.length > 0) {
-            var message = cleanMessage($scope.inputmessage);
+            var hd = $hiddendiv.get();
+            hd.html($scope.inputmessage);
+            var message = cleanMessage(hd);
+            hd.html("");
             if (message) {
                 $scope.clearMessageHistory($scope.buffer.id);
                 $quassel.sendMessage($scope.buffer.id, message);
@@ -742,7 +745,7 @@ angular.module('quassel')
             }
         }
     };
-    
+
     var decodeEntities = (function() {
         var element = document.createElement('div');
         function decodeHTMLEntities(str) {
@@ -758,47 +761,106 @@ angular.module('quassel')
         }
         return decodeHTMLEntities;
     })();
-    
-    function cleanMessage(value) {
-        // Replace html tags with IRC formatting chars
-        var message = '', modifiersMap = {'bold': '\x02', 'italic': '\x1D', 'underline': '\x1F'}, prop;
-        var contextualModifiers = {
-            'bold': false,
-            'italic': false,
-            'underline': false
-        };
-        function nodesProcessor(){
-            if (this.nodeType === 3) {  // Text Node
-                message += this.textContent;
-            } else if (this.nodeType === 1) {  // Element Node
-                var cs = $(this).css(['font-weight', 'font-style', 'text-decoration']);
-                var closingModifiers = '';
-                var currentModifiers = {
-                    'bold': cs['font-weight'].indexOf('bold') !== -1,
-                    'italic': cs['font-style'].indexOf('italic') !== -1,
-                    'underline': cs['text-decoration'].indexOf('underline') !== -1
-                };
-                for (prop in contextualModifiers) {
-                    if (contextualModifiers[prop] !== currentModifiers[prop]) {
-                        message += modifiersMap[prop];
-                        closingModifiers = modifiersMap[prop] + closingModifiers;
-                    }
-                }
-                var parentModifiers = contextualModifiers;
-                contextualModifiers = currentModifiers;
-                $(this).contents().each(nodesProcessor);
-                contextualModifiers = parentModifiers;
-                message += closingModifiers;
+
+    var modifiersMap = {
+        bold: '\x02',
+        italic: '\x1D',
+        underline: '\x1F',
+        color: '\x03',
+        all: '\x0F'
+    };
+
+    var props = ['bold', 'italic', 'underline'];
+
+    function applyModifiersToString(pendingModifiers, contextModifiers, rootModifiers) {
+        var prop, closingColorTag = false, modifiers = [], currentContextModifier = contextModifiers;
+        for (prop in props) {
+            if (pendingModifiers[props[prop]] !== currentContextModifier[props[prop]]) {
+                modifiers.push(modifiersMap[props[prop]]);
+                contextModifiers[props[prop]] = pendingModifiers[props[prop]];
             }
         }
-        $('#messagebox').contents().each(nodesProcessor);
+        if (pendingModifiers.color[0] !== currentContextModifier.color[0] || pendingModifiers.color[1] !== currentContextModifier.color[1]) {
+            // Background or foreground color changed
+            var tmpModifier = modifiersMap.color;
+            if (pendingModifiers.color[0] === rootModifiers.color[0] && pendingModifiers.color[1] !== rootModifiers.color[1] ||
+                pendingModifiers.color[0] !== rootModifiers.color[0] && pendingModifiers.color[1] === rootModifiers.color[1]) {
+                tmpModifier += modifiersMap.color; // Close then open a new one
+            }
+            if (pendingModifiers.color[0] === rootModifiers.color[0] && pendingModifiers.color[1] === rootModifiers.color[1]) {
+                closingColorTag = true;
+            } else {
+                if (pendingModifiers.color[0] !== currentContextModifier.color[0]) {
+                    // Foreground color changed
+                    tmpModifier += $mirc.getMIRCIndByColor(pendingModifiers.color[0]);
+                    contextModifiers.color[0] = pendingModifiers.color[0];
+                } else {
+                    if (pendingModifiers.color[1] !== currentContextModifier.color[1]) {
+                        // background changed but not foreground, so use parents foreground if possible
+                        tmpModifier += $mirc.getMIRCIndByColor(currentContextModifier.color[0]);
+                    } else {
+                        tmpModifier += '1';
+                        contextModifiers.color[0] = '1';
+                    }
+                }
+                if (pendingModifiers.color[1] !== false && pendingModifiers.color[1] !== currentContextModifier.color[1]) {
+                    // Background color changed
+                    tmpModifier += ',' + $mirc.getMIRCIndByColor(pendingModifiers.color[1]);
+                    contextModifiers.color[1] = pendingModifiers.color[1];
+                }
+            }
+            modifiers.push(tmpModifier);
+        }
+        if (!contextModifiers.bold && !contextModifiers.italic && !contextModifiers.underline && closingColorTag) return modifiersMap.all;
+        return modifiers.join("");
+    }
+
+    function cleanMessage(input) {
+        // Replace html tags with IRC formatting chars
+        var message = '';
+        var rootModifiers = {
+            bold: false,
+            italic: false,
+            underline: false,
+            color: [
+                false,
+                false
+            ]
+        };
+        var contextModifiers = $.extend(true, {}, rootModifiers);
+        var modifiersByLevel = [$.extend(true, {}, rootModifiers)];
+        var level = 1;
+        function nodesProcessor() {
+            if (this.nodeType === 1) {  // Element Node
+                var cs = $(this).css(['font-weight', 'font-style', 'text-decoration', 'color', 'background-color']);
+                modifiersByLevel[level] = {
+                    bold: $mirc.isBold(cs['font-weight']) || modifiersByLevel[level-1].bold,
+                    italic: $mirc.isItalic(cs['font-style']) || modifiersByLevel[level-1].italic,
+                    underline: $mirc.isUnderline(cs['text-decoration']) || modifiersByLevel[level-1].underline,
+                    color: [
+                        $mirc.getMIRCValidColor(cs['color']) || modifiersByLevel[level-1].color[0],
+                        $mirc.getMIRCValidColor(cs['background-color']) || modifiersByLevel[level-1].color[1]
+                    ]
+                };
+            } else if (this.nodeType === 3) {  // Text Node
+                message += applyModifiersToString(modifiersByLevel[level-1], contextModifiers, rootModifiers);
+                message += this.textContent;
+            }
+            if (this.nodeType === 1) {
+                level = level + 1;
+                $(this).contents().each(nodesProcessor);
+                level = level - 1;
+            }
+        }
+        input.contents().each(nodesProcessor);
+        console.log(message);
         return decodeEntities(message);
     }
-    
+
     $scope.execCommand = function(value) {
         document.execCommand(value, false, null);
     };
-    
+
     $scope.$watch('buffer', function(newValue, oldValue) {
         var valid = false;
         if (newValue !== null) {
@@ -827,7 +889,7 @@ angular.module('quassel')
     $scope.currentFilter = [];
     $scope.currentFilter2 = {};
     $scope.defaultFilter = filters;
-    
+
     function onCurrentFilterUpdate() {
         angular.forEach($scope.currentFilter, function(value, key) {
             $scope.currentFilter2[''+value.type] = value.value;
@@ -838,11 +900,11 @@ angular.module('quassel')
             }
         });
     }
-    
+
     if (localStorage.filter) {
         $scope.defaultFilter = JSON.parse(localStorage.filter);
     }
-    
+
     $scope.$watch('buffer', function(newValue, oldValue) {
         if (oldValue !== null) {
             bufferFilters[''+oldValue.id] = angular.copy($scope.currentFilter);
@@ -855,14 +917,14 @@ angular.module('quassel')
             onCurrentFilterUpdate();
         }
     });
-    
+
     $scope.$watch('currentFilter', onCurrentFilterUpdate, true);
-    
+
     $scope.setAsDefault = function() {
         $scope.defaultFilter = angular.copy($scope.currentFilter);
         localStorage.filter = JSON.stringify($scope.defaultFilter);
     };
-    
+
     $scope.useDefault = function() {
         $scope.currentFilter = angular.copy($scope.defaultFilter);
         onCurrentFilterUpdate();

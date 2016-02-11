@@ -37,9 +37,9 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     };
 }])
 .factory('$config', ['$rootScope', function($rootScope){
-    
+
     var keys = {};
-    
+
     return {
         set: function(key, val, raw) {
             localStorage.setItem(key, raw ? val : JSON.stringify(val));
@@ -73,12 +73,12 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         num = num + 1;
         favico.badge(num);
     };
-    
+
     var less = function() {
         num = (num-1 < 0) ? 0 : (num - 1);
         favico.badge(num);
     };
-    
+
     var reset = function() {
         favico.reset();
     };
@@ -90,30 +90,30 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     };
 }])
 .factory('$alert', ['notify', function(notify) {
-    
+
     notify.config({startTop: 2, verticalSpacing: 4, duration: 8000});
-    
+
     function info(message, options) {
         options = options || {};
         options.message = message;
         options.classes = ["alert-info"];
         notify(options);
     }
-    
+
     function warn(message, options) {
         options = options || {};
         options.message = message;
         options.classes = ["alert-warning"];
         notify(options);
     }
-    
+
     function error(message, options) {
         options = options || {};
         options.message = message;
         options.classes = ["alert-danger"];
         notify(options);
     }
-    
+
     return {
         info: info,
         warn: warn,
@@ -134,7 +134,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             granted = permission === "granted";
         });
     }
-    
+
     return function(title, body, timeout){
         if (granted) {
             var options = {};
@@ -185,17 +185,84 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             nextFocusCallback();
         nextFocusCallback = null;
     });
-    
+
     $(window).blur(function() {
         focus = false;
     });
-    
+
     return {
         isFocus: function() {
             return focus;
         },
         onNextFocus: function(callback) {
             nextFocusCallback = callback;
+        }
+    };
+}])
+.factory('$hiddendiv', [function(){
+    var hd = $('<div/>').appendTo('body').hide();
+    return {
+        get: function() {
+            return hd;
+        }
+    };
+
+}])
+.factory('$mirc', ['$hiddendiv', function($hiddendiv){
+
+    var color;
+    var mapIndColor = [];
+    var mapColorInd = {};
+    var transparent = null;
+    var bold = null;
+    var italic = null;
+    var underline = null;
+
+    function populate() {
+        var i = 0;
+        for (; i<15; i++) {
+            color = $hiddendiv.get().removeClass().addClass('mirc-fg-' + i).css('color');
+            mapIndColor[i] = color;
+            mapColorInd[color] = i;
+        }
+        transparent = $hiddendiv.get().removeClass().addClass('mirc-bg-transparent').css('background-color');
+        bold = $hiddendiv.get().removeClass().addClass('mirc-bold').css('font-weight');
+        italic = $hiddendiv.get().removeClass().addClass('mirc-italic').css('font-style');
+        underline = $hiddendiv.get().removeClass().addClass('mirc-underline').css('text-decoration');
+    }
+    populate();
+
+    return {
+        getColorByMIRCInd: function(ind) {
+            if (!(ind in mapIndColor)) return false;
+            return mapIndColor[ind];
+        },
+        getMIRCValidColor: function(color) {
+            if (transparent === color) return false;
+            if (!(color in mapColorInd)) return false;
+            return color;
+        },
+        getMIRCIndByColor: function(color) {
+            if (!(color in mapColorInd)) return false;
+            return mapColorInd[color];
+        },
+        isBold: function(value) {
+            if (typeof value === "string") {
+                return value.indexOf(bold) !== -1;
+            }
+            return false;
+        },
+        isItalic: function(value) {
+            if (typeof value === "string") {
+                return value.indexOf(italic) !== -1;
+            }
+            return false;
+        },
+        isUnderline: function(value) {
+            if (typeof value === "string") {
+                return value.indexOf(underline) !== -1;
+            }
+            return false;
         }
     };
 }])

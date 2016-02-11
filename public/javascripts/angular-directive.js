@@ -10,25 +10,33 @@ angular.module('quassel')
         }
     };
 })
-.directive('formattable', function ($parse) {
+.directive('colorpicker', ['$mirc', function($mirc) {
     return {
+        restrict: 'E',
+        transclude: true,
+        scope: {},
+        require: '?colopickerMode',
+        template: '<span ng-transclude></span>' +
+        '<ul class="colors">' +
+            '<li ng-repeat="color in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]">' +
+                '<a class="btn btn-xs mirc-bg-{{color}}" ng-click="setColor(color)"></a>' +
+            '</li>' +
+        '</ul>',
         link: function (scope, element, attrs) {
-            var formatter = $('<div class="formattable" style="display: none">blublu</div>');
-            formatter.insertAfter(element);
+            var mode = null;
+            if (attrs.colopickerMode == 'foreColor' || attrs.colopickerMode == 'backColor') {
+                mode = attrs.colopickerMode;
+            } else {
+                return;
+            }
             
-            element.on('select', function(e){
-                formatter.show();
-            });
-            
-            element.on("blur click change keyup", function (event) {
-                var selection = window.getSelection();
-                if (selection.getRangeAt(0).collapsed) {
-                    formatter.hide();
-                }
-            });
+            scope.setColor = function(colorInd) {
+                var color = $mirc.getColorByMIRCInd(colorInd);
+                document.execCommand(mode, false, color);
+            };
         }
     };
-})
+}])
 .directive('ircMessage', ['$compile', '$filter', function($compile, $filter){
     
     var MT = require('message').Type;
@@ -225,11 +233,11 @@ angular.module('quassel')
         var len = a.length;
         var j = 0;
         for (var i = 0; i < len; i++) {
-             var item = a[i];
-             if (seen[item] !== 1) {
-                   seen[item] = 1;
-                   out[j++] = item;
-             }
+            var item = a[i];
+            if (seen[item] !== 1) {
+                seen[item] = 1;
+                out[j++] = item;
+            }
         }
         return out;
     }
