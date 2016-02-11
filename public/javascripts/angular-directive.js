@@ -29,7 +29,7 @@ angular.module('quassel')
             } else {
                 return;
             }
-            
+
             scope.setColor = function(colorInd) {
                 var color = $mirc.getColorByMIRCInd(colorInd);
                 document.execCommand(mode, false, color);
@@ -38,7 +38,7 @@ angular.module('quassel')
     };
 }])
 .directive('ircMessage', ['$compile', '$filter', function($compile, $filter){
-    
+
     var MT = require('message').Type;
     var dateFormat;
     if (typeof Intl != "undefined" && Intl.DateTimeFormat) {
@@ -50,7 +50,7 @@ angular.module('quassel')
             }
         };
     }
-    
+
     function nickplaceholder(val) {
         if (typeof val != 'undefined') {
             var nickhash=$filter('hash')(val);
@@ -59,7 +59,7 @@ angular.module('quassel')
         }
         return '<span data-nickhash="{{::message.sender | hash}}" ng-nick="{{::message.sender}}"></span>';
     }
-    
+
     function getmessagetemplate(scope, message) {
         var content, arr, servers;
         switch(message.type) {
@@ -103,7 +103,7 @@ angular.module('quassel')
         }
         return content + '<br>';
     }
-    
+
     return {
         scope: {
             message: "="
@@ -126,7 +126,7 @@ angular.module('quassel')
             } else {
                 scope.nick = $filter('stripnick')(attrs.ngNick);
             }
-            
+
             var deregister = $rootScope.$on('config.displayfullhostmask', function(evt, newValue) {
                 if (!newValue) {
                     scope.nick = $filter('stripnick')(attrs.ngNick);
@@ -134,7 +134,7 @@ angular.module('quassel')
                     scope.nick = attrs.ngNick;
                 }
             });
-            
+
             scope.$on('$destroy', deregister);
         },
         template: "{{nick}}"
@@ -142,7 +142,7 @@ angular.module('quassel')
 }])
 .directive('theme', ['$theme', '$parse', function ($theme, $parse) {
     var regex = /(.*theme-).*\.css$/;
-    
+
     return {
         require: '?defaultTheme',
         link: function (scope, element, attrs) {
@@ -150,7 +150,7 @@ angular.module('quassel')
             if ($theme.getClientTheme()) {
                 scope.activeTheme = $theme.getClientTheme();
             }
-            
+
             scope.$watch('activeTheme', function(newValue, oldValue){
                 if (newValue) {
                     var href = element.attr("href");
@@ -191,10 +191,10 @@ angular.module('quassel')
         else if ((rect.bottom - 80) > parent.clientHeight) return rect.bottom - 80 - parent.clientHeight;
         return 0;
     }
-    
+
     return {
         link: function (scope, element, attrs) {
-            
+
             function updateHighlights() {
                 var parent = element[0], highlightTop = 0, highlightBottom = 0, val;
                 $('.buffer-highlight').each(function(){
@@ -217,16 +217,16 @@ angular.module('quassel')
                     element.removeClass('highlight-on-top');
                 }
             }
-            
+
             $(window).resize(updateHighlights);
             element.on('scroll', updateHighlights);
             scope.$on('highlight', updateHighlights);
         }
     };
 })
-.directive('caret', function() {
+.directive('caret', ['$hiddendiv', function($hiddendiv) {
     var MT = require('message').Type;
-    
+
     function uniq(a) {
         var seen = {};
         var out = [];
@@ -241,23 +241,49 @@ angular.module('quassel')
         }
         return out;
     }
-    
+
+    function getCaretPosition(elem) {
+        var range = window.getSelection().getRangeAt(0);
+        var preSelectionRange = range.cloneRange();
+        preSelectionRange.selectNodeContents(elem);
+        preSelectionRange.setEnd(range.startContainer, range.startOffset);
+        var start = preSelectionRange.toString().length;
+
+        return {
+            start: start,
+            end: start + range.toString().length
+        };
+    }
+
     function setCaretPosition(elem, caretPos) {
         if (elem !== null) {
-            if (elem.createTextRange) {
-                var range = elem.createTextRange();
-                range.move('character', caretPos);
-                range.select();
-            } else {
-                if (elem.selectionStart) {
-                    elem.focus();
-                    elem.setSelectionRange(caretPos, caretPos);
-                } else
-                    elem.focus();
+            var charIndex = 0, range = document.createRange();
+            range.setStart(elem, 0);
+            range.collapse(true);
+            var nodeStack = [elem], node, foundStart = false;
+
+            while (!foundStart && (node = nodeStack.pop())) {
+                if (node.nodeType == 3) {
+                    var nextCharIndex = charIndex + node.length;
+                    if (!foundStart && caretPos >= charIndex && caretPos <= nextCharIndex) {
+                        range.setStart(node, caretPos - charIndex);
+                        foundStart = true;
+                    }
+                    charIndex = nextCharIndex;
+                } else {
+                    var i = node.childNodes.length;
+                    while (i--) {
+                        nodeStack.push(node.childNodes[i]);
+                    }
+                }
             }
+
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
         }
     }
-    
+
     // Find the most recent nick who has talked.
     function getMostRecentNick(scope, token) {
         if (!scope.buffer) return [];
@@ -277,7 +303,7 @@ angular.module('quassel')
             var nick = message.getNick();
             if (nick.length <= token.length)
                 continue;
-            
+
             if (!(nick in scope.buffer.nickUserMap))
                 continue;
 
@@ -287,7 +313,7 @@ angular.module('quassel')
         }
         return uniq(nicks);
     }
-    
+
     // Find the closet nick alphabetically from the current buffer's nick list.
     function getNickAlphabetically(scope, token) {
         if (!scope.buffer) return [];
@@ -308,7 +334,7 @@ angular.module('quassel')
         }
         return uniq(nicks);
     }
-    
+
     function getTokenCompletion(scope, token, tokenStart) {
         var nicks = getMostRecentNick(scope, token), pos = 0;
         if (nicks.length === 0)
@@ -325,7 +351,7 @@ angular.module('quassel')
     return {
         link: function(scope, element, attrs) {
             var lastTokens = null, lastTokenStart = null, lastTokenEnd = null;
-            
+
             // Nick completion
             element.on('blur', function(){
                 lastTokens = null;
@@ -336,20 +362,20 @@ angular.module('quassel')
                 if ($event.keyCode == 9) { // Tab
                     $event.preventDefault();
                     var newTokens = null, tokenStart = null, tokenEnd = null;
-                    var message = scope.inputmessage;
+                    var message = $hiddendiv.get().html(scope.inputmessage).text();
+                    $hiddendiv.get().html("");
                     var messageLength = message.length;
                     if (lastTokens !== null) {
                         newTokens = lastTokens;
                         tokenStart = lastTokenStart;
                         tokenEnd = lastTokenEnd;
                     } else {
-                        tokenEnd = element[0].selectionEnd;
+                        tokenEnd = getCaretPosition(element[0]).end;
                         var messageLeft = message.substr(0, tokenEnd);
                         tokenStart = messageLeft.lastIndexOf(' ') + 1;
                         var token = messageLeft.substr(tokenStart);
                         newTokens = getTokenCompletion(scope, token, tokenStart);
                     }
-
                     if (newTokens) {
                         var newToken = newTokens();
                         var newMessage = message.substr(0, tokenStart) + newToken + message.substr(tokenEnd);
@@ -358,7 +384,7 @@ angular.module('quassel')
                         });
                         var newTokenEnd = tokenEnd + newMessage.length - messageLength;
                         setCaretPosition(element[0], newTokenEnd);
-                        
+
                         lastTokens = newTokens;
                         lastTokenStart = tokenStart;
                         lastTokenEnd = newTokenEnd;
@@ -378,7 +404,7 @@ angular.module('quassel')
             });
         }
     };
-})
+}])
 .directive('scrollme', [function () {
     var parent = $("ul.backlog")[0];
     var promise = null;
@@ -416,15 +442,15 @@ angular.module('quassel')
             var lastScrolled = -9999;
             var lastBottom = 0;
             scope.fetching = false;
-            
+
             element.before($compile('<div class="fetching" ng-show="fetching">Fetching more backlogs...</div>')(scope));
-            
+
             lengthThreshold = parseInt(lengthThreshold, 10);
 
             if (!handler || !angular.isFunction(handler)) {
                 handler = angular.noop;
             }
-            
+
             function clearFetching() {
                 if (promiseFetching !== null) timeout.cancel(promiseFetching);
                 // In case no response for 30 seconds, reset fetching to false
@@ -432,15 +458,15 @@ angular.module('quassel')
                     scope.fetching = false;
                 }, 30000);
             }
-            
+
             scope.$watch('currentFilter', function(newValue, oldValue) {
                 tryLaunchHandler();
             }, true);
-            
+
             scope.$watch('buffer', function(newValue, oldValue){
                 tryLaunchHandler();
             });
-            
+
             $quassel.on('buffer.backlog', function(bufferId, messageIds) {
                 if (scope.buffer !== null && bufferId == scope.buffer.id) {
                     timeout(function () {
@@ -455,7 +481,7 @@ angular.module('quassel')
                 if (promiseFetching !== null) timeout.cancel(promiseFetching);
                 scope.fetching = false;
             });
-            
+
             function tryLaunchHandler() {
                 if (promiseFetching !== null) timeout.cancel(promiseFetching);
                 scope.fetching = false;
@@ -466,7 +492,7 @@ angular.module('quassel')
                     }
                 }, 0);
             }
-            
+
             function launchHandler() {
                 if (!scope.fetching) {
                     lastBottom = element[0].scrollHeight - element[0].scrollTop;
@@ -542,7 +568,7 @@ angular.module('quassel')
                 }
                 ngModel.$setViewValue(html);
             }
-            
+
             function submit() {
                 read();
                 element.trigger('submit');
