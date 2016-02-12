@@ -859,7 +859,6 @@ angular.module('quassel')
             }
         }
         input.contents().each(nodesProcessor);
-        console.log(message);
         return decodeEntities(message);
     }
 
@@ -871,7 +870,7 @@ angular.module('quassel')
         var valid = false;
         if (newValue !== null) {
             if (typeof newValue.network === "number") {
-                var network = this.get(newValue.network);
+                var network = $quassel.get().getNetworks().get(newValue.network);
                 if (network) {
                     $scope.nick = network.nick;
                     valid = true;
