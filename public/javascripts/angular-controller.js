@@ -35,33 +35,25 @@ angular.module('quassel')
     function updateMessages() {
         if ($scope.buffer) {
             var messages = $scope.buffer.messages.values();
-            messages = applyIgnoreList(messages, $scope.buffer);
-            $scope.messages = insertDayChangeMessages(messages);
+            $scope.messages = insertDayChangeMessagesAndApplyIgnoreList(messages, $scope.buffer);
         }
     }
 
-    function applyIgnoreList(messages, buffer) {
-        var i = 0, shouldDelete = false;
-        for (; i<messages.length; i++) {
-            shouldDelete = false;
-            if (buffer.ignoreListRevision === $ignore.getRevision() && typeof messages[i].isIgnored === "boolean") {
-                shouldDelete = messages[i].isIgnored;
-            } else if ($ignore.getList().matches(messages[i], $quassel.get().getNetworks())) {
-                messages[i].isIgnored = true;
-                shouldDelete = true;
-            } else {
-                messages[i].isIgnored = false;
-            }
-            if (shouldDelete) {
-                messages.splice(i, 1);
-                i--;
-            }
+    function isIgnored(message, buffer) {
+        var shouldDelete = false;
+        if (buffer.ignoreListRevision === $ignore.getRevision() && typeof message.isIgnored === "boolean") {
+            shouldDelete = message.isIgnored;
+        } else if ($ignore.getList().matches(message, $quassel.get().getNetworks())) {
+            message.isIgnored = true;
+            shouldDelete = true;
+        } else {
+            message.isIgnored = false;
         }
         buffer.ignoreListRevision = $ignore.getRevision();
-        return messages;
+        return shouldDelete;
     }
 
-    function insertDayChangeMessages(messages) {
+    function insertDayChangeMessagesAndApplyIgnoreList(messages, buffer) {
         var i, j, lastMessageDay, lastMessage, currentMessageDay, currentMessage,
             interval, today = new Date().setHours(0, 0, 0, 0);
         // Sort by id
@@ -69,10 +61,14 @@ angular.module('quassel')
             return a.id - b.id;
         });
         // Add missing DayChange messages between existing messages
+        // and apply ignore list
         for (i=0; i<messages.length; i++) {
             messages[i].sid = messages[i].id;
             currentMessageDay = new Date(messages[i].datetime).setHours(0, 0, 0, 0);
             currentMessage = messages[i];
+            if (isIgnored(currentMessage, buffer)) {
+                messages.splice(i--, 1);
+            }
             if (i > 0) {
                 interval = (currentMessageDay - lastMessageDay) / 86400000;
                 for (j=interval; j>0; j--) {
@@ -81,6 +77,7 @@ angular.module('quassel')
             }
             lastMessageDay = currentMessageDay;
             lastMessage = currentMessage;
+            
         }
         interval = (today - lastMessageDay) / 86400000;
         // Add missing DayChange messages after last message
