@@ -217,8 +217,9 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     li.dropdown-header Hide events
                     li(ng-repeat="fil in currentFilter")
                       a(href="#")
-                        input(type="checkbox", id="filter-type-{{::fil.type}}", data-message-type="{{::fil.type}}", ng-model="fil.value")
-                        label(for="filter-type-{{::fil.type}}") {{::fil.label}}
+                        label.checkbox
+                          input(type="checkbox", data-message-type="{{::fil.type}}", ng-model="fil.value")
+                          | {{::fil.label}}
                     li.divider
                     li
                       a.btn(ng-click="setAsDefault()", href="#") Set as default
