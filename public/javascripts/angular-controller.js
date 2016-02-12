@@ -470,7 +470,7 @@ angular.module('quassel')
         });
     });
 }])
-.controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', '$config', function($scope, $quassel, $timeout, $window, $alert, $config) {
+.controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', '$config', '$favico', function($scope, $quassel, $timeout, $window, $alert, $config, $favico) {
     $scope.disconnected = false;
     $scope.connecting = false;
     $scope.logged = false;
@@ -494,6 +494,12 @@ angular.module('quassel')
         if (!newValue) {
             $config.del('host');
             $config.del('port');
+        }
+    });
+    
+    $scope.$watch('disconnected', function(newValue, oldValue) {
+        if (newValue) {
+            $favico.reset();
         }
     });
 
