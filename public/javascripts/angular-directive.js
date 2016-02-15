@@ -344,7 +344,7 @@ angular.module('quassel')
         return function() {
             var nick = nicks[pos];
             pos = (pos + 1) % nicks.length;
-            return tokenStart === 0 ? nick + ': ' : nick;
+            return tokenStart === 0 ? nick + ': ' /* non-breaking space */ : nick;
         };
     }
 
