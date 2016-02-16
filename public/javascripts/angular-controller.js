@@ -749,22 +749,6 @@ angular.module('quassel')
         }
     };
 
-    var decodeEntities = (function() {
-        var element = document.createElement('div');
-        function decodeHTMLEntities(str) {
-            if (str && typeof str === 'string') {
-                // strip script/html tags
-                str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
-                str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
-                element.innerHTML = str;
-                str = element.textContent;
-                element.textContent = '';
-            }
-            return str;
-        }
-        return decodeHTMLEntities;
-    })();
-
     var modifiersMap = {
         bold: '\x02',
         italic: '\x1D',
@@ -859,7 +843,7 @@ angular.module('quassel')
             }
         }
         input.contents().each(nodesProcessor);
-        return decodeEntities(message);
+        return message;
     }
 
     $scope.execCommand = function(value) {
