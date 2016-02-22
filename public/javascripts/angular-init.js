@@ -1,3 +1,5 @@
+/* global angular */
+
 angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
 .factory('$ignore', ['$quassel', function($quassel){
     var IgnoreList = require('ignore').IgnoreList;

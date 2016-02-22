@@ -36,6 +36,7 @@ angular.module('quassel')
         if ($scope.buffer) {
             var messages = $scope.buffer.messages.values();
             $scope.messages = insertDayChangeMessagesAndApplyIgnoreList(messages, $scope.buffer);
+            $scope.buffer.ignoreListRevision = $ignore.getRevision();
         }
     }
 
@@ -49,7 +50,6 @@ angular.module('quassel')
         } else {
             message.isIgnored = false;
         }
-        buffer.ignoreListRevision = $ignore.getRevision();
         return shouldDelete;
     }
 
