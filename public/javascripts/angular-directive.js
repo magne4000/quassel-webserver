@@ -345,7 +345,7 @@ angular.module('quassel')
             var nick = nicks[pos];
             pos = (pos + 1) % nicks.length;
             return tokenStart === 0 ? nick + ': ' /* non-breaking space */ : nick;
-        };
+        }
     }
 
     return {
@@ -563,6 +563,11 @@ angular.module('quassel')
                     }
                 });
             }
+
+            element.on('paste', function (e){
+                e.preventDefault();
+                document.execCommand("insertHTML", false, (e.originalEvent || e).clipboardData.getData("text/plain"));
+            });
 
             // Listen for change events to enable binding
             element.on('blur keyup change', function() {
