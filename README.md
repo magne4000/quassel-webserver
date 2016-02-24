@@ -1,7 +1,7 @@
 # quassel-webserver
 A web client for Quassel (requires a running quasselcore)
 
-:exclamation: Your node (NOT quasselcore) version should be at least v0.11.13 (**v0.12.x** recommended).
+:exclamation: Your node (NOT quasselcore) version should be at least v0.11.13 (**v0.12.x and above** recommended).
 To install node last version, you can run :
 ```
 npm -g install n
@@ -62,6 +62,12 @@ cp scripts/startup /etc/init.d/quasselweb
 and then edit the file /etc/init.d/quasselweb and change `BASEDIR`, `RUNASUSER` and `RUNASGROUP` vars.
 
 ### Reverse proxy snippets
+In you run behind `/quassel` location on your webserver, do not forget to edit `settings-user.js` file
+```json
+...
+prefixpath: '/quassel',
+...
+```
 #### nginx
 ```nginx
 # rewrite ^[/]quassel$ /quassel/ permanent;
