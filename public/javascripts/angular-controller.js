@@ -741,10 +741,15 @@ angular.module('quassel')
             var message = cleanMessage(hd);
             hd.html("");
             if (message) {
-                $scope.clearMessageHistory($scope.buffer.id);
-                $quassel.sendMessage($scope.buffer.id, message);
-                $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
-                $scope.inputmessage = '';
+                var lines = message.match(/[^\r\n]+/gm);
+                if (lines && lines.length > 0) {
+                    $scope.clearMessageHistory($scope.buffer.id);
+                    for (var idx in lines) {
+                        $quassel.sendMessage($scope.buffer.id, lines[idx]);
+                    }
+                    $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
+                    $scope.inputmessage = '';
+                }
             }
         }
     };
