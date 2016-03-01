@@ -868,6 +868,14 @@ angular.module('quassel')
         }
         if (!valid) $scope.nick = null;
     });
+
+    $quassel.on('network.mynick', function(networkId, newNick) {
+        if ($scope.buffer && $scope.buffer.network === parseInt(networkId, 10)) {
+            $scope.$apply(function(){
+                $scope.nick = newNick;
+            });
+        }
+    });
 }])
 .controller('FilterController', ['$scope', function($scope) {
     var filters = [
