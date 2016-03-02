@@ -144,9 +144,7 @@ angular.module('quassel')
     var regex = /(.*theme-).*\.css$/;
 
     return {
-        require: '?defaultTheme',
         link: function (scope, element, attrs) {
-            $theme.setDefaultTheme(attrs.defaultTheme);
             if ($theme.getClientTheme()) {
                 scope.activeTheme = $theme.getClientTheme();
             }

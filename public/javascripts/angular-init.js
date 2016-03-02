@@ -1,4 +1,5 @@
 /* global angular */
+/* global Favico */
 
 angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
 .factory('$ignore', ['$quassel', function($quassel){
@@ -38,9 +39,41 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
     };
 }])
-.factory('$config', ['$rootScope', function($rootScope){
+.factory('$config', ['$rootScope', '$http', '$alert', function($rootScope, $http, $alert){
 
     var keys = {};
+    var configurationKeys = ['initialBacklogLimit', 'backlogLimit', 'unsecurecore', 'theme', 'themes'];
+    var ind;
+    var missingKeys = false;
+    for (var ind in configurationKeys) {
+        if (localStorage.getItem(configurationKeys[ind]) === null) {
+            missingKeys = true;
+            break;
+        }
+    }
+    $http.get("settings")
+    .success(function(data, status) {
+        if (missingKeys) {
+            localStorage.setItem('host', data.settings.host);
+            localStorage.setItem('port', data.settings.port);
+            localStorage.setItem('initialBacklogLimit', data.settings.initialBacklogLimit);
+            localStorage.setItem('backlogLimit', data.settings.backlogLimit);
+            localStorage.setItem('unsecurecore', data.settings.unsecurecore || false);
+            localStorage.setItem('theme', data.settings.theme);
+        }
+        localStorage.setItem('themes', JSON.stringify(data.themes || ['default', 'darksolarized']));
+    }).error(function(data, status) {
+        $alert.warn("Could not load settings. Check nodejs logs.");
+        if (missingKeys) {
+            localStorage.setItem('host', '');
+            localStorage.setItem('port', 4242);
+            localStorage.setItem('initialBacklogLimit', 20);
+            localStorage.setItem('backlogLimit', 100);
+            localStorage.setItem('unsecurecore', false);
+            localStorage.setItem('theme', 'default');
+        }
+        localStorage.setItem('themes', JSON.stringify(['default', 'darksolarized']));
+    });
 
     return {
         set: function(key, val, raw) {
@@ -152,29 +185,23 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
     };
 }])
-.factory('$theme', [function(){
-    var defaultTheme = '';
-    var packagedThemes = [
-        'default',
-        'darksolarized',
-    ];
+.factory('$theme', ['$config', function($config){
+    // Migrate defaultTheme to theme
+    if (localStorage.getItem('defaultTheme') !== null) {
+        var theme = localStorage.getItem('defaultTheme');
+        $config.del('defaultTheme');
+        $config.set('theme', theme, true);
+    }
 
     return {
-        setDefaultTheme: function(theme) {
-            defaultTheme = theme;
-        },
         getClientTheme: function() {
-            return localStorage.defaultTheme || null;
+            return $config.get('theme', null, true);
         },
         setClientTheme: function(theme) {
-            localStorage.defaultTheme = theme;
+            $config.set('theme', theme, true);
         },
         getAllThemes: function() {
-            var themes = [].concat(packagedThemes);
-            if (defaultTheme && themes.indexOf(defaultTheme) === -1) {
-                themes.push(defaultTheme);
-            }
-            return themes;
+            return $config.get('themes');
         },
     };
 }])

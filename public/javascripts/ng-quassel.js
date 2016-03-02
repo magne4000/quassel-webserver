@@ -10,7 +10,6 @@
 
 // Module for provide Socket.io support
 
-/* global quasselconf */
 /* global angular */
 
 (function () {
@@ -21,9 +20,9 @@
   function socketProvider() {
     var Quassel = require('quassel');
     
-    this.$get = [socketFactory];
+    this.$get = ['$config', socketFactory];
 
-    function socketFactory() {
+    function socketFactory($config) {
       this.quassel = null;
       this.server = '';
       this.port = '';
@@ -83,13 +82,13 @@
               path: window.location.pathname + 'p',
           });
           self.quassel = new Quassel(self.server, self.port, {
-              nobacklogs: quasselconf.initialBacklogLimit === 0,
-              initialbackloglimit: quasselconf.initialBacklogLimit || 20,
-              backloglimit: quasselconf.backlogLimit || 50,
-              unsecurecore: quasselconf.unsecurecore || false // tls-browserify module doesn't respect tls API of nodejs
+              nobacklogs: $config.get('initialBacklogLimit', 0, true),
+              initialbackloglimit: $config.get('initialBacklogLimit', 20, true),
+              backloglimit: $config.get('backlogLimit', 50, true),
+              unsecurecore: $config.get('unsecurecore', false, true)  // tls-browserify module doesn't respect tls API of nodejs
           }, function(next) {
               next(self.login, self.password);
-              var istls = !quasselconf.unsecurecore;
+              var istls = !$config.get('unsecurecore', false, true);
               if (istls) {
                 self.ws = self.quassel.qtsocket.socket._socket._ws;
               } else {

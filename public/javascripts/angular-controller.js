@@ -1,10 +1,9 @@
-/* global quasselconf */
 /* global angular */
 
 angular.module('quassel')
 .controller('NetworkController',
-        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore',
-            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore) {
+        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config',
+            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config) {
     $scope.networks = [];
     $scope.buffer = null;
     $scope.messages = [];
@@ -150,7 +149,7 @@ angular.module('quassel')
             }
 
             var bufferLastMessage = buffer.getLastMessage();
-            if (typeof bufferLastMessage === 'undefined' && quasselconf.initialBacklogLimit !== 0) {
+            if (typeof bufferLastMessage === 'undefined' && $config.get('initialBacklogLimit', 20, true) !== 0) {
                 initialLastSeenList[bufferId] = messageId;
             }
             if (typeof bufferLastMessage !== 'undefined' && messageId < bufferLastMessage.id) {
