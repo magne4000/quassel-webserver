@@ -469,7 +469,7 @@ angular.module('quassel')
         });
     });
 }])
-.controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', '$config', '$favico', function($scope, $quassel, $timeout, $window, $alert, $config, $favico) {
+.controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', '$config', '$favico', '$rootScope', function($scope, $quassel, $timeout, $window, $alert, $config, $favico, $rootScope) {
     $scope.disconnected = false;
     $scope.connecting = false;
     $scope.logged = false;
@@ -478,7 +478,16 @@ angular.module('quassel')
     $scope.port = $scope.remember ? $config.get('port') || "" : "";
     $scope.user = $config.get('user') || "";
     $scope.password = $config.get('password') || "";
+    $scope.securecoreconnection = !$config.get('unsecurecore', false);
+    $scope.initialBacklogLimit = parseInt($config.get('initialBacklogLimit', 20, true), 10);
+    $scope.backlogLimit = parseInt($config.get('backlogLimit', 100, true), 10);
     $scope.alert = "";
+
+    $rootScope.$on('defaultsettings', function() {
+        $scope.securecoreconnection = !$config.get('unsecurecore', !$scope.securecoreconnection);
+        $scope.initialBacklogLimit = parseInt($config.get('initialBacklogLimit', $scope.initialBacklogLimit, true), 10);
+        $scope.backlogLimit = parseInt($config.get('backlogLimit', $scope.backlogLimit, true), 10);
+    });
 
     $scope.$watch('alert', function(newValue, oldValue) {
         if (newValue !== "") {
@@ -614,6 +623,9 @@ angular.module('quassel')
             $config.set('host', $scope.host);
             $config.set('port', $scope.port);
         }
+        $config.set('unsecurecore', !$scope.securecoreconnection, true);
+        $config.set('initialBacklogLimit', $scope.initialBacklogLimit, true);
+        $config.set('backlogLimit', $scope.backlogLimit, true);
         console.log('Connecting to quasselcore');
     };
 

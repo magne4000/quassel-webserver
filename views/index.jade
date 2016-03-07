@@ -126,10 +126,26 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   .form-group
                     label(for='password') Password
                     input#password.form-control(type='password', ng-model="$parent.password")
-                  .checkbox
-                    label(for='remember')
-                      input#remember(type='checkbox', ng-model="$parent.remember")
-                      | Auto login
+                  .checkbox.row
+                    .col-md-6
+                      label(for='remember')
+                        input#remember(type='checkbox', ng-model="$parent.remember")
+                        | Auto login
+                    .col-md-6
+                      a.pull-right(href='#', ng-click='moreoptions = !moreoptions') {{moreoptions ? 'less options' : 'more options'}}
+                  .row(ng-show='moreoptions')
+                    .col-md-12
+                      .checkbox
+                        label(for='securecoreconnection')
+                          input#securecoreconnection(type='checkbox', ng-model="$parent.securecoreconnection")
+                          | SSL core connection
+                      .form-group.row
+                        .col-md-6
+                          label(for='initial-backlog-limit') Initial backlog limit
+                          input.form-control#initial-backlog-limit(type='number', ng-model="$parent.initialBacklogLimit", min="0", max="9999")
+                        .col-md-6
+                          label(for='backlog-limit') Standard backlog limit
+                          input.form-control#backlog-limit(type='number', ng-model="$parent.backlogLimit", min="0", max="9999")
                   button.btn.btn-primary.btn-connect(type='submit') Connect
             .col-md-3
           .row.ng-cloak.splash(ng-class="{'ng-cloak': connecting}")
@@ -284,7 +300,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src='#{settings.prefixpath}/javascripts/jquery-2.2.0.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular-aria.min.js')
-      script(src='#{settings.prefixpath}/javascripts/ui-bootstrap-tpls-1.1.1.min.js')
+      script(src='#{settings.prefixpath}/javascripts/ui-bootstrap-tpls-1.2.1.min.js')
       script(src='#{settings.prefixpath}/javascripts/bootstrap-tokenfield.min.js')
       script(src='#{settings.prefixpath}/javascripts/favico-0.3.10.min.js')
       script(src='#{settings.prefixpath}/javascripts/ng-quassel.js')

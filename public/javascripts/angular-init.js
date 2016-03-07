@@ -62,6 +62,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             localStorage.setItem('theme', data.settings.theme);
         }
         localStorage.setItem('themes', JSON.stringify(data.themes || ['default', 'darksolarized']));
+        $rootScope.$emit('defaultsettings', true);
     }).error(function(data, status) {
         $alert.warn("Could not load settings. Check nodejs logs.");
         if (missingKeys) {
@@ -73,6 +74,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             localStorage.setItem('theme', 'default');
         }
         localStorage.setItem('themes', JSON.stringify(['default', 'darksolarized']));
+        $rootScope.$emit('defaultsettings', false);
     });
 
     return {
