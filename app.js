@@ -18,7 +18,7 @@ var routes = require('./routes/index');
 
 var settings = require('./lib/utils').settings(true);
 opts
-  .version('1.2.0')
+  .version('1.3.0')
   .option('-l, --listen <value>', 'listening address', undefined, null)
   .option('-p, --port <value>', 'HTTP(S) port to use', parseInt, null)
   .option('-m, --mode <value>', 'HTTP mode (http|https) [https]', undefined, 'https')

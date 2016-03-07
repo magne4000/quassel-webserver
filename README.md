@@ -91,5 +91,5 @@ ProxyPass /quassel http://127.0.0.1:64080/quassel
 ```
 
 ## License
-Copyright (c) 2014-2015 Joël Charles  
+Copyright (c) 2014-2016 Joël Charles  
 Licensed under the MIT license.
