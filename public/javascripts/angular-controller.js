@@ -375,16 +375,16 @@ angular.module('quassel')
         }
     };
 }])
-.controller('ModalJoinChannelInstanceCtrl', function ($scope, $modalInstance, network) {
+.controller('ModalJoinChannelInstanceCtrl', function ($scope, $uibModalInstance, network) {
     $scope.name = '';
     $scope.network = network;
 
     $scope.ok = function () {
-        $modalInstance.close($scope.name);
+        $uibModalInstance.close($scope.name);
     };
 
     $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
+        $uibModalInstance.dismiss('cancel');
     };
 })
 .controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config) {

@@ -1,3 +1,4 @@
+/* global angular */
 angular.module('quassel')
 .directive('input', function ($parse) {
     return {
