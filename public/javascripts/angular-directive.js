@@ -67,7 +67,11 @@ angular.module('quassel')
                 content = $filter('color')($filter('linky')(message.content, '_blank'));
                 break;
             case MT.Nick:
-                content = nickplaceholder() + " is now known as {{::message.content}}";
+                if (message.sender === message.content) {
+                    content = "You are now known as " +  nickplaceholder(message.content);
+                } else {
+                    content = nickplaceholder() + " is now known as " + nickplaceholder(message.content);
+                }
                 break;
             case MT.Mode:
                 content = "Mode {{::message.content}} by " + nickplaceholder();
