@@ -202,10 +202,12 @@ angular.module('quassel')
                 if (buffer.isStatusBuffer()) {
                     setHighlight(buffer, 'low');
                 } else if (!buffer.isChannel()) {
-                    if (setHighlight(buffer, 'high')) {
-                        incFavico(buffer);
+                    if (!message.isSelf()) {
+                        if (setHighlight(buffer, 'high')) {
+                            incFavico(buffer);
+                        }
+                        $desktop(buffer.name, message.content);
                     }
-                    $desktop(buffer.name, message.content);
                 } else {
                     if (message.isHighlighted()) {
                         if (setHighlight(buffer, 'high')) {
