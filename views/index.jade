@@ -198,7 +198,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                           ng-class="channel.isPermanentlyRemoved || channel.isTemporarilyRemoved ? 'icon-eye-off' : 'icon-eye'"
                           title="{{channel.isPermanentlyRemoved ? 'Permanently hidden' : channel.isTemporarilyRemoved ? 'Temporarily hidden' : 'Unhidden'}}"
                         )
-                    span.channel-name(ng-click="showBuffer(channel)") {{channel.name}}
+                    span.channel-name(ng-click="showBuffer(channel)", title="{{channel.name}}") {{channel.name}}
                     a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
                       i.icon-qws.icon-menu
                     ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
