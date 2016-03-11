@@ -163,12 +163,26 @@ html, body, .container {
     opacity: 0.5;
 }
 
-.network-name, .group-name {
+.network-name, .group-name, .user-name, .channel-name {
     height: 32px;
     line-height: 32px;
     opacity: 0.75;
     flex: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.network-name, .group-name {
     text-transform: uppercase;
+}
+
+.user-name {
+    display: inline-block;
+    font-family: @font-side;
+}
+
+.channel-name {
+    font-family: @font-side;
 }
 
 .collapsable {
@@ -232,31 +246,10 @@ html, body, .container {
     font-size: 0.9em;
 }
 
-.user-name {
-    height: 32px;
-    display: inline-block;
-    line-height: 32px;
-    opacity: 0.75;
-    flex: 1;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    font-family: @font-side;
-}
-
 .channel-icon {
     .icon;
     display: inline-block;
     padding: 6px;
-}
-
-.channel-name {
-    height: 32px;
-    flex: 1;
-    line-height: 32px;
-    opacity: 0.75;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    font-family: @font-side;
 }
 
 .buffer-bottom-bar {
