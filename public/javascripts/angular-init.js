@@ -93,7 +93,13 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         get: function(key, defval, raw) {
             var myitem = localStorage.getItem(key);
             if (myitem === null) return defval;
-            return raw ? myitem : JSON.parse(myitem);
+            try {
+                return raw ? myitem : JSON.parse(myitem);
+            } catch (e) {
+                console.log(e);
+                localStorage.removeItem(key);
+            }
+            return null;
         }
     };
 }])
