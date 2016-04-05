@@ -284,7 +284,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                             colorpicker.list-group-item-text(colopicker-mode="backColor")
             #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
               .buffer-container
-                .user(ng-repeat="user in buffer.nickUserMap | ordernicks:buffer track by user.nick", uib-dropdown)
+                .user(ng-repeat="user in buffer.users | ordernicks:buffer track by user.nick", uib-dropdown)
                   span.user-icon
                     i.icon-qws.icon-circle(ng-class="user.away ? 'user-away' : 'user-not-away'")
                   span.user-name(ng-class="{'user-op': buffer.isOp(user.nick), 'user-voiced': buffer.isVoiced(user.nick)}") {{user.nick}}

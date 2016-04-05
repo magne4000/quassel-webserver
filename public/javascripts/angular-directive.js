@@ -291,7 +291,7 @@ angular.module('quassel')
     function getMostRecentNick(scope, token) {
         if (!scope.buffer) return [];
 
-        var keys = scope.buffer.messages.keys(), nicks = [];
+        var keys = Array.from(scope.buffer.messages.keys()), nicks = [];
         keys.sort();
         keys.reverse();
 
@@ -307,7 +307,7 @@ angular.module('quassel')
             if (nick.length <= token.length)
                 continue;
 
-            if (!(nick in scope.buffer.nickUserMap))
+            if (!scope.buffer.users.has(nick))
                 continue;
 
             if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length)) {
@@ -321,7 +321,7 @@ angular.module('quassel')
     function getNickAlphabetically(scope, token) {
         if (!scope.buffer) return [];
 
-        var subjects = Object.keys(scope.buffer.nickUserMap), nicks = [];
+        var subjects = Array.from(scope.buffer.users.keys()), nicks = [];
         subjects.sort(function(a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
         });

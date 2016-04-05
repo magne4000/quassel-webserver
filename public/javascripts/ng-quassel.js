@@ -82,13 +82,13 @@
               path: window.location.pathname + 'p',
           });
           self.quassel = new Quassel(self.server, self.port, {
-              nobacklogs: $config.get('initialBacklogLimit', 0, true),
-              initialbackloglimit: $config.get('initialBacklogLimit', 20, true),
-              backloglimit: $config.get('backlogLimit', 50, true),
-              unsecurecore: $config.get('unsecurecore', false, true)  // tls-browserify module doesn't respect tls API of nodejs
+              nobacklogs: $config.get('initialBacklogLimit', 0),
+              initialbackloglimit: $config.get('initialBacklogLimit', 20),
+              backloglimit: $config.get('backlogLimit', 50),
+              unsecurecore: $config.get('securecore', true)  // tls-browserify module doesn't respect tls API of nodejs
           }, function(next) {
               next(self.login, self.password);
-              var istls = !$config.get('unsecurecore', false, true);
+              var istls = !$config.get('securecore', true);
               if (istls) {
                 self.ws = self.quassel.qtsocket.socket._socket._ws;
               } else {

@@ -12,8 +12,18 @@ angular.module('quassel')
     var MT = require('message').Type;
     var MF = require('message').Flag;
     var IRCMessage = require('message').IRCMessage;
-    var loadingMoreBacklogs = [];
+    var loadingMoreBacklogs = new Map;
     var initialLastSeenList = [];
+    
+    function _updateBuffers(network) {
+        var it = network.getBufferMap().values();
+        var networkItem = it.next();
+        network._buffers = [];
+        while(!networkItem.done) {
+            network._buffers.push(networkItem.value);
+            networkItem = it.next();
+        }
+    }
 
     function createDayChangeMessage(msg, timestamp) {
         var message = new IRCMessage({
@@ -26,14 +36,19 @@ angular.module('quassel')
                 id: msg.bufferId
             }
         });
-        message.__s_done = true;
         message.sid = msg.id+timestamp;
         return message;
     }
 
     function updateMessages() {
         if ($scope.buffer) {
-            var messages = $scope.buffer.messages.values();
+            var it = $scope.buffer.messages.values();
+            var messageItem = it.next();
+            var messages = [];
+            while(!messageItem.done) {
+                messages.push(messageItem.value);
+                messageItem = it.next();
+            }
             $scope.messages = insertDayChangeMessagesAndApplyIgnoreList(messages, $scope.buffer);
             $scope.buffer.ignoreListRevision = $ignore.getRevision();
         }
@@ -98,15 +113,15 @@ angular.module('quassel')
 
     $quassel.on('network.addbuffer', function(networkId, bufferId) {
         var network = this.getNetworks().get(networkId);
-        network._buffers = network.getBufferHashMap().values();
+        _updateBuffers(network);
     });
 
     $quassel.on('buffer.backlog', function(bufferId, messageIds) {
         if (messageIds.length === 0) {
             // No more backlogs to receive for this buffer
-            loadingMoreBacklogs[''+bufferId] = 'stop';
+            loadingMoreBacklogs.set(bufferId, 'stop');
         } else if ($scope.buffer !== null) {
-            loadingMoreBacklogs[''+bufferId] = false;
+            loadingMoreBacklogs.set(bufferId, false);
             if (bufferId === $scope.buffer.id) {
                 updateMessages();
             }
@@ -149,30 +164,37 @@ angular.module('quassel')
             }
 
             var bufferLastMessage = buffer.getLastMessage();
-            if (typeof bufferLastMessage === 'undefined' && $config.get('initialBacklogLimit', 20, true) !== 0) {
+            if (typeof bufferLastMessage === 'undefined' && $config.get('initialBacklogLimit', 20) !== 0) {
                 initialLastSeenList[bufferId] = messageId;
             }
             if (typeof bufferLastMessage !== 'undefined' && messageId < bufferLastMessage.id) {
-                var found = buffer.messages.forEach(function(val, key){
+                var found = true;
+                var it = buffer.messages.entries();
+                var entry = it.next();
+                while(!entry.done) {
+                    var val = entry[1], key = entry[0];
                     if (key > messageId) {
                         if (buffer.isStatusBuffer()) {
                             setHighlight(buffer, 'low');
-                            return false;
+                            found = false;
+                            break;
                         } else if (!buffer.isChannel()) {
                             if (setHighlight(buffer, 'high')) {
                                 incFavico(buffer);
                             }
-                            return false;
+                            found =  false;
+                            break;
                         } else if (typeof val.isHighlighted === 'function' && val.isHighlighted()) {
                             if (setHighlight(buffer, 'high')) {
                                 incFavico(buffer);
                             }
                             $desktop(buffer.name, val.content);
-                            return false;
+                            found =  false;
+                            break;
                         }
                     }
-                    return true;
-                }, undefined, true);
+                    entry = it.next();
+                }
                 if (!found) {
                     setHighlight(buffer, 'low');
                 }
@@ -241,11 +263,11 @@ angular.module('quassel')
     });
 
     $quassel.on('buffer.remove', function(bufferId) {
-        var networks = this.getNetworks().all();
+        var networks = this.getNetworksMap();
         $scope.$apply(function(){
-            for (var i=0; i<networks.length; i++) {
-                networks[i]._buffers = networks[i].getBufferHashMap().values();
-            }
+            networks.forEach(function(network){
+                _updateBuffers(network);
+            });
         });
     });
 
@@ -253,7 +275,8 @@ angular.module('quassel')
         var buffer1 = this.getNetworks().findBuffer(bufferId1);
         var network = this.getNetworks().get(buffer1.network);
         $scope.$apply(function(){
-            network._buffers = network.getBufferHashMap().values();
+            network._buffers = network.getBufferMap().values();
+            _updateBuffers(network);
         });
     });
 
@@ -277,7 +300,7 @@ angular.module('quassel')
         $scope.buffer = channel;
         updateMessages();
         var id = 0;
-        channel.messages.forEach(function(val, key) {
+        channel.messages.forEach(function(val) {
             if (val.id > id) id = val.id;
         });
         $('#messagebox').focus();
@@ -285,11 +308,14 @@ angular.module('quassel')
     };
 
     $scope.loadMore = function() {
-        if ($scope.buffer !== null && (typeof loadingMoreBacklogs[''+$scope.buffer.id] === 'undefined' || loadingMoreBacklogs[''+$scope.buffer.id] === false) && loadingMoreBacklogs[''+$scope.buffer.id] !== 'stop') {
-            var firstMessage = Math.min.apply(null, $scope.buffer.messages.keys());
-            loadingMoreBacklogs[''+$scope.buffer.id] = true;
-            if (firstMessage === Infinity) firstMessage = -1;
-            $quassel.moreBacklogs($scope.buffer.id, firstMessage);
+        if ($scope.buffer !== null
+            && (!loadingMoreBacklogs.has($scope.buffer.id)
+                ||  loadingMoreBacklogs.get($scope.buffer.id) === false)
+            && loadingMoreBacklogs.get($scope.buffer.id) !== 'stop') {
+            var firstMessage = $scope.buffer.getFirstMessage();
+            loadingMoreBacklogs.set($scope.buffer.id, true);
+            if (!firstMessage) firstMessage = {id: -1};
+            $quassel.moreBacklogs($scope.buffer.id, firstMessage.id);
             return true;
         }
         return false;
@@ -476,19 +502,19 @@ angular.module('quassel')
     $scope.connecting = false;
     $scope.logged = false;
     $scope.remember = $config.get('remember') || false;
-    $scope.host = $scope.remember ? $config.get('host', '', true) : "";
-    $scope.port = $scope.remember ? $config.get('port', '', true) : "";
-    $scope.user = $config.get('user') || "";
-    $scope.password = $config.get('password') || "";
-    $scope.securecoreconnection = !$config.get('unsecurecore', false, true);
-    $scope.initialBacklogLimit = parseInt($config.get('initialBacklogLimit', 20, true), 10);
-    $scope.backlogLimit = parseInt($config.get('backlogLimit', 100, true), 10);
+    $scope.host = $scope.remember ? $config.get('host', '') : "";
+    $scope.port = $scope.remember ? $config.get('port', '') : "";
+    $scope.user = $config.get('user', '');
+    $scope.password = $config.get('password', '');
+    $scope.securecoreconnection = $config.get('securecore', true);
+    $scope.initialBacklogLimit = $config.get('initialBacklogLimit', 20);
+    $scope.backlogLimit = $config.get('backlogLimit', 100);
     $scope.alert = "";
 
     $rootScope.$on('defaultsettings', function() {
-        $scope.securecoreconnection = !$config.get('unsecurecore', !$scope.securecoreconnection, true);
-        $scope.initialBacklogLimit = parseInt($config.get('initialBacklogLimit', $scope.initialBacklogLimit, true), 10);
-        $scope.backlogLimit = parseInt($config.get('backlogLimit', $scope.backlogLimit, true), 10);
+        $scope.securecoreconnection = $config.get('securecore', $scope.securecoreconnection);
+        $scope.initialBacklogLimit = $config.get('initialBacklogLimit', $scope.initialBacklogLimit);
+        $scope.backlogLimit = $config.get('backlogLimit', $scope.backlogLimit);
     });
 
     $scope.$watch('alert', function(newValue, oldValue) {
@@ -622,12 +648,12 @@ angular.module('quassel')
         if ($scope.remember) {
             $config.set('user', $scope.user);
             $config.set('password', $scope.password);
-            $config.set('host', $scope.host, true);
-            $config.set('port', $scope.port, true);
+            $config.set('host', $scope.host);
+            $config.set('port', $scope.port);
         }
-        $config.set('unsecurecore', !$scope.securecoreconnection, true);
-        $config.set('initialBacklogLimit', $scope.initialBacklogLimit, true);
-        $config.set('backlogLimit', $scope.backlogLimit, true);
+        $config.set('securecore', $scope.securecoreconnection);
+        $config.set('initialBacklogLimit', $scope.initialBacklogLimit);
+        $config.set('backlogLimit', $scope.backlogLimit);
         console.log('Connecting to quasselcore');
     };
 

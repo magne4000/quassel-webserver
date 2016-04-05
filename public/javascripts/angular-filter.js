@@ -226,10 +226,11 @@ angular.module('quassel')
         if (!users || buffer === null) return users;
         var op = [], voiced = [], other = [];
 
-        angular.forEach(users, function(value) {
-            if (buffer.isOp(value.nick)) op.push(value);
-            else if (buffer.isVoiced(value.nick)) voiced.push(value);
-            else other.push(value);
+        users.forEach(function(value) {
+            var user = value.user;
+            if (buffer.isOp(user.nick)) op.push(user);
+            else if (buffer.isVoiced(user.nick)) voiced.push(user);
+            else other.push(user);
         });
 
         function sortNicks(a, b){
