@@ -322,6 +322,9 @@ angular.module('quassel')
         if (!scope.buffer) return [];
 
         var subjects = Array.from(scope.buffer.users.keys()), nicks = [];
+        if (subjects.length === 0) {
+            subjects = [scope.buffer.name, scope.nick];
+        }
         subjects.sort(function(a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
         });
@@ -348,7 +351,7 @@ angular.module('quassel')
             var nick = nicks[pos];
             pos = (pos + 1) % nicks.length;
             return tokenStart === 0 ? nick + ': ' /* non-breaking space */ : nick;
-        }
+        };
     }
 
     return {
