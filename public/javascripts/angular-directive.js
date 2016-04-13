@@ -318,10 +318,10 @@ angular.module('quassel')
     }
 
     // Find the closet nick alphabetically from the current buffer's nick list.
-    function getNickAlphabetically(scope, token) {
-        if (!scope.buffer) return [];
+    function completeNicksAlphabetically(nicks, scope, token) {
+        if (!scope.buffer) return nicks;
 
-        var subjects = Array.from(scope.buffer.users.keys()), nicks = [];
+        var subjects = Array.from(scope.buffer.users.keys());
         if (subjects.length === 0) {
             subjects = [scope.buffer.name, scope.nick];
         }
@@ -334,7 +334,7 @@ angular.module('quassel')
             if (nick.length <= token.length)
                 continue;
 
-            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length)) {
+            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length) && nicks.indexOf(nick) === -1) {
                 nicks.push(nick);
             }
         }
@@ -343,8 +343,7 @@ angular.module('quassel')
 
     function getTokenCompletion(scope, token, tokenStart) {
         var nicks = getMostRecentNick(scope, token), pos = 0;
-        if (nicks.length === 0)
-            nicks = getNickAlphabetically(scope, token);
+        nicks = completeNicksAlphabetically(nicks, scope, token);
         if (nicks.length === 0)
             return null;
         return function() {
