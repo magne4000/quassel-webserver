@@ -413,12 +413,48 @@ angular.module('quassel')
         $uibModalInstance.dismiss('cancel');
     };
 })
-.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config) {
+.controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, $timeout, networks, identities) {
+    $scope.name = '';
+    $scope.networks = networks;
+    $scope.identities = identities;
+    $scope.activeServer = 0;
+
+    $scope.ok = function () {
+        $uibModalInstance.close($scope.name);
+    };
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+
+    $scope.$watch('mnic.activeServer', function(a, b) {
+        console.log('mnic', a, b);
+    });
+    
+    $scope.addServer = function(network) {
+        network.ServerList.push({
+            Host: '',
+            Port: 6667,
+            Password: '',
+            UseSSL: false,
+            sslVersion: 0,
+            UseProxy: false,
+            ProxyType: '',
+            ProxyHost: '',
+            ProxyPort: '',
+            ProxyUser: '',
+            ProxyPass: ''
+        });
+    };
+})
+.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $timeout) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
-    $scope.displayIgnoreList = false;
-    var modal, activeIndice = 0, dbg = require("debug");
+    $scope.displayIgnoreListConfigItem = false;
+    $scope.displayNetworksConfigItem = false;
+    $scope.activeIndice = 0;
+    var modal, dbg = require("debug");
 
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
@@ -430,6 +466,27 @@ angular.module('quassel')
             templateUrl: 'modalChangeTheme.html',
             scope: $scope,
         });
+    };
+    
+    $scope.configNetworks = function() {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'modalNetworks.html',
+            controller: 'ModalNetworkInstanceCtrl',
+            controllerAs: 'mnic',
+            size: 'lg',
+            resolve: {
+                networks: function(){
+                    return Array.from($quassel.get().getNetworksMap().values());
+                },
+                identities: function(){
+                    return Array.from($quassel.get().identities.values());
+                }
+            }
+        });
+
+        // modalInstance.result.then(function (name) {
+        //     $quassel.sendMessage(network.getStatusBuffer().id, '/join ' + name);
+        // });
     };
 
     $scope.configIgnoreList = function() {
@@ -483,17 +540,23 @@ angular.module('quassel')
     };
 
     $scope.setActiveIndice = function(indice) {
-        activeIndice = indice;
+        $scope.activeIndice = indice;
     };
 
     $scope.deleteSelectedIgnoreItem = function() {
-        $ignore.deleteItem(activeIndice);
+        $ignore.deleteItem($scope.activeIndice);
         $scope.ignoreList = $ignore.getList();
     };
 
     $quassel.once('ignorelist', function(list) {
         $scope.$apply(function(){
-            $scope.displayIgnoreList = true;
+            $scope.displayIgnoreListConfigItem = true;
+        });
+    });
+    
+    $quassel.on('network.init', function() {
+        $scope.$apply(function(){
+            $scope.displayNetworksConfigItem = true;
         });
     });
 }])

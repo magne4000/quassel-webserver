@@ -48,7 +48,7 @@
         requestConnectNetwork: requestConnectNetwork,
         requestRemoveBuffer: requestRemoveBuffer,
         requestMergeBuffersPermanently: requestMergeBuffersPermanently,
-        requestUpdate: requestUpdate,
+        requestUpdateIgnoreListManager: requestUpdateIgnoreListManager,
         connect: connect,
         disconnect: disconnect,
         login: login,
@@ -200,8 +200,8 @@
         self.quassel.requestHideBufferPermanently(bufferId);
       }
       
-      function requestUpdate(ignoreList) {
-        self.quassel.requestUpdate(ignoreList);
+      function requestUpdateIgnoreListManager(ignoreList) {
+        self.quassel.requestUpdateIgnoreListManager(ignoreList);
       }
       
       function connect() {

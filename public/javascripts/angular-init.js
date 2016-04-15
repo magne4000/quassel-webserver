@@ -35,7 +35,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         },
         save: function() {
             savedIgnoreList = angular.copy(ignoreList);
-            $quassel.requestUpdate(ignoreList.export());
+            $quassel.requestUpdateIgnoreListManager(ignoreList.export());
         }
     };
 }])
@@ -308,8 +308,20 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
     };
 }])
-.run([function(){
+.run(['$templateCache', function($templateCache){
     console.log('AngularJS loaded');
+    $templateCache.put("uib/template/tabs/tabsetleft.html",
+        "<div>\n" +
+        "  <ul class=\"nav col-sm-4 text-right nav-{{tabset.type || 'tabs'}}\" ng-class=\"{'nav-stacked': vertical, 'nav-justified': justified}\" ng-transclude></ul>\n" +
+        "  <div class=\"tab-content col-sm-8\">\n" +
+        "    <div class=\"tab-pane\"\n" +
+        "         ng-repeat=\"tab in tabset.tabs\"\n" +
+        "         ng-class=\"{active: tabset.active === tab.index}\"\n" +
+        "         uib-tab-content-transclude=\"tab\">\n" +
+        "    </div>\n" +
+        "  </div>\n" +
+        "</div>\n" +
+        "");
 }]);
 
 // Production steps of ECMA-262, Edition 6, 22.1.2.1

@@ -1,0 +1,41 @@
+script(type="text/ng-template", id="modalIgnoreList.html")
+    .modal-header
+      button.close(type='button', ng-click='$dismiss("close")') ×
+      h4#myModalLabel.modal-title Ignore list
+    .modal-body
+      uib-tabset(type="pills")
+        uib-tab(heading="{{ignoreItem.ignoreRule}}", select="setActiveIndice($index)", ng-repeat="ignoreItem in ignoreList.list")
+          button.btn.btn-primary.pull-right(type="button", ng-model="ignoreItem.isActive", uib-btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0") {{ignoreItem.isActive ? 'Rule enabled':'Rule disabled'}}
+          h4 Strictness
+          .btn-group
+            label.btn.btn-primary(ng-model="ignoreItem.strictness", uib-btn-radio="1") Dynamic
+            label.btn.btn-primary(ng-model="ignoreItem.strictness", uib-btn-radio="2") Permanent
+          h4 Rule type
+          .btn-group
+            label.btn.btn-primary(ng-model="ignoreItem.ignoreType", uib-btn-radio="0") Sender
+            label.btn.btn-primary(ng-model="ignoreItem.ignoreType", uib-btn-radio="1") Message
+            label.btn.btn-primary(ng-model="ignoreItem.ignoreType", uib-btn-radio="2") CTCP
+          h4 Ignore rule
+          form.form-inline
+            .form-group
+              .input-group
+                input.form-control(type="text", ng-model="ignoreItem.ignoreRule")
+                .input-group-btn
+                  button.btn.btn-primary(type="button", ng-model="ignoreItem.isRegEx", uib-btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0")
+                    i.icon-qws(ng-class="{'icon-check-empty': !ignoreItem.isRegEx, 'icon-check': ignoreItem.isRegEx}")
+                    span  Regex ?
+          h4 Scope
+          .form-group
+            .input-group
+              input(type="text", ng-model="ignoreItem.scopeRule", token-field)
+              .input-group-btn
+                label.btn.btn-primary(ng-model="ignoreItem.scope", uib-btn-radio="0") Global
+                label.btn.btn-primary(ng-model="ignoreItem.scope", uib-btn-radio="1") Network
+                label.btn.btn-primary(ng-model="ignoreItem.scope", uib-btn-radio="2") Channel
+        button.btn.btn-danger.btn-sm.pull-right(title="Delete current rule", ng-confirm-click="Are you sure you want to delete this rule ?", ng-ok-click="deleteSelectedIgnoreItem()")
+          i.icon-qws.icon-trash
+        button.btn.btn-success.btn-sm.pull-right(title="Add a rule", ng-click="createIgnoreItem()")
+          i.icon-qws.icon-plus
+    .modal-footer
+      button.btn(ng-click="cancelIgnoreList()") Cancel
+      button.btn.btn-default(ng-click="saveIgnoreList()") Save

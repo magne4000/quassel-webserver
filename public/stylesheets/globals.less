@@ -629,3 +629,15 @@
     -moz-hyphens: auto;
     hyphens: auto;
 }
+
+// Mixin itself
+.clearfix() {
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
