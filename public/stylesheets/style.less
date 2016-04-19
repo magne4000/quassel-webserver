@@ -372,7 +372,7 @@ html, body, .container {
     }
 }
 
-:not(.tokenfield) > input[type="text"], :not(.tokenfield) > input[type="password"], :not(.tokenfield) > input[type="number"] {
+:not(.tokenfield) > input[type="text"], :not(.tokenfield) > input[type="password"], :not(.tokenfield) > input[type="number"], :not(.tokenfield) > select {
     height: @box-height !important;
     color: @input-color !important;
     background: @input-bg !important;
@@ -650,7 +650,7 @@ html, body, .container {
 .btn-default:focus,
 .btn-default:active {
     color: @button-default-text-color;
-    background-color: darken(@button-default-bg, 5);
+    background-color: darken(@button-default-bg, 5%);
 }
 
 .btn-primary {
@@ -663,7 +663,7 @@ html, body, .container {
 .btn-primary:focus,
 .btn-primary:active {
     color: @button-primary-text-color;
-    background-color: darken(@button-primary-bg, 5);
+    background-color: darken(@button-primary-bg, 5%);
 }
 
 .network-name, .group-name {
@@ -718,10 +718,37 @@ html, body, .container {
     box-shadow: inset 0 0 8px #000;
 }
 
+// Panels
+
+.panel-default {
+    background-color: @panel-bg;
+    border: 1px solid @border-color;
+}
+
 // Tabs
 
 .tab-margin .tab-pane {
     margin: 15px 15px;
+}
+
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+    color: @text-color;
+    background-color: @nav-active-bg;
+    border: 1px solid @border-color;
+    border-bottom-color: transparent;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid @border-color;
+}
+
+.nav-tabs>li>a:hover {
+    border-color: @button-default-bg @button-default-bg @border-color;
+}
+
+.nav>li>a:hover, .nav>li>a:focus {
+    background-color: @button-default-bg;
+    color: @button-default-text-color;
 }
 
 // Dropdown

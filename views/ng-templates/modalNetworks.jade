@@ -1,52 +1,76 @@
 script(type="text/ng-template", id="modalNetworks.html")
+  form(name="networksForm")
     .modal-header
       button.close(type='button', ng-click='$dismiss("close")') ×
       h4#myModalLabel.modal-title Networks
     .modal-body.tab-margin
       uib-tabset
-        uib-tab(heading="{{network.networkName}}", ng-repeat="network in networks", select="mnic.activeServer = 0")
-          // Identity
-          .form-group
-            label(for="identity-{{network.networkName}}") Identity
-            select.form-control(
-                  id="identity-{{network.networkName}}"
-                  ng-model="network.identityId"
-                  convert-to-number)
-              option(ng-repeat="identity in identities", ng-selected="identity.identityId == network.identityId", value="{{identity.identityId|number}}") {{identity.identityName}}
-          uib-tabset
-            uib-tab(heading="Servers")
-              // Servers
-              uib-tabset.clearfix(type="pills", vertical="true", active="mnic.activeServer", template-url="uib/template/tabs/tabsetleft.html")
-                uib-tab(heading="{{server.Host}}:{{server.Port}}", ng-repeat="server in network.ServerList", index="$index")
-                  form.form-horizontal
-                    .form-group
-                      label.col-sm-2.control-label(for="host-{{server.Host}}") Host
-                      .col-sm-5
-                        input.form-control(type="text", id="host-{{server.Host}}", ng-model="server.Host")
-                      label.col-sm-2.control-label(for="port-{{server.Host}}") Port
-                      .col-sm-3
-                        input.form-control(type="number", id="port-{{server.Host}}", ng-model="server.Port", string-to-number)
-                    .form-group
-                      label.col-sm-2.control-label(for="password-{{server.Host}}") Password
-                      .col-sm-10
-                        input.form-control(type="password", id="password-{{server.Host}}", ng-model="server.Password")
-                    .form-group
-                      .col-sm-offset-2.col-sm-10
-                        .checkbox
-                          label
-                            input(type="checkbox", ng-model="server.UseSSL")
-                            | Use SSL
-                    .form-group
-                      .col-sm-offset-2.col-sm-10
-                        button.btn.btn-danger.pull-right(title="Delete current server", ng-confirm-click="Are you sure you want to delete this server ?", ng-ok-click="deleteServer(network, server)")
-                          i.icon-qws.icon-trash  Delete
-              button.btn.btn-success.pull-right(ng-click="addServer(network); mnic.activeServer = network.ServerList.length - 1")
-                i.icon-qws.icon-plus  Add a server
-            uib-tab(heading="Commands")
-        button.btn.btn-danger.btn-sm.pull-right(title="Delete current network", ng-confirm-click="Are you sure you want to delete this network ?", ng-ok-click="deleteSelectedNetwork()")
+        uib-tab(heading="{{network.networkName}}", ng-repeat="network in networks", select="selectNetwork($index); selectServer(network, 0)", disable="networksForm.$invalid")
+          ng-form(name="networkForm")
+            // Identity
+            .form-group(ng-class="{'has-error': networkForm.networkName.$invalid}")
+              label.control-label(for="networkName") Name
+              input.form-control(type="text", id="networkName", name="networkName", ng-model="network.networkName", required)
+            .form-group
+              label.control-label(for="identity") Identity
+              select.form-control(
+                    id="identity"
+                    ng-model="network.identityId"
+                    convert-to-number)
+                option(ng-repeat="identity in identities", ng-selected="identity.identityId == network.identityId", value="{{identity.identityId|number}}") {{identity.identityName}}
+            ng-form.form-horizontal(name="serversForm")
+              uib-tabset
+                uib-tab(heading="Servers", disable="serversForm.$invalid")
+                  // Servers
+                  .row
+                    ul.list-group.col-md-4
+                      li.list-group-item(
+                            ng-repeat="server in network.ServerList"
+                            ng-class="{active: activeServerIndex == $index, disabled: serversForm.$invalid}"
+                            ng-click="!serversForm.$invalid && selectServer(network, $index)"
+                        ) {{server.Host}}:{{server.Port}}
+                      li.list-group-item.list-group-item-success(
+                            ng-class="{disabled: serversForm.$invalid}"
+                            ng-click="serversForm.$invalid || (addServer(network) && selectServer(network, network.ServerList.length - 1))"
+                        )
+                        i.icon-qws.icon-plus  Add a server
+                    .panel.panel-default.col-md-8
+                      .panel-body
+                        .form-group
+                          .col-md-7(ng-class="{'has-error': serversForm.hostServer.$invalid}")
+                            label.col-sm-3.control-label(for="hostServer") Host
+                            .col-sm-9
+                              input.form-control(type="text", id="hostServer", name="hostServer", ng-model="activeServer.Host", required)
+                          .col-md-5(ng-class="{'has-error': serversForm.portServer.$invalid}")
+                            label.col-sm-3.control-label(for="portServer") Port
+                            .col-sm-9
+                              input.form-control(type="number", id="portServer", ng-model="activeServer.Port", min="0", max="65535", string-to-number)
+                        .form-group
+                          label.col-sm-2.control-label(for="passwordServer") Password
+                          .col-sm-10
+                            input.form-control(type="password", id="passwordServer", ng-model="activeServer.Password")
+                        .form-group
+                          .col-sm-offset-2.col-sm-10
+                            .checkbox
+                              label
+                                input(type="checkbox", ng-model="activeServer.UseSSL")
+                                | Use SSL
+                        .form-group
+                          .col-sm-offset-2.col-sm-10
+                            button.btn.btn-danger.pull-right(title="Delete current server", ng-confirm-click="Are you sure you want to delete this server ?", ng-ok-click="deleteServer(network, activeServerIndex)")
+                              i.icon-qws.icon-trash  Delete
+                // uib-tab(heading="Commands", disable="serversForm.$invalid")
+                // uib-tab(heading="Connection", disable="serversForm.$invalid")
+                // uib-tab(heading="Auto Identity", disable="serversForm.$invalid")
+                // uib-tab(heading="Encodings", disable="serversForm.$invalid")
+                uib-tab(heading="Commands", disable="true")
+                uib-tab(heading="Connection", disable="true")
+                uib-tab(heading="Auto Identity", disable="true")
+                uib-tab(heading="Encodings", disable="true")
+        button.btn.btn-danger.btn-sm.pull-right(title="Delete current network", ng-confirm-click="Are you sure you want to delete this network ?", ng-ok-click="deleteActiveNetwork()")
           i.icon-qws.icon-trash
         button.btn.btn-success.btn-sm.pull-right(title="Add a network", ng-click="createNetwork()")
           i.icon-qws.icon-plus
     .modal-footer
-      button.btn(ng-click='$dismiss("close")') Cancel
-      button.btn.btn-default(ng-click="saveNetworks()") Save
+      button.btn.btn-default(ng-click='$dismiss("close")') Cancel
+      button.btn.btn-primary(ng-click="saveNetworks()", ng-disabled="networksForm.$invalid") Save

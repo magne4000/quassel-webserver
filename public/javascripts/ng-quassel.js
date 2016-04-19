@@ -49,6 +49,9 @@
         requestRemoveBuffer: requestRemoveBuffer,
         requestMergeBuffersPermanently: requestMergeBuffersPermanently,
         requestUpdateIgnoreListManager: requestUpdateIgnoreListManager,
+        requestSetNetworkInfo: requestSetNetworkInfo,
+        createNetwork: createNetwork,
+        removeNetwork: removeNetwork,
         connect: connect,
         disconnect: disconnect,
         login: login,
@@ -202,6 +205,18 @@
       
       function requestUpdateIgnoreListManager(ignoreList) {
         self.quassel.requestUpdateIgnoreListManager(ignoreList);
+      }
+      
+      function requestSetNetworkInfo(networkId, network) {
+        self.quassel.requestSetNetworkInfo(networkId, network);
+      }
+      
+      function createNetwork(networkName, identityId, initialServer, optionsopt) {
+        self.quassel.createNetwork(networkName, identityId, initialServer, optionsopt);
+      }
+      
+      function removeNetwork(networkId) {
+        self.quassel.removeNetwork(networkId);
       }
       
       function connect() {

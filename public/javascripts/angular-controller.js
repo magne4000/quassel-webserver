@@ -1,4 +1,5 @@
 /* global angular */
+/* global $ */
 
 angular.module('quassel')
 .controller('NetworkController',
@@ -108,7 +109,24 @@ angular.module('quassel')
     $quassel.on('network.init', function(networkId) {
         var networks = this.getNetworks();
         var network = networks.get(networkId);
-        $scope.networks.push(network);
+        $scope.$apply(function(){
+            $scope.networks.push(network);
+        });
+    });
+    
+    $quassel.on('network.remove', function(networkId) {
+        var index = null;
+        for (var i=0; i<$scope.networks.length; i++) {
+            if ($scope.networks[i].networkId === networkId) {
+                index = i;
+                break;
+            }
+        }
+        if (index !== null) {
+            $scope.$apply(function(){
+                $scope.networks.splice(index, 1);
+            });
+        }
     });
 
     $quassel.on('network.addbuffer', function(networkId, bufferId) {
@@ -205,7 +223,9 @@ angular.module('quassel')
     $quassel.on('buffer.markerline', function(bufferId, messageId) {
         var buffer = this.getNetworks().findBuffer(bufferId);
         if (buffer !== null) {
-            buffer.markerline = parseInt(messageId, 10);
+            $scope.$apply(function(){
+                buffer.markerline = parseInt(messageId, 10);
+            });
         }
     });
 
@@ -295,16 +315,18 @@ angular.module('quassel')
     $quassel.on('buffer.unhide', function() {
         $scope.$apply();
     });
-
+    
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
-        updateMessages();
-        var id = 0;
-        channel.messages.forEach(function(val) {
-            if (val.id > id) id = val.id;
-        });
-        $('#messagebox').focus();
-        $quassel.markBufferAsRead(channel.id, id);
+        if ($scope.buffer !== null) {
+            updateMessages();
+            var id = 0;
+            channel.messages.forEach(function(val) {
+                if (val.id > id) id = val.id;
+            });
+            $('#messagebox').focus();
+            $quassel.markBufferAsRead(channel.id, id);
+        }
     };
 
     $scope.loadMore = function() {
@@ -414,22 +436,24 @@ angular.module('quassel')
     };
 })
 .controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, $timeout, networks, identities) {
-    $scope.name = '';
     $scope.networks = networks;
     $scope.identities = identities;
-    $scope.activeServer = 0;
+    $scope.activeNetworkIndex = 0;
+    $scope.activeServerIndex = 0;
+    $scope.activeServer = null;
 
-    $scope.ok = function () {
-        $uibModalInstance.close($scope.name);
+    $scope.saveNetworks = function () {
+        $uibModalInstance.close($scope.networks);
     };
-
-    $scope.cancel = function () {
-        $uibModalInstance.dismiss('cancel');
+    
+    $scope.selectServer = function(network, index) {
+        $scope.activeServerIndex = index;
+        $scope.activeServer = network.ServerList[index];
     };
-
-    $scope.$watch('mnic.activeServer', function(a, b) {
-        console.log('mnic', a, b);
-    });
+    
+    $scope.selectNetwork = function(index) {
+        $scope.activeNetworkIndex = index;
+    };
     
     $scope.addServer = function(network) {
         network.ServerList.push({
@@ -445,6 +469,42 @@ angular.module('quassel')
             ProxyUser: '',
             ProxyPass: ''
         });
+        return true;
+    };
+    
+    $scope.createNetwork = function() {
+        $scope.networks.push({
+            networkName: 'New network',
+            identityId: $scope.identities[0].identityId,
+            ServerList: [],
+            codecForServer: '',
+            codecForEncoding: '',
+            codecForDecoding: '',
+            useRandomServer: false,
+            perform: [],
+            useAutoIdentify: false,
+            autoIdentifyService: 'NickServ',
+            autoIdentifyPassword: '',
+            useSasl: false,
+            saslAccount: '',
+            saslPassword: '',
+            useAutoReconnect: true,
+            autoReconnectInterval: 60,
+            autoReconnectRetries: 20,
+            unlimitedReconnectRetries: false,
+            rejoinChannels: true
+        });
+        $scope.addServer($scope.networks[$scope.networks.length - 1]);
+        return true;
+    };
+    
+    $scope.deleteActiveNetwork = function() {
+        $scope.networks.splice($scope.activeNetworkIndex, 1);
+    };
+    
+    $scope.deleteServer = function(network, index) {
+        network.ServerList.splice(index, 1);
+        $scope.selectServer(network, 0);
     };
 })
 .controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $timeout) {
@@ -472,21 +532,40 @@ angular.module('quassel')
         var modalInstance = $uibModal.open({
             templateUrl: 'modalNetworks.html',
             controller: 'ModalNetworkInstanceCtrl',
-            controllerAs: 'mnic',
+            scope: $scope.$new(true),
             size: 'lg',
             resolve: {
                 networks: function(){
-                    return Array.from($quassel.get().getNetworksMap().values());
+                    return angular.copy(Array.from($quassel.get().getNetworksMap().values()));
                 },
                 identities: function(){
-                    return Array.from($quassel.get().identities.values());
+                    return angular.copy(Array.from($quassel.get().identities.values()));
                 }
             }
         });
 
-        // modalInstance.result.then(function (name) {
-        //     $quassel.sendMessage(network.getStatusBuffer().id, '/join ' + name);
-        // });
+        modalInstance.result.then(function (networks) {
+            var nm = new Map($quassel.get().getNetworksMap()), i=0, network, areEquals = false;
+            for (;i<networks.length; i++) {
+                if (typeof networks[i].networkId === 'number' && networks[i].networkId > -1) {
+                    network = nm.get(networks[i].networkId);
+                    nm.delete(networks[i].networkId);
+                    areEquals = angular.equals(network, networks[i]);
+                    if (!areEquals) {
+                        // Update network information
+                        $quassel.requestSetNetworkInfo(network.networkId, networks[i]);
+                    }
+                    nm.delete(networks[i].networkId);
+                } else {
+                    // Create the new network
+                    $quassel.createNetwork(networks[i].networkName, networks[i].identityId, undefined, networks[i]);
+                    // TODO Check networkName duplicates
+                }
+            }
+            nm.forEach(function(network) {
+                $quassel.removeNetwork(network.networkId);
+            });
+        });
     };
 
     $scope.configIgnoreList = function() {

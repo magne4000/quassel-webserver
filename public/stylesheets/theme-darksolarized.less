@@ -14,13 +14,13 @@
 @topic-color: #888;
 @text-pane-color: @text-color;
 @header-text-color: @text-color;
-@input-bg: @brand-primary;
+@input-bg: lighten(@brand-primary, 5%);
 @input-color: @text-color;
 @input-color-placeholder: darken(@text-color, 50%);
 @button-primary-text-color: @text-color;
 @button-default-text-color: @text-color;
 @button-default-bg: #292929;
-@button-primary-bg: @button-default-bg;
+@button-primary-bg: lighten(@body-bg, 3%);
 @link-color: @brand-primary;
 @link-hover-color: darken(@link-color, 15%);
 @border-color: #444444;
@@ -36,6 +36,9 @@
 @font-backlog: consolas, "Droid Sans Mono", monospace;
 
 @pane-color: @brand-primary;
+
+@panel-bg: @brand-primary;
+@nav-active-bg: @brand-primary;
 
 @type-1-color: #839496;
 @type-2-color: #93a1a1;
@@ -108,6 +111,18 @@ a.list-group-item:focus {
 .list-group-item.active:focus {
     background-color: darken(#337ab7, 10%);
     border-color:  darken(#337ab7, 20%)
+}
+
+.list-group-item.disabled,
+.list-group-item.disabled:hover,
+.list-group-item.disabled:focus {
+    background-color: #ccc;
+}
+
+.list-group-item-success {
+    color: white;
+    background-color: darken(@brand-success, 20%);
+    border-color: darken(@brand-success, 30%);
 }
 
 .network.off > span,
