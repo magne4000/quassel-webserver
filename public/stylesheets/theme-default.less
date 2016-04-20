@@ -1,43 +1,23 @@
 @import "style.less";
-@import "bootstrap-tokenfield.less";
 
-@brand-primary: #4B79C4;
-@brand-success: #5cb85c;
-@brand-warning: #f0ad4e;
-@brand-danger: #d9534f;
-@brand-info: #5bc0de;
-
+// Bootstrap variables
 @body-bg: #EAEAF8;
-@topic-bg: white;
-@login-bg: white;
-@text-color: #333;
-@topic-color: @text-color;
-@text-pane-color: white;
-@header-text-color: white;
-@input-bg: white;
-@input-color: black;
-@button-primary-text-color: white;
-@button-default-text-color: black;
-@button-primary-bg: darken(@brand-primary, 2%);
-@button-default-bg: #E6E6E6;
-@link-color: @brand-primary;
-@link-hover-color: darken(@link-color, 15%);
-@border-color: #ddd;
+
+// Custom variables
 @markerline-bg: #d9534f;
-@dropdown-bg: white;
-@dropdown-bg-hover: #F5F5F5;
 @highlight-low-color: @brand-info;
 @highlight-medium-color: @brand-success;
 @highlight-high-color: @brand-warning;
 @highlight-on-bg: fadeout(@highlight-high-color, 20%);
-
-@font-side: "Roboto Condensed";
-@font-backlog: "Droid Sans Mono", monospace;
-
-@pane-color: #39383E;
-
-@panel-bg: white;
-@nav-active-bg: white;
+@highlight-message-bg: @brand-warning;
+@backlog-font: "Droid Sans Mono", monospace;
+@pane-bg: @gray-dark;
+@pane-font: "Roboto Condensed";
+@pane-color: white;
+@header-bg: @brand-primary;
+@header-color: white;
+@topic-bg: white;
+@topic-color: @text-color;
 
 @type-1-color: inherit;
 @type-2-color: #916409;

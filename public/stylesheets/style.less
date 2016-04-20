@@ -1,20 +1,27 @@
-@import (reference) "bootstrap-overrides";
+@import "bootstrap.less";
+@import (reference) "mixins.less";
+@import "bootstrap-tokenfield.less";
 
-@panel-width: 200px;
+// Bootstrap overrides
+// @font-size-base: 16px;
+@font-family-base: "Roboto";
+
+// Custom variables
 @header-height: 48px;
 @box-height: 32px;
+@highlight-on-bottom: inset 0 -16px 16px -16px @highlight-on-bg;
+@highlight-on-top: inset 0 16px 16px -16px @highlight-on-bg;
 
 body {
-    font-size: 16px;
-    font-weight: 200;
-    background-color: @body-bg;
-    font-family: "Roboto";
-    color: @text-color;
     overflow: hidden;
 }
 
 html, body, .container {
-    height:100%;
+    height: 100%;
+}
+
+.fill {
+    width: 100%;
 }
 
 #container {
@@ -33,13 +40,6 @@ html, body, .container {
     min-height: 0;
 }
 
-#buffer-pane, #nick-pane {
-    position: relative;
-    overflow: auto;
-    background-color: @pane-color;
-    color: @text-pane-color;
-}
-
 .buffer-container {
     overflow: auto;
     position: absolute;
@@ -49,6 +49,11 @@ html, body, .container {
 }
 
 .pane {
+    position: relative;
+    overflow: auto;
+    font-family: @pane-font;
+    color: @pane-color;
+    background-color: @pane-bg;
     width: 16.6667%;
 }
 
@@ -65,15 +70,12 @@ html, body, .container {
 }
 
 .animation, .animation .network, .animation .network-channels {
-    .transition(all 0.5s ease-in-out;);
+    .transition(margin 0.5s ease-in-out, height 0.5s ease-in-out;);
 }
 
 .buffer-container  {
     .transition(opacity 0.5s linear;);
 }
-
-@highlight-on-bottom: inset 0 -16px 16px -16px @highlight-on-bg;
-@highlight-on-top: inset 0 16px 16px -16px @highlight-on-bg;
 
 .buffer-container.highlight-on-bottom {
     box-shadow: @highlight-on-bottom;
@@ -107,7 +109,7 @@ html, body, .container {
 }
 
 #topic {
-    font-family: @font-backlog;
+    font-family: @backlog-font;
     padding-left: 4px;
     padding-right: 36px;
     height: 32px;
@@ -128,8 +130,8 @@ html, body, .container {
 }
 
 #header {
-    background-color: @brand-primary;
-    color: @header-text-color;
+    background-color: @header-bg;
+    color: @header-color;
     height: @header-height;
     line-height: @header-height;
     .transition(background-color 0.5s linear;);
@@ -144,7 +146,7 @@ html, body, .container {
 }
 
 .connecting #header {
-    background-color: @brand-warning;
+    background-color: lighten(@brand-primary, 10%);
 }
 
 .network, .channel, .user {
@@ -155,7 +157,7 @@ html, body, .container {
     position: relative;
 
     &:hover, &.active {
-        background-color: darken(@pane-color, 5);
+        background-color: darken(@pane-bg, 5%);
     }
 }
 
@@ -178,11 +180,6 @@ html, body, .container {
 
 .user-name {
     display: inline-block;
-    font-family: @font-side;
-}
-
-.channel-name {
-    font-family: @font-side;
 }
 
 .collapsable {
@@ -260,7 +257,7 @@ html, body, .container {
     bottom: 0;
     position: absolute;
     width: 100%;
-    background-color: darken(@pane-color, 5);
+    background-color: darken(@pane-bg, 5%);
 }
 
 .showhide {
@@ -271,24 +268,28 @@ html, body, .container {
     cursor: pointer;
     opacity: 0.5;
     padding: 6px;
+    color: @pane-color;
+    border-radius: 0;
+    box-sizing: border-box;
 
     &:hover {
         opacity: 1;
-        background-color: darken(@pane-color, 8);
+        background-color: lighten(@pane-bg, 10%);
+        border-left: 1px solid @pane-bg;
+        border-right: 1px solid @pane-bg;
     }
-}
-
-.showhide .icon-qws {
-    color: @text-pane-color;
-    font-size: 1.2em;
-}
-
-.buffer-bottom-bar .showhide.left {
-    left: 0;
-}
-
-.buffer-bottom-bar .showhide.right {
-    right: 0;
+    
+    &.left {
+        left: 0;
+    }
+    
+    &.right {
+        right: 0;
+    }
+    
+    .icon-qws {
+        font-size: 1.2em;
+    }
 }
 
 .quassel-logo {
@@ -324,7 +325,6 @@ html, body, .container {
 }
 
 .input {
-    // min-height: @box-height;
     width: 100%;
     background: @input-bg;
     word-break: break-word;
@@ -372,12 +372,6 @@ html, body, .container {
     }
 }
 
-:not(.tokenfield) > input[type="text"], :not(.tokenfield) > input[type="password"], :not(.tokenfield) > input[type="number"], :not(.tokenfield) > select {
-    height: @box-height !important;
-    color: @input-color !important;
-    background: @input-bg !important;
-}
-
 .backlog {
     margin: 0;
     padding: 4px;
@@ -415,12 +409,6 @@ html, body, .container {
 
 .backlog .irc-message > span, .backlog .irc-message > .message {
     display: table-cell;
-
-    &.hiddenforcopy {
-        width: 0px;
-        display: inline-block;
-        overflow: hidden;
-    }
 }
 
 .backlog .markerline {
@@ -449,23 +437,9 @@ html, body, .container {
     margin-top: 64px;
 }
 
-.login-container {
-    background-color: @login-bg;
-    .border-radius;
-
-    h1 {
-        font-size: 20px;
-        margin-top: 0;
-    }
-
-    .btn {
-        width: 100%;
-    }
-}
-
 .logout, .reconnect, .config {
     float: right;
-    margin: 8px;
+    margin: 7px;
 }
 
 .prefs .dropdown-toggle {
@@ -639,37 +613,6 @@ html, body, .container {
     border: 0;
 }
 
-/* Style */
-.btn-default {
-    color: @button-default-text-color;
-    background-color: @button-default-bg;
-    border: none;
-}
-
-.btn-default:hover,
-.btn-default:focus,
-.btn-default:active {
-    color: @button-default-text-color;
-    background-color: darken(@button-default-bg, 5%);
-}
-
-.btn-primary {
-    color: @button-primary-text-color;
-    background-color: @button-primary-bg;
-    border: none;
-}
-
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active {
-    color: @button-primary-text-color;
-    background-color: darken(@button-primary-bg, 5%);
-}
-
-.network-name, .group-name {
-    font-family: @font-side;
-}
-
 .channel.selected {
     background-color: black;
 }
@@ -696,7 +639,7 @@ html, body, .container {
 }
 
 .dropdown-network .icon-qws, .dropdown-channel .icon-qws, .dropdown-user .icon-qws {
-    color: @text-pane-color;
+    color: @pane-color;
     top: 6px;
     left: 5px;
     font-size: 1.3em;
@@ -707,62 +650,21 @@ html, body, .container {
 }
 
 .backlog .timestamp > span, .backlog .message, .backlog .nick {
-    font-family: @font-backlog;
+    font-family: @backlog-font;
 }
 
 .backlog .irc-message.highlighted {
-    background-color: @brand-warning;
+    background-color: @highlight-message-bg;
 }
 
 .drop.dropable.hover {
     box-shadow: inset 0 0 8px #000;
 }
 
-// Panels
-
-.panel-default {
-    background-color: @panel-bg;
-    border: 1px solid @border-color;
-}
-
 // Tabs
 
 .tab-margin .tab-pane {
     margin: 15px 15px;
-}
-
-.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
-    color: @text-color;
-    background-color: @nav-active-bg;
-    border: 1px solid @border-color;
-    border-bottom-color: transparent;
-}
-
-.nav-tabs {
-    border-bottom: 1px solid @border-color;
-}
-
-.nav-tabs>li>a:hover {
-    border-color: @button-default-bg @button-default-bg @border-color;
-}
-
-.nav>li>a:hover, .nav>li>a:focus {
-    background-color: @button-default-bg;
-    color: @button-default-text-color;
-}
-
-// Dropdown
-
-.open > .dropdown-menu {
-    background-color: @dropdown-bg;
-}
-
-.dropdown-menu > li > a {
-    color: @text-color !important;
-}
-
-.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
-    background-color: @dropdown-bg-hover;
 }
 
 // Minimum width for the sidebars.

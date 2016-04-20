@@ -3,9 +3,11 @@ script(type="text/ng-template", id="modalIgnoreList.html")
       button.close(type='button', ng-click='$dismiss("close")') ×
       h4#myModalLabel.modal-title Ignore list
     .modal-body
-      uib-tabset(type="pills")
+      uib-tabset
         uib-tab(heading="{{ignoreItem.ignoreRule}}", select="setActiveIndice($index)", ng-repeat="ignoreItem in ignoreList.list")
-          button.btn.btn-primary.pull-right(type="button", ng-model="ignoreItem.isActive", uib-btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0") {{ignoreItem.isActive ? 'Rule enabled':'Rule disabled'}}
+          button.btn.btn-primary.pull-right(type="button", ng-model="ignoreItem.isActive", uib-btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0")
+            i.icon-qws(ng-class="{'icon-check-empty': !ignoreItem.isActive, 'icon-check': ignoreItem.isActive}")
+            span  {{ignoreItem.isActive ? 'Rule enabled':'Rule disabled'}}
           h4 Strictness
           .btn-group
             label.btn.btn-primary(ng-model="ignoreItem.strictness", uib-btn-radio="1") Dynamic
@@ -37,5 +39,5 @@ script(type="text/ng-template", id="modalIgnoreList.html")
         button.btn.btn-success.btn-sm.pull-right(title="Add a rule", ng-click="createIgnoreItem()")
           i.icon-qws.icon-plus
     .modal-footer
-      button.btn(ng-click="cancelIgnoreList()") Cancel
-      button.btn.btn-default(ng-click="saveIgnoreList()") Save
+      button.btn.btn-default(ng-click="cancelIgnoreList()") Cancel
+      button.btn.btn-primary(ng-click="saveIgnoreList()") Save

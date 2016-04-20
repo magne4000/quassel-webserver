@@ -1,7 +1,0 @@
-script(type="text/ng-template", id="modalChangeTheme.html")
-    .modal-header
-      button.close(type='button', ng-click='$dismiss("close")') ×
-      h4#myModalLabel.modal-title Select theme
-    .modal-body
-      .list-group
-        a.list-group-item(href="#", ng-repeat="theme in getAllThemes()", ng-class="{active: activeTheme == theme}", ng-click="setTheme(theme)") {{theme}}

@@ -520,13 +520,6 @@ angular.module('quassel')
         $scope.activeTheme = theme;
         $theme.setClientTheme(theme);
     };
-
-    $scope.configTheme = function() {
-        modal = $uibModal.open({
-            templateUrl: 'modalChangeTheme.html',
-            scope: $scope,
-        });
-    };
     
     $scope.configNetworks = function() {
         var modalInstance = $uibModal.open({

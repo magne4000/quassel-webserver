@@ -1,5 +1,8 @@
 /* global angular */
 /* global Favico */
+/* global localStorage */
+/* global Notification */
+/* global $ */
 
 angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
 .factory('$ignore', ['$quassel', function($quassel){
@@ -308,7 +311,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
     };
 }])
-.run(['$templateCache', function($templateCache){
+.run([function(){
     console.log('AngularJS loaded');
 }]);
 

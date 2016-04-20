@@ -37,14 +37,14 @@ script(type="text/ng-template", id="modalNetworks.html")
                     .panel.panel-default.col-md-8
                       .panel-body
                         .form-group
-                          .col-md-7(ng-class="{'has-error': serversForm.hostServer.$invalid}")
-                            label.col-sm-3.control-label(for="hostServer") Host
-                            .col-sm-9
-                              input.form-control(type="text", id="hostServer", name="hostServer", ng-model="activeServer.Host", required)
-                          .col-md-5(ng-class="{'has-error': serversForm.portServer.$invalid}")
-                            label.col-sm-3.control-label(for="portServer") Port
-                            .col-sm-9
-                              input.form-control(type="number", id="portServer", ng-model="activeServer.Port", min="0", max="65535", string-to-number)
+                          .col-md-2(ng-class="{'has-error': serversForm.hostServer.$invalid}")
+                            label.control-label.fill(for="hostServer") Host
+                          .col-md-5(ng-class="{'has-error': serversForm.hostServer.$invalid}")
+                            input.form-control(type="text", id="hostServer", name="hostServer", ng-model="activeServer.Host", required)
+                          .col-md-2(ng-class="{'has-error': serversForm.portServer.$invalid}")
+                            label.control-label.fill(for="portServer") Port
+                          .col-md-3(ng-class="{'has-error': serversForm.portServer.$invalid}")
+                            input.form-control(type="number", id="portServer", name="portServer", ng-model="activeServer.Port", min="1", max="65535", required, string-to-number)
                         .form-group
                           label.col-sm-2.control-label(for="passwordServer") Password
                           .col-sm-10

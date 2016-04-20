@@ -7,8 +7,6 @@
  */
 
 .tokenfield {
-  height: 32px;
-  min-height: 32px;
   background-color: @input-bg;
   padding: 5px 10px 0px 10px;
 }
@@ -24,11 +22,12 @@
   border: none;
   white-space: nowrap;
   margin: -1px 5px 5px 0;
-  height: 22px;
+  height: 27px;
+  line-height: 27px;
   vertical-align: top;
   cursor: default;
-  color: @button-primary-text-color;
-  background-color: @button-default-bg;
+  color: @btn-default-color;
+  background-color: @btn-default-bg;
 }
 .tokenfield .token:hover {
   border-color: #b9b9b9;
@@ -63,13 +62,11 @@
   display: inline-block;
   line-height: 100%;
   font-size: 1.1em;
-  line-height: 1.49em;
   margin-left: 5px;
   float: none;
   height: 100%;
-  vertical-align: top;
   padding-right: 4px;
-  color: @button-primary-text-color;
+  color: @btn-default-color;
 }
 .tokenfield .token-input {
   background: none;

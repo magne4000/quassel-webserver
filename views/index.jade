@@ -16,13 +16,11 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .ng-cloak.splash {
           display: block !important;
         }
-      link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/bootstrap.min.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/fonts.css')
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/theme-#{settings.default.theme || settings.theme}.css', theme)
     body.login-page
       include ./ng-templates/modalJoinChannel.jade
       include ./ng-templates/modalGeneralConfig.jade
-      include ./ng-templates/modalChangeTheme.jade
       include ./ng-templates/modalNetworks.jade
       include ./ng-templates/modalIgnoreList.jade
       #container(ng-controller="QuasselController", ng-class="{connecting: connecting, disconnected: disconnected}")
@@ -31,20 +29,24 @@ html(ng-app="quassel", ng-controller="ConfigController")
           span Quassel Web App
           small(ng-if="connecting", ng-cloak)  (connecting)
           small(ng-if="disconnected && !connecting", ng-cloak)  (disconnected)
-          button.btn.btn-default.config.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
+          button.btn.btn-default.config.dropdown-toggle(data-toggle="dropdown", title="Options", uib-dropdown-toggle)
             i.icon-qws.icon-cog
           ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
             li
               a(href="#", ng-click="configGeneral()") General Configuration
-              a(href="#", ng-click="configTheme()") Change Theme
+            li
               a(href="#", ng-click="configNetworks()", ng-show="displayNetworksConfigItem") Networks
+            li
               a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreListConfigItem") Ignore List
+            li(class="dropdown-header") Themes
+            li(ng-repeat="theme in getAllThemes()", ng-class="{active: activeTheme == theme}")
+              a(href="#", ng-click="setTheme(theme)") {{theme}}
           button.btn.btn-default.logout(type="button", ng-if="logged && !disconnected", ng-cloak, ng-click="logout()") Logout
           button.btn.btn-default.reconnect(type="button", ng-if="disconnected && !connecting", ng-cloak, ng-click="reload()") Reconnect
         .container.login(ng-if="!logged")
           .row.ng-cloak(ng-class="{'ng-cloak': connecting}")
             .col-md-3
-            .col-md-6.row.login-container
+            .col-md-6.row.well.login-container
                 uib-alert(ng-if="alert != ''", ng-cloak) {{alert}}
                 form#logonform(role='form', ng-submit="login()")
                   h1 Connect to Quassel Core
@@ -80,7 +82,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                         .col-md-6
                           label(for='backlog-limit') Standard backlog limit
                           input.form-control#backlog-limit(type='number', ng-model="$parent.backlogLimit", min="0", max="9999")
-                  button.btn.btn-primary.btn-connect(type='submit') Connect
+                  button.btn.btn-primary.btn-block.btn-connect(type='submit') Connect
             .col-md-3
           .row.ng-cloak.splash(ng-class="{'ng-cloak': connecting}")
             .col-md-3
@@ -180,13 +182,9 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   )
                   span.timestamp
                     span {{::message.datetime | duration}}
-                  span.hiddenforcopy {{' <'}}
                   span.nick(data-nickhash="{{message.type == 1 ? message.sender : '' | hash}}") {{::message | decoratenick}}
-                  span.hiddenforcopy {{'> '}}
                   irc-message.message(message="::message")
                 li.markerline.irc-message(irc-markerline, ng-if="buffer.markerline == message.id", ng-repeat-end)
-                  span
-                  span
                   span
                   span
                   span

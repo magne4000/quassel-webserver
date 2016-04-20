@@ -1,4 +1,7 @@
 /* global angular */
+/* global Intl */
+/* global $ */
+
 angular.module('quassel')
 .directive('input', function ($parse) {
     return {
@@ -145,7 +148,7 @@ angular.module('quassel')
         template: "{{nick}}"
     };
 }])
-.directive('theme', ['$theme', '$parse', function ($theme, $parse) {
+.directive('theme', ['$theme', '$parse', '$alert', function ($theme, $parse, $alert) {
     var regex = /(.*theme-).*\.css$/;
 
     return {
