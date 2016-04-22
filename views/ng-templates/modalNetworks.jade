@@ -18,32 +18,32 @@ script(type="text/ng-template", id="modalNetworks.html")
                     ng-model="network.identityId"
                     convert-to-number)
                 option(ng-repeat="identity in identities", ng-selected="identity.identityId == network.identityId", value="{{identity.identityId|number}}") {{identity.identityName}}
-            ng-form.form-horizontal(name="serversForm")
+            ng-form(name="tabsForm")
               uib-tabset
-                uib-tab(heading="Servers", disable="serversForm.$invalid")
+                uib-tab(heading="Servers", disable="tabsForm.$invalid")
                   // Servers
-                  .row
+                  .row.form-horizontal
                     ul.list-group.col-md-4
                       li.list-group-item(
                             ng-repeat="server in network.ServerList"
-                            ng-class="{active: activeServerIndex == $index, disabled: serversForm.$invalid}"
-                            ng-click="!serversForm.$invalid && selectServer(network, $index)"
+                            ng-class="{active: activeServerIndex == $index, disabled: tabsForm.$invalid}"
+                            ng-click="!tabsForm.$invalid && selectServer(network, $index)"
                         ) {{server.Host}}:{{server.Port}}
                       li.list-group-item.list-group-item-success(
-                            ng-class="{disabled: serversForm.$invalid}"
-                            ng-click="serversForm.$invalid || (addServer(network) && selectServer(network, network.ServerList.length - 1))"
+                            ng-class="{disabled: tabsForm.$invalid}"
+                            ng-click="tabsForm.$invalid || (addServer(network) && selectServer(network, network.ServerList.length - 1))"
                         )
                         i.icon-qws.icon-plus  Add a server
                     .panel.panel-default.col-md-8
                       .panel-body
                         .form-group
-                          .col-md-2(ng-class="{'has-error': serversForm.hostServer.$invalid}")
+                          .col-md-2(ng-class="{'has-error': tabsForm.hostServer.$invalid}")
                             label.control-label.fill(for="hostServer") Host
-                          .col-md-5(ng-class="{'has-error': serversForm.hostServer.$invalid}")
+                          .col-md-5(ng-class="{'has-error': tabsForm.hostServer.$invalid}")
                             input.form-control(type="text", id="hostServer", name="hostServer", ng-model="activeServer.Host", required)
-                          .col-md-2(ng-class="{'has-error': serversForm.portServer.$invalid}")
+                          .col-md-2(ng-class="{'has-error': tabsForm.portServer.$invalid}")
                             label.control-label.fill(for="portServer") Port
-                          .col-md-3(ng-class="{'has-error': serversForm.portServer.$invalid}")
+                          .col-md-3(ng-class="{'has-error': tabsForm.portServer.$invalid}")
                             input.form-control(type="number", id="portServer", name="portServer", ng-model="activeServer.Port", min="1", max="65535", required, string-to-number)
                         .form-group
                           label.col-sm-2.control-label(for="passwordServer") Password
@@ -59,14 +59,82 @@ script(type="text/ng-template", id="modalNetworks.html")
                           .col-sm-offset-2.col-sm-10
                             button.btn.btn-danger.pull-right(title="Delete current server", ng-confirm-click="Are you sure you want to delete this server ?", ng-ok-click="deleteServer(network, activeServerIndex)")
                               i.icon-qws.icon-trash  Delete
-                // uib-tab(heading="Commands", disable="serversForm.$invalid")
-                // uib-tab(heading="Connection", disable="serversForm.$invalid")
-                // uib-tab(heading="Auto Identity", disable="serversForm.$invalid")
-                // uib-tab(heading="Encodings", disable="serversForm.$invalid")
-                uib-tab(heading="Commands", disable="true")
-                uib-tab(heading="Connection", disable="true")
-                uib-tab(heading="Auto Identity", disable="true")
-                uib-tab(heading="Encodings", disable="true")
+                uib-tab(heading="Commands", disable="tabsForm.$invalid")
+                  // Commands
+                  .panel.panel-default
+                    .panel-heading Commands to execute on connect
+                    .panel-body
+                      textarea.form-control(rows="5", ng-model="network.perform", array-to-textarea)
+                uib-tab(heading="Connection", disable="tabsForm.$invalid")
+                  // Connection
+                  .panel.panel-default(ng-class="{'panel-success': network.useAutoReconnect}")
+                    .panel-heading.panel-heading-small.form-group
+                      button.btn.btn-transparent(type="button", ng-model="network.useAutoReconnect", uib-btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0")
+                        i.icon-qws(ng-class="{'icon-check-empty': !network.useAutoReconnect, 'icon-check': network.useAutoReconnect}")
+                      | Automatic Reconnect
+                    .panel-body
+                      .form-group.form-inline(ng-class="{'has-error': tabsForm.autoReconnectInterval.$invalid}")
+                        | Wait 
+                        input.input-sm.form-control(type="number", name="autoReconnectInterval", ng-model="network.autoReconnectInterval", required, min="10", max="3600")
+                        |  s between retries
+                      .form-inline
+                        .form-group(ng-class="{'has-error': tabsForm.autoReconnectRetries.$invalid}")
+                          label.control-label(for="autoReconnectRetries") Number of retries:
+                          input.input-sm.form-control(type="number", id="autoReconnectRetries", name="autoReconnectRetries", ng-model="network.autoReconnectRetries", required, min="1", max="999")
+                        .form-group.checkbox(style="margin-left: 5px;")
+                          label
+                            input(type="checkbox", ng-model="network.unlimitedReconnectRetries", ng-true-value="1", ng-false-value="0")
+                            |  Unlimited
+                      .form-group.checkbox
+                        label
+                          input(type="checkbox", ng-model="network.rejoinChannels", ng-true-value="1", ng-false-value="0")
+                          | Rejoin all channels after reconnect
+                uib-tab(heading="Auto Identify", disable="tabsForm.$invalid")
+                  // Auto Identify
+                  .panel.panel-default(ng-class="{'panel-success': network.useAutoIdentify}")
+                    .panel-heading.panel-heading-small.form-group
+                      button.btn.btn-transparent(type="button", ng-model="network.useAutoIdentify", uib-btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0")
+                        i.icon-qws(ng-class="{'icon-check-empty': !network.useAutoIdentify, 'icon-check': network.useAutoIdentify}")
+                      | Auto Identify
+                    .panel-body.form-horizontal
+                      .form-group
+                        label.control-label.col-md-2(for="autoIdentifyService") Service
+                        .col-md-10
+                          input.form-control(type="text", id="autoIdentifyService", ng-model="network.autoIdentifyService")
+                      .form-group
+                        label.control-label.col-md-2(for="autoIdentifyPassword") Password
+                        .col-md-10
+                          input.form-control(type="password", id="autoIdentifyPassword", ng-model="network.autoIdentifyPassword")
+                  .panel.panel-default(ng-class="{'panel-success': network.useSasl}")
+                    .panel-heading.panel-heading-small.form-group
+                      button.btn.btn-transparent(type="button", ng-model="network.useSasl", uib-btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0")
+                        i.icon-qws(ng-class="{'icon-check-empty': !network.useSasl, 'icon-check': network.useSasl}")
+                      | Use SASL Authentication
+                    .panel-body.form-horizontal
+                      .form-group
+                        label.control-label.col-md-2(for="saslAccount") Account
+                        .col-md-10
+                          input.form-control(type="text", id="saslAccount", ng-model="network.saslAccount")
+                      .form-group
+                        label.control-label.col-md-2(for="saslPassword") Password
+                        .col-md-10
+                          input.form-control(type="password", id="saslPassword", ng-model="network.saslPassword")
+                uib-tab(heading="Encodings", disable="tabsForm.$invalid")
+                  // Encodings
+                  .panel.panel-default
+                    .panel-body.form-horizontal
+                      .form-group
+                        label.col-sm-3.control-label(for="codecForDecoding") Send messages in
+                        .col-sm-9
+                          input.form-control(type="text", id="codecForDecoding", ng-model="network.codecForDecoding", placeholder="Default")
+                      .form-group
+                        label.col-sm-3.control-label(for="codecForEncoding") Receive fallback
+                        .col-sm-9
+                          input.form-control(type="text", id="codecForEncoding", ng-model="network.codecForEncoding", placeholder="Default")
+                      .form-group
+                        label.col-sm-3.control-label(for="codecForServer") Server encoding
+                        .col-sm-9
+                          input.form-control(type="text", id="codecForServer", ng-model="network.codecForServer", placeholder="Default")
         button.btn.btn-danger.btn-sm.pull-right(title="Delete current network", ng-confirm-click="Are you sure you want to delete this network ?", ng-ok-click="deleteActiveNetwork()")
           i.icon-qws.icon-trash
         button.btn.btn-success.btn-sm.pull-right(title="Add a network", ng-click="createNetwork()")

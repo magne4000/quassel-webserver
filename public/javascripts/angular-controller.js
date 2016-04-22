@@ -529,10 +529,18 @@ angular.module('quassel')
             size: 'lg',
             resolve: {
                 networks: function(){
-                    return angular.copy(Array.from($quassel.get().getNetworksMap().values()));
+                    var networks = $quassel.get().getNetworksMap();
+                    if (networks.__mapValuesData__) {
+                        return angular.copy(networks.__mapValuesData__);
+                    }
+                    return angular.copy(Array.from(networks.values()));
                 },
                 identities: function(){
-                    return angular.copy(Array.from($quassel.get().identities.values()));
+                    var identities = $quassel.get().identities;
+                    if (identities.__mapValuesData__) {
+                        return angular.copy(identities.__mapValuesData__);
+                    }
+                    return angular.copy(Array.from(identities.values()));
                 }
             }
         });

@@ -614,6 +614,19 @@ angular.module('quassel')
     }
   };
 })
+.directive('arrayToTextarea', function() {
+  return {
+    require: 'ngModel',
+    link: function(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function(val) {
+        return val.split('\n');
+      });
+      ngModel.$formatters.push(function(val) {
+        return val.join('\n');
+      });
+    }
+  };
+})
 .directive('stringToNumber', function() {
   return {
     require: 'ngModel',
