@@ -571,7 +571,7 @@ angular.module('quassel')
 
             element.on('paste', function (e){
                 e.preventDefault();
-                document.execCommand("insertHTML", false, (e.originalEvent || e).clipboardData.getData("text/plain"));
+                document.execCommand("insertText", false, (e.originalEvent || e).clipboardData.getData("text/plain"));
             });
 
             // Listen for change events to enable binding
