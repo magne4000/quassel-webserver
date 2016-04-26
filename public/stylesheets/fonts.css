@@ -45,7 +45,7 @@
   font-family: 'quassel-webserver';
   src: url('fonts/quassel-webserver.eot?53892388');
   src: url('fonts/quassel-webserver.eot?53892388#iefix') format('embedded-opentype'),
-       url('../font/quassel-webserver.woff2?53892388') format('woff2'),
+       url('fonts/quassel-webserver.woff2?53892388') format('woff2'),
        url('fonts/quassel-webserver.woff?53892388') format('woff'),
        url('fonts/quassel-webserver.ttf?53892388') format('truetype'),
        url('fonts/quassel-webserver.svg?53892388#quassel-webserver') format('svg');
