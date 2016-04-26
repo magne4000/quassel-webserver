@@ -1,20 +1,38 @@
 @import "style.less";
 
+// Solarized variables
+@base03: #002b36;
+@base02: #073642;
+@base01: #586e75;
+@base00: #657b83;
+@base0: #839496;
+@base1: #93a1a1;
+@base2: #eee8d5;
+@base3: #fdf6e3;
+@yellow: #b58900;
+@orange: #cb4b16;
+@red: #dc322f;
+@magenta: #d33682;
+@violet: #6c71c4;
+@blue: #268bd2;
+@cyan: #2aa198;
+@green: #859900;
+
 // Bootstrap variables
 @gray-darker: #272b30;
 @gray-dark: #3a3f44;
 @gray: #52575c;
 @gray-light: #7a8288;
 @gray-lighter: #999999;
-@brand-primary: #00313e;
-@brand-success: #2d602d;
-@brand-info: #5fa8bd;
-@brand-warning: #d98003;
-@brand-danger: #a61c18;
-@body-bg: #00212a;
+@brand-primary: @base02;
+@brand-success: @green;
+@brand-info: @blue;
+@brand-warning: @orange;
+@brand-danger: @red;
+@body-bg: @base03;
 @text-color: #c8c8c8;
-@link-color: #ffffff;
-@link-hover-color: #ffffff;
+@link-color: @base3;
+@link-hover-color: @base3;
 @headings-font-family: @font-family-base;
 @padding-base-vertical: 8px;
 @padding-large-vertical: 14px;
@@ -138,12 +156,12 @@
 @hr-border: darken(@gray-darker, 5%);
 
 // Custom variables
-@markerline-bg: #073642;
-@highlight-low-color: whitesmoke;
-@highlight-medium-color: #268bd2;
-@highlight-high-color: #FFAA00;
+@markerline-bg: @base02;
+@highlight-low-color: @base2;
+@highlight-medium-color: @blue;
+@highlight-high-color: @orange;
 @highlight-on-bg: lighten(@highlight-high-color, 10%);
-@highlight-message-bg: lighten(@brand-primary, 6%);
+@highlight-message-bg: @base02;
 @backlog-font: consolas, "Droid Sans Mono", monospace;
 @pane-bg: darken(@gray-darker, 8%);
 @pane-font: consolas, "Roboto Condensed";
@@ -153,43 +171,43 @@
 @topic-bg: @gray-darker;
 @topic-color: @pane-color;
 
-@type-1-color: #839496;
-@type-2-color: #93a1a1;
-@type-4-color: #93a1a1;
+@type-1-color: @base0;
+@type-2-color: @base1;
+@type-4-color: @base1;
 .type-4 { .nick,.message {font-style: italic; font-weight: bold;}} // Action
-@type-8-color: #586e75;
-@type-16-color: #586e75;
-@type-32-color: #586e75;
-@type-64-color: #586e75;
-@type-128-color: #586e75;
-@type-256-color: #586e75;
-@type-512-color: #586e75;
-@type-1024-color: #93a1a1;
-@type-2048-color: #93a1a1;
-@type-4096-color: #dc322f;
-@type-8192-color: #93a1a1;
+@type-8-color: @base01;
+@type-16-color: @base01;
+@type-32-color: @base01;
+@type-64-color: @base01;
+@type-128-color: @base01;
+@type-256-color: @base01;
+@type-512-color: @base01;
+@type-1024-color: @base1;
+@type-2048-color: @base1;
+@type-4096-color: @red;
+@type-8192-color: @base1;
 .type-8192 {opacity: 0.5;}
-@type-16384-color: #b58900;
-@type-32768-color: #586e75;
-@type-65536-color: #586e75;
-@type-131072-color: #586e75;
+@type-16384-color: @yellow;
+@type-32768-color: @base01;
+@type-65536-color: @base01;
+@type-131072-color: @base01;
 
-@nichkash-0-color: #B58900;
-@nichkash-1-color: #CB4B16;
-@nichkash-2-color: #DC322f;
-@nichkash-3-color: #D33682;
-@nichkash-4-color: #6C71C4;
-@nichkash-5-color: #268BD2;
-@nichkash-6-color: #2AA198;
-@nichkash-7-color: #859900;
-@nichkash-8-color: #B58900;
-@nichkash-9-color: #CB4B16;
-@nichkash-10-color: #DC322f;
-@nichkash-11-color: #D33682;
-@nichkash-12-color: #6C71C4;
-@nichkash-13-color: #268BD2;
-@nichkash-14-color: #2AA198;
-@nichkash-15-color: #859900;
+@nichkash-0-color: @yellow;
+@nichkash-1-color: @orange;
+@nichkash-2-color: @red;
+@nichkash-3-color: @magenta;
+@nichkash-4-color: @violet;
+@nichkash-5-color: @blue;
+@nichkash-6-color: @cyan;
+@nichkash-7-color: @green;
+@nichkash-8-color: @yellow;
+@nichkash-9-color: @orange;
+@nichkash-10-color: @red;
+@nichkash-11-color: @magenta;
+@nichkash-12-color: @violet;
+@nichkash-13-color: @blue;
+@nichkash-14-color: @cyan;
+@nichkash-15-color: @green;
 
 // Forms
 input,

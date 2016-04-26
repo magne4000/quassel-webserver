@@ -203,7 +203,7 @@ angular.module('quassel')
 
             function updateHighlights() {
                 var parent = element[0], highlightTop = 0, highlightBottom = 0, val;
-                $('.buffer-highlight').each(function(){
+                $('.buffer-highlight-high').each(function(){
                     val = compareViewport(this, parent);
                     if (val < highlightTop) highlightTop = val;
                     if (val > highlightBottom) highlightBottom = val;
