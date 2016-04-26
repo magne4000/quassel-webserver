@@ -22,6 +22,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       include ./ng-templates/modalJoinChannel.jade
       include ./ng-templates/modalGeneralConfig.jade
       include ./ng-templates/modalNetworks.jade
+      include ./ng-templates/modalIdentities.jade
       include ./ng-templates/modalIgnoreList.jade
       #container(ng-controller="QuasselController", ng-class="{connecting: connecting, disconnected: disconnected}")
         #header.dropdown(uib-dropdown)
@@ -34,6 +35,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
           ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
             li
               a(href="#", ng-click="configGeneral()") General Configuration
+            li
+              a(href="#", ng-click="configIdentities()", ng-show="displayIdentitiesConfigItem") Identities
             li
               a(href="#", ng-click="configNetworks()", ng-show="displayNetworksConfigItem") Networks
             li

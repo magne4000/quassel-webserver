@@ -48,10 +48,13 @@
         requestConnectNetwork: requestConnectNetwork,
         requestRemoveBuffer: requestRemoveBuffer,
         requestMergeBuffersPermanently: requestMergeBuffersPermanently,
+        requestUpdateIdentity: requestUpdateIdentity,
         requestUpdateIgnoreListManager: requestUpdateIgnoreListManager,
         requestSetNetworkInfo: requestSetNetworkInfo,
         createNetwork: createNetwork,
         removeNetwork: removeNetwork,
+        createIdentity: createIdentity,
+        removeIdentity: removeIdentity,
         connect: connect,
         disconnect: disconnect,
         login: login,
@@ -217,6 +220,18 @@
       
       function removeNetwork(networkId) {
         self.quassel.removeNetwork(networkId);
+      }
+      
+      function createIdentity(identityName, options) {
+        self.quassel.createIdentity(identityName, options);
+      }
+      
+      function removeIdentity(identityId) {
+        self.quassel.removeIdentity(identityId);
+      }
+      
+      function requestUpdateIdentity(identityId, identity) {
+        self.quassel.requestUpdateIdentity(identityId, identity);
       }
       
       function connect() {

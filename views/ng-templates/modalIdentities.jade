@@ -1,0 +1,110 @@
+script(type="text/ng-template", id="modalIdentities.html")
+  form(name="identitiesForm")
+    .modal-header
+      button.close(type='button', ng-click='$dismiss("close")') ×
+      h4#myModalLabel.modal-title Identities
+    .modal-body.tab-margin
+      uib-tabset
+        uib-tab(heading="{{identity.identityName}}", ng-repeat="identity in identities", select="selectIdentity($index)", disable="identitiesForm.$invalid")
+          ng-form(name="identityForm")
+            .form-group(ng-class="{'has-error': identityForm.identityName.$invalid}")
+              label.control-label(for="identityName") Name
+              input.form-control(type="text", id="identityName", name="identityName", ng-model="identity.identityName", required)
+            ng-form(name="tabsForm")
+              // Servers
+              .row.form-horizontal
+                ul.list-group.col-md-4
+                  li.list-group-item(
+                        ng-class="{active: activeCategoryIndex == 0, disabled: tabsForm.$invalid}"
+                        ng-click="!tabsForm.$invalid && selectCategory(0)"
+                    ) General
+                  li.list-group-item(
+                        ng-class="{active: activeCategoryIndex == 1, disabled: tabsForm.$invalid}"
+                        ng-click="!tabsForm.$invalid && selectCategory(1)"
+                    ) Away
+                  li.list-group-item(
+                        ng-class="{active: activeCategoryIndex == 2, disabled: tabsForm.$invalid}"
+                        ng-click="!tabsForm.$invalid && selectCategory(2)"
+                    ) Advanced
+                .panel.panel-default.col-md-8(ng-show="activeCategoryIndex == 0")
+                  // General
+                  .panel-body
+                    .form-group
+                      label.col-sm-3.control-label(for="realName") Real name
+                      .col-sm-9
+                        input.form-control(type="text", id="realName", ng-model="identity.realName")
+                    .panel.panel-default
+                      .panel-heading
+                        | Nicknames
+                        button.btn.btn-success.btn-xs.pull-right(title="Add a nick", ng-click="createNick()")
+                          i.icon-qws.icon-plus
+                      ul.list-group
+                        li.list-group-item(ng-repeat="nick in identity.nicks track by $index")
+                          ng-form(name="nickForm")
+                            .input-group(ng-class="{'has-error': nickForm.nick.$invalid}")
+                              span.input-group-btn
+                                button.btn.btn-default(title="Move up", ng-click="moveNick($index, $index-1)", ng-if="$index > 0")
+                                  i.icon-qws.icon-arrow-up
+                                button.btn.btn-default(title="Move down", ng-click="moveNick($index, $index+1)", ng-if="$index < identity.nicks.length - 1")
+                                  i.icon-qws.icon-arrow-down
+                              input.form-control(type="text", name="nick", ng-model="identity.nicks[$index]", required)
+                              .input-group-btn
+                                button.btn.btn-danger(
+                                      title="Delete nick"
+                                      ng-confirm-click="Are you sure you want to delete this nick ?"
+                                      ng-ok-click="deleteNick(nick)"
+                                      ng-disabled="identity.nicks.length <= 1"
+                                  )
+                                  i.icon-qws.icon-trash
+                .panel.panel-default.col-md-8(ng-show="activeCategoryIndex == 1")
+                  // Away
+                  .panel-body
+                    .panel.panel-default
+                      .panel-heading Default Away Settings
+                      .panel-body.form-group
+                        label.col-sm-3.control-label(for="awayReason") Away Reason
+                        .col-sm-9
+                          input.form-control(type="text", id="awayReason", ng-model="identity.awayReason")
+                    .panel.panel-default(ng-class="{'panel-success': identity.detachAwayReasonEnabled}")
+                      .panel-heading.panel-heading-small
+                        button.btn.btn-transparent(type="button", ng-model="identity.detachAwayReasonEnabled", uib-btn-checkbox)
+                          i.icon-qws(ng-class="{'icon-check-empty': !identity.detachAwayReasonEnabled, 'icon-check': identity.detachAwayReasonEnabled}")
+                        | Away On Detach
+                      .panel-body.form-group
+                        label.col-sm-3.control-label(for="detachAwayReason") Away Reason
+                        .col-sm-9
+                          input.form-control(type="text", id="detachAwayReason", ng-model="identity.detachAwayReason")
+                .panel.panel-default.col-md-8(ng-show="activeCategoryIndex == 2")
+                  // Advanced
+                  .panel-body
+                    .form-group
+                      label.col-sm-2.control-label(for="ident") Ident
+                      .col-sm-10
+                        input.form-control(type="text", id="ident", ng-model="identity.ident")
+                    .panel.panel-default
+                      .panel-heading Messages
+                      .panel-body
+                        .form-group
+                          label.col-sm-3.control-label(for="kickReason") Kick Reason
+                          .col-sm-9
+                            input.form-control(type="text", id="kickReason", ng-model="identity.kickReason")
+                        .form-group
+                          label.col-sm-3.control-label(for="partReason") Part Reason
+                          .col-sm-9
+                            input.form-control(type="text", id="partReason", ng-model="identity.partReason")
+                        .form-group
+                          label.col-sm-3.control-label(for="quitReason") Quit Reason
+                          .col-sm-9
+                            input.form-control(type="text", id="quitReason", ng-model="identity.quitReason")
+        button.btn.btn-danger.btn-sm.pull-right(
+              title="Delete current identity"
+              ng-confirm-click="Are you sure you want to delete this identity ?"
+              ng-ok-click="deleteActiveIdentity()"
+              ng-disabled="identities.length <= 1"
+          )
+          i.icon-qws.icon-trash
+        button.btn.btn-success.btn-sm.pull-right(title="Add an identity", ng-click="createIdentity()")
+          i.icon-qws.icon-plus
+    .modal-footer
+      button.btn.btn-default(ng-click='$dismiss("close")') Cancel
+      button.btn.btn-primary(ng-click="saveIdentities()", ng-disabled="identitiesForm.$invalid") Save

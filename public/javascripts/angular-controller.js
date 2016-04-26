@@ -435,7 +435,66 @@ angular.module('quassel')
         $uibModalInstance.dismiss('cancel');
     };
 })
-.controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, $timeout, networks, identities) {
+.controller('ModalIdentitiesInstanceCtrl', function ($scope, $uibModalInstance, identities) {
+    $scope.identities = identities;
+    $scope.activeCategoryIndex = 0;
+    $scope.activeIdentityIndex = 0;
+    
+    $scope.selectIdentity = function(index) {
+        $scope.activeIdentityIndex = index;
+    };
+    
+    $scope.selectCategory = function(index) {
+        $scope.activeCategoryIndex = index;
+    };
+    
+    $scope.createNick = function() {
+        $scope.identities[$scope.activeIdentityIndex].nicks.push('');
+    };
+    
+    $scope.deleteNick = function(nick) {
+        $scope.identities[$scope.activeIdentityIndex].nicks.splice($scope.identities[$scope.activeIdentityIndex].nicks.indexOf(nick), 1);
+    };
+    
+    $scope.moveNick = function(indexFrom, indexTo) {
+        var tmp = $scope.identities[$scope.activeIdentityIndex].nicks[indexTo];
+        $scope.identities[$scope.activeIdentityIndex].nicks[indexTo] = $scope.identities[$scope.activeIdentityIndex].nicks[indexFrom];
+        $scope.identities[$scope.activeIdentityIndex].nicks[indexFrom] = tmp;
+    };
+    
+    $scope.createIdentity = function() {
+        var identity = {
+            autoAwayEnabled: true,
+            autoAwayReason: "Not here. No, really. not here!",
+            autoAwayReasonEnabled: false,
+            autoAwayTime: 10,
+            awayNick: "",
+            awayNickEnabled: false,
+            awayReason: "Gone fishing.",
+            awayReasonEnabled: true,
+            detachAwayEnabled: false,
+            detachAwayReason: "All Quassel clients vanished from the face of the earth...",
+            detachAwayReasonEnabled: true,
+            ident: "quassel",
+            identityName: "New identity",
+            kickReason: "Kindergarten is elsewhere!",
+            nicks: ["qws-user-" + (Math.floor(Math.random() * 9999))],
+            partReason: "http://quassel-irc.org - Chat comfortably. Anywhere.",
+            quitReason: "http://quassel-irc.org - Chat comfortably. Anywhere.",
+            realName: ""
+        };
+        $scope.identities.push(identity);
+    };
+    
+    $scope.deleteActiveIdentity = function() {
+        $scope.identities.splice($scope.activeIdentityIndex, 1);
+    };
+    
+    $scope.saveIdentities = function() {
+        $uibModalInstance.close($scope.identities);
+    };
+})
+.controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, networks, identities) {
     $scope.networks = networks;
     $scope.identities = identities;
     $scope.activeNetworkIndex = 0;
@@ -513,12 +572,52 @@ angular.module('quassel')
     $scope.ignoreList = $ignore.getList();
     $scope.displayIgnoreListConfigItem = false;
     $scope.displayNetworksConfigItem = false;
+    $scope.displayIdentitiesConfigItem = false;
     $scope.activeIndice = 0;
     var modal, dbg = require("debug");
 
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
         $theme.setClientTheme(theme);
+    };
+    
+    $scope.configIdentities = function() {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'modalIdentities.html',
+            controller: 'ModalIdentitiesInstanceCtrl',
+            scope: $scope.$new(true),
+            size: 'lg',
+            resolve: {
+                identities: function(){
+                    var identities = $quassel.get().identities;
+                    if (identities.__mapValuesData__) {
+                        return angular.copy(identities.__mapValuesData__);
+                    }
+                    return angular.copy(Array.from(identities.values()));
+                }
+            }
+        });
+        
+        modalInstance.result.then(function (identities) {
+            var im = new Map($quassel.get().identities), i=0, identity, areEquals = false;
+            for (;i<identities.length; i++) {
+                if (typeof identities[i].identityId === 'number' && identities[i].identityId > -1) {
+                    identity = im.get(identities[i].identityId);
+                    im.delete(identities[i].identityId);
+                    areEquals = angular.equals(identity, identities[i]);
+                    if (!areEquals) {
+                        // Update identity information
+                        $quassel.requestUpdateIdentity(identity.identityId, identities[i]);
+                    }
+                } else {
+                    // Create the new identity
+                    $quassel.createIdentity(identities[i].identityName, identities[i]);
+                }
+            }
+            im.forEach(function(identity) {
+                $quassel.removeIdentity(identity.identityId);
+            });
+        });
     };
     
     $scope.configNetworks = function() {
@@ -556,7 +655,6 @@ angular.module('quassel')
                         // Update network information
                         $quassel.requestSetNetworkInfo(network.networkId, networks[i]);
                     }
-                    nm.delete(networks[i].networkId);
                 } else {
                     // Create the new network
                     $quassel.createNetwork(networks[i].networkName, networks[i].identityId, undefined, networks[i]);
@@ -637,6 +735,12 @@ angular.module('quassel')
     $quassel.on('network.init', function() {
         $scope.$apply(function(){
             $scope.displayNetworksConfigItem = true;
+        });
+    });
+    
+    $quassel.on('identities.init', function() {
+        $scope.$apply(function(){
+            $scope.displayIdentitiesConfigItem = true;
         });
     });
 }])
