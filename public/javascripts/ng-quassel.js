@@ -91,6 +91,7 @@
               nobacklogs: $config.get('initialBacklogLimit', 0),
               initialbackloglimit: $config.get('initialBacklogLimit', 20),
               backloglimit: $config.get('backlogLimit', 50),
+              highlightmode: $config.get('highlightMode', 2),
               unsecurecore: $config.get('securecore', true)  // tls-browserify module doesn't respect tls API of nodejs
           }, function(next) {
               next(self.login, self.password);

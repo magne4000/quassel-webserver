@@ -10,3 +10,11 @@ script(type="text/ng-template", id="modalGeneralConfig.html")
         label
           input(type="checkbox", ng-model="gsdisplayfullhostmask", ng-model-options="{ getterSetter: true }")
           | Display full hostmask on join/part/quit ?
+      h4 Highlight nicks
+        small  if logged, needs a refresh to take effect
+      .btn-group
+        label.btn.btn-primary(ng-model="gshighlightmode", ng-model-options="{ getterSetter: true }", uib-btn-radio="1") None
+        label.btn.btn-primary(ng-model="gshighlightmode", ng-model-options="{ getterSetter: true }", uib-btn-radio="2") Current nick
+        label.btn.btn-primary(ng-model="gshighlightmode", ng-model-options="{ getterSetter: true }", uib-btn-radio="3") All nicks from identity
+    .modal-footer
+      button.btn.btn-default(ng-click='$dismiss("close")') Close

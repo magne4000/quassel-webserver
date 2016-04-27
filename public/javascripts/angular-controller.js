@@ -693,6 +693,14 @@ angular.module('quassel')
         }
         return $config.get('debug', false, true) ? true : false;
     };
+    
+    $scope.gshighlightmode = function(newValue) {
+        if (arguments.length > 0) {
+            $config.set('highlightmode', newValue);
+            $quassel.get().options.highlightmode = newValue;
+        }
+        return $config.get('highlightmode', 2);
+    };
 
     $scope.configGeneral = function() {
         modal = $uibModal.open({

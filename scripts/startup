@@ -16,6 +16,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Quassel web server"
 NAME=quasselweb
+NODE_ENV=production
 # Path to quassel web server dir
 BASEDIR=CHANGEME
 APP="$BASEDIR/app.js"

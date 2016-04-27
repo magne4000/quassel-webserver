@@ -33,15 +33,15 @@
     "quassel-webserver"
   ],
   "dependencies": {
-    "body-parser": "~1.14.1",
+    "body-parser": "^1.15.0",
     "commander": "^2.9.0",
     "cookie-parser": "~1.4.0",
     "express": "^4.13.3",
     "jade": "~1.11.0",
-    "less": "~2.5.3",
-    "less-middleware": "~2.0.1",
+    "less": "^2.6.1",
+    "less-middleware": "^2.1.0",
     "libquassel": "~1.1.0",
-    "morgan": "~1.6.1",
+    "morgan": "^1.7.0",
     "net-browserify-alt": "^0.6.1",
     "serve-favicon": "~2.3.0"
   },
