@@ -10,6 +10,9 @@ script(type="text/ng-template", id="modalGeneralConfig.html")
         label
           input(type="checkbox", ng-model="gsdisplayfullhostmask", ng-model-options="{ getterSetter: true }")
           | Display full hostmask on join/part/quit ?
+        label
+          input(type="checkbox", ng-model="gsemptybufferonswitch", ng-model-options="{ getterSetter: true }")
+          | Empty buffer when switching to another buffer (check this if you have slowdowns after some time)
       h4 Highlight nicks
         small  if logged, needs a refresh to take effect
       .btn-group

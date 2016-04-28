@@ -1,4 +1,5 @@
 /* global angular */
+/* global localStorage */
 /* global $ */
 
 angular.module('quassel')
@@ -112,6 +113,15 @@ angular.module('quassel')
         $scope.$apply(function(){
             $scope.networks.push(network);
         });
+    });
+    
+    $scope.$watch('buffer', function(newValue, oldValue) {
+        if (oldValue !== null && (newValue === null || newValue.id !== oldValue.id)) {
+            if ($config.get('emptybufferonswitch', false)) {
+                loadingMoreBacklogs.delete(oldValue.id);
+                oldValue.clearMessages();
+            }
+        }
     });
     
     $quassel.on('network.remove', function(networkId) {
@@ -250,7 +260,7 @@ angular.module('quassel')
                         }
                         $desktop(buffer.name, message.content);
                     }
-                } else {
+                } else if (!message.isSelf()) {
                     if (message.isHighlighted()) {
                         if (setHighlight(buffer, 'high')) {
                             incFavico(buffer);
@@ -701,6 +711,13 @@ angular.module('quassel')
         }
         return $config.get('highlightmode', 2);
     };
+    
+    $scope.gsemptybufferonswitch = function(newValue) {
+        if (arguments.length > 0) {
+            $config.set('emptybufferonswitch', newValue);
+        }
+        return $config.get('emptybufferonswitch', false);
+    };
 
     $scope.configGeneral = function() {
         modal = $uibModal.open({
@@ -795,51 +812,6 @@ angular.module('quassel')
         }
     });
 
-    /*
-    $socket.on('_error', function(e) {
-        console.log(e);
-        switch (e.errno) {
-        case 'ECONNREFUSED':
-            $scope.$apply(function(){
-                $scope.alert = "Connection refused.";
-            });
-            break;
-        default:
-            $alert.error('Error received from server. See Javascript console for details.');
-        }
-    });
-
-    $socket.on("connected", function() {
-        console.log('CONNECTED');
-        $scope.$apply(function(){
-            $scope.disconnected = false;
-            $scope.connecting = false;
-            $scope.firstconnected = true;
-        });
-    });
-
-    $socket.on('reconnect_attempt', function() {
-        console.log('RECONNECTING');
-        $scope.$apply(function(){
-            $scope.connecting = true;
-        });
-    });
-
-    $socket.on('reconnect_error', function() {
-        console.log('RECONNECTING_ERROR');
-        $scope.$apply(function(){
-            $scope.connecting = false;
-        });
-    });
-
-    $socket.on('reconnect_failed', function() {
-        console.log('RECONNECTING_FAILED');
-        $scope.$apply(function(){
-            $scope.connecting = false;
-            $scope.disconnected = true;
-        });
-    });
-    */
     $quassel.on('ws.close', function() {
         console.log('DISCONNECTED');
         $quassel.disconnect();

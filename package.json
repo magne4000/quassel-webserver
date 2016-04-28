@@ -40,7 +40,7 @@
     "jade": "~1.11.0",
     "less": "^2.6.1",
     "less-middleware": "^2.1.0",
-    "libquassel": "~1.1.1",
+    "libquassel": "~1.1.3",
     "morgan": "^1.7.0",
     "net-browserify-alt": "^0.6.1",
     "serve-favicon": "~2.3.0"
