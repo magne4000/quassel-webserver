@@ -135,12 +135,18 @@
     {
       "uid": "95376bf082bfec6ce06ea1cda7bd7ead",
       "css": "arrow-up",
-      "code": 59414,
+      "code": 59413,
       "src": "fontawesome"
     },
     {
       "uid": "1c4068ed75209e21af36017df8871802",
       "css": "arrow-down",
+      "code": 59414,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "c1f1975c885aa9f3dad7810c53b82074",
+      "css": "lock",
       "code": 59415,
       "src": "fontawesome"
     }

@@ -28,6 +28,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
         #header.dropdown(uib-dropdown)
           span.quassel-logo
           span Quassel Web App
+          i.icon-qws.icon-lock.icon-secure(ng-if="logged && !disconnected && secure", title="The connection to your core is encrypted with SSL")
           small(ng-if="connecting", ng-cloak)  (connecting)
           small(ng-if="disconnected && !connecting", ng-cloak)  (disconnected)
           button.btn.btn-default.config.dropdown-toggle(data-toggle="dropdown", title="Options", uib-dropdown-toggle)

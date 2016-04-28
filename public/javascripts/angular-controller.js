@@ -756,6 +756,7 @@ angular.module('quassel')
     $scope.disconnected = false;
     $scope.connecting = false;
     $scope.logged = false;
+    $scope.secure = null;
     $scope.remember = $config.get('remember') || false;
     $scope.host = $scope.remember ? $config.get('host', '') : "";
     $scope.port = $scope.remember ? $config.get('port', '') : "";
@@ -861,6 +862,7 @@ angular.module('quassel')
         $scope.$apply(function(){
             $scope.connecting = false;
             $scope.logged = true;
+            $scope.secure = $quassel.get().useSSL;
         });
     });
 
