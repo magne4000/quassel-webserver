@@ -41,7 +41,7 @@ angular.module('quassel')
         }
     };
 }])
-.directive('ircMessage', ['$compile', '$filter', function($compile, $filter){
+.directive('ircMessage', ['$filter', function($filter){
 
     var MT = require('message').Type;
     var dateFormat;
@@ -55,13 +55,10 @@ angular.module('quassel')
         };
     }
 
-    function nickplaceholder(val) {
-        if (typeof val != 'undefined') {
-            var nickhash=$filter('hash')(val);
-            val = val.replace('"', '\\"');
-            return '<span data-nickhash="'+nickhash+'" ng-nick="'+val+'"></span>';
-        }
-        return '<span data-nickhash="{{::message.sender | hash}}" ng-nick="{{::message.sender}}"></span>';
+    function nickplaceholder(sender) {
+        var nickhash = $filter('hash')(sender);
+        sender = sender.replace('"', '\\"');
+        return '<span data-nickhash="' + nickhash + '" ng-nick="' + sender + '"></span>';
     }
 
     function getmessagetemplate(scope, message) {
@@ -74,24 +71,24 @@ angular.module('quassel')
                 if (message.sender === message.content) {
                     content = "You are now known as " +  nickplaceholder(message.content);
                 } else {
-                    content = nickplaceholder() + " is now known as " + nickplaceholder(message.content);
+                    content = nickplaceholder(message.sender) + " is now known as " + nickplaceholder(message.content);
                 }
                 break;
             case MT.Mode:
-                content = "Mode {{::message.content}} by " + nickplaceholder();
+                content = "Mode " + message.content + " by " + nickplaceholder(message.sender);
                 break;
             case MT.Join:
-                content = nickplaceholder() + " has joined";
+                content = nickplaceholder(message.sender) + " has joined";
                 break;
             case MT.Part:
-                content = nickplaceholder() + " has left (" + message.content + ")";
+                content = nickplaceholder(message.sender) + " has left (" + message.content + ")";
                 break;
             case MT.Quit:
-                content = nickplaceholder() + " has quit (" + message.content + ")";
+                content = nickplaceholder(message.sender) + " has quit (" + message.content + ")";
                 break;
             case MT.Kick:
                 var ind = message.content.indexOf(" ");
-                content = nickplaceholder() + " has kicked " + message.content.slice(0, ind) + " (" + message.content.slice(ind+1) + ")";
+                content = nickplaceholder(message.sender) + " has kicked " + message.content.slice(0, ind) + " (" + message.content.slice(ind+1) + ")";
                 break;
             case MT.NetsplitJoin:
                 arr = message.content.split("#:#");
@@ -107,7 +104,7 @@ angular.module('quassel')
                 content = "{Day changed to " + dateFormat.format(message.datetime) + "}";
                 break;
             default:
-                content = "{{::message.content}}";
+                content = message.content;
         }
         return content + '<br>';
     }
@@ -121,7 +118,6 @@ angular.module('quassel')
         link: function (scope, element, attrs) {
             var msg = getmessagetemplate(scope, scope.message);
             element.html(msg);
-            $compile(element.contents())(scope);
         }
     };
 }])
@@ -427,7 +423,6 @@ angular.module('quassel')
                     for (var i=0; i<subjects.length; i++) {
                         cumulativeHeight += subjects[i].offsetHeight + 1;
                     }
-                    console.log(parent.scrollHeight - parent.scrollTop - parent.clientHeight, cumulativeHeight);
                     if (parent.scrollHeight - parent.scrollTop - parent.clientHeight <= cumulativeHeight) {
                         parent.scrollTop = parent.scrollHeight;
                     }
