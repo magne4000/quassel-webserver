@@ -414,37 +414,34 @@ angular.module('quassel')
     };
 }])
 .directive('scrollme', [function () {
-    var parent = $("ul.backlog")[0];
     var promise = null;
-    var heightsum = 0;
+    var subjects = [];
     return {
         link: function (scope, element, attr) {
+            var parent = $(attr.scrollme)[0];
             clearTimeout(promise);
-            if (element.is(':last-child')) {
-                heightsum += element.height();
+            if (parent.lastElementChild.isEqualNode(element[0])) {
+                subjects.push(element[0]);
                 promise = setTimeout(function(){
-                    if (!element.is(':hidden')) {
-                        if (parent.offsetHeight + parent.scrollTop + heightsum + 10 >= parent.scrollHeight) {
-                            parent.scrollTop = parent.scrollHeight;
-                            heightsum = 0;
-                        }
+                    var cumulativeHeight = 0;
+                    for (var i=0; i<subjects.length; i++) {
+                        cumulativeHeight += subjects[i].offsetHeight + 1;
                     }
+                    console.log(parent.scrollHeight - parent.scrollTop - parent.clientHeight, cumulativeHeight);
+                    if (parent.scrollHeight - parent.scrollTop - parent.clientHeight <= cumulativeHeight) {
+                        parent.scrollTop = parent.scrollHeight;
+                    }
+                    subjects = [];
                 }, 50);
             }
         }
     };
 }])
-.directive('backlog', ['$timeout', '$compile', '$quassel', function (timeout, $compile, $quassel) {
+.directive('backlog', ['$timeout', '$compile', '$quassel', '$parse', function (timeout, $compile, $quassel, $parse) {
     return {
-        scope: {
-            backlog: "=",
-            buffer: "=parentBuffer",
-            currentFilter: "="
-        },
-        template: "",
         link: function (scope, element, attr) {
             var lengthThreshold = attr.scrollThreshold || 20;
-            var handler = scope.backlog;
+            var handler = $parse(attr.backlog)(scope);
             var promiseFetching = null;
             var promiseScroll = null;
             var lastScrolled = -9999;

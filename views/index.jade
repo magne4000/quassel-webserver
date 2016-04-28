@@ -176,9 +176,9 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       a.btn(ng-click="setAsDefault()", href="#") Set as default
                     li
                       a.btn(ng-click="useDefault()", href="#") Use default
-              ul.backlog(backlog="loadMore", parent-buffer="buffer", current-filter="currentFilter")
+              ul.backlog(backlog="loadMore", current-filter="currentFilter")
                 li.irc-message(
-                      scrollme
+                      scrollme="ul.backlog"
                       ng-repeat-start="message in messages track by message.sid"
                       class="type-{{::message.type}}"
                       ng-class="{highlighted: message.isHighlighted()}"
@@ -194,7 +194,6 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   span
               .input(ng-controller="InputController")
                 form#messageform(ng-submit="sendMessage()")
-                  //input#messagebox(type='text', autocomplete='off', ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", ng-model-options="{ debounce: 100 }", caret)
                   #messagebox(contenteditable, mimic-input="true", focusonfocus, ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", caret)
                   .formatter
                     button.btn.btn-default.btn-xs.handle(type="button", ng-click="formattervisible = !formattervisible", title="Format")

@@ -44,12 +44,11 @@ angular.module('quassel')
 
     function updateMessages() {
         if ($scope.buffer) {
-            var it = $scope.buffer.messages.values();
-            var messageItem = it.next();
             var messages = [];
-            while(!messageItem.done) {
-                messages.push(messageItem.value);
-                messageItem = it.next();
+            if ($scope.buffer.messages.__mapValuesData__) {
+                messages = $scope.buffer.messages.__mapValuesData__;
+            } else {
+                messages = Array.from($scope.buffer.messages.values());
             }
             $scope.messages = insertDayChangeMessagesAndApplyIgnoreList(messages, $scope.buffer);
             $scope.buffer.ignoreListRevision = $ignore.getRevision();
@@ -330,12 +329,8 @@ angular.module('quassel')
         $scope.buffer = channel;
         if ($scope.buffer !== null) {
             updateMessages();
-            var id = 0;
-            channel.messages.forEach(function(val) {
-                if (val.id > id) id = val.id;
-            });
             $('#messagebox').focus();
-            $quassel.markBufferAsRead(channel.id, id);
+            $quassel.markBufferAsRead(channel.id, channel._lastMessageId);
         }
     };
 
