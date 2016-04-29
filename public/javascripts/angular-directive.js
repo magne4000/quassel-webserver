@@ -61,7 +61,7 @@ angular.module('quassel')
         return '<span data-nickhash="' + nickhash + '" ng-nick="' + sender + '"></span>';
     }
 
-    function getmessagetemplate(scope, message) {
+    function getmessagetemplate(message) {
         var content, arr, servers;
         switch(message.type) {
             case MT.Plain:
@@ -116,12 +116,12 @@ angular.module('quassel')
         restrict: 'E',
         require: '?message',
         link: function (scope, element, attrs) {
-            var msg = getmessagetemplate(scope, scope.message);
+            var msg = getmessagetemplate(scope.message);
             element.html(msg);
         }
     };
 }])
-.directive('ngNick', ['$filter', '$compile', '$rootScope', '$config', function ($filter, $compile, $rootScope, $config) {
+.directive('ngNick', ['$filter', '$rootScope', '$config', function ($filter, $rootScope, $config) {
     return {
         scope: {},
         link: function (scope, element, attrs) {
@@ -144,7 +144,7 @@ angular.module('quassel')
         template: "{{nick}}"
     };
 }])
-.directive('theme', ['$theme', '$parse', '$alert', function ($theme, $parse, $alert) {
+.directive('theme', ['$theme', function ($theme) {
     var regex = /(.*theme-).*\.css$/;
 
     return {
@@ -177,7 +177,7 @@ angular.module('quassel')
         }
     };
 })
-.directive('ircMarkerline', function ($parse) {
+.directive('ircMarkerline', function () {
     var lastElement = null;
     return {
         link: function (scope, element, attrs) {
@@ -186,7 +186,7 @@ angular.module('quassel')
         }
     };
 })
-.directive('highlightContainer', function ($parse) {
+.directive('highlightContainer', function () {
     function compareViewport(el, parent) {
         var rect = el.getBoundingClientRect();
         if (rect.top < 0) return rect.top;
