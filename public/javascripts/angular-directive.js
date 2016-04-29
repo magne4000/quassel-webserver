@@ -41,7 +41,7 @@ angular.module('quassel')
         }
     };
 }])
-.directive('ircMessage', ['$filter', function($filter){
+.directive('ircMessage', ['$filter', '$parse', function($filter, $parse){
 
     var MT = require('message').Type;
     var dateFormat;
@@ -110,14 +110,11 @@ angular.module('quassel')
     }
 
     return {
-        scope: {
-            message: "="
-        },
         restrict: 'E',
         require: '?message',
         link: function (scope, element, attrs) {
-            var msg = getmessagetemplate(scope.message);
-            element.html(msg);
+            var message = $parse(attrs.message)(scope);
+            element.html(getmessagetemplate(message));
         }
     };
 }])

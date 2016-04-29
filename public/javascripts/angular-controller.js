@@ -9,6 +9,11 @@ angular.module('quassel')
     $scope.networks = [];
     $scope.buffer = null;
     $scope.messages = [];
+    $scope.messagesp = {};
+    $scope.messagesp.get = function(index, count, success) {
+        console.log(index, count);
+        success($scope.messages.slice(index, count));
+    };
     $scope.showhidden = false;
 
     var MT = require('message').Type;

@@ -176,7 +176,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       a.btn(ng-click="setAsDefault()", href="#") Set as default
                     li
                       a.btn(ng-click="useDefault()", href="#") Use default
-              ul.backlog(backlog="loadMore", current-filter="currentFilter")
+              ul.backlog(backlog="loadMore")
                 li.irc-message(
                       scrollme="ul.backlog"
                       ng-repeat-start="message in messages track by message.sid"
