@@ -1,8 +1,3 @@
-if (!Object.observe) {
-    console.log("Your nodejs version is too old, you need at least 0.12, and you have", process.version);
-    process.exit(1);
-}
-
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -18,7 +13,7 @@ var routes = require('./routes/index');
 
 var settings = require('./lib/utils').settings(true);
 opts
-  .version('1.3.0')
+  .version('1.4.0')
   .option('-l, --listen <value>', 'listening address', undefined, null)
   .option('-p, --port <value>', 'HTTP(S) port to use', parseInt, null)
   .option('-m, --mode <value>', 'HTTP mode (http|https) [https]', undefined, 'https')

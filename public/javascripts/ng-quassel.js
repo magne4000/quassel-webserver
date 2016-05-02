@@ -252,7 +252,7 @@
           var i = 0;
           for (; i<self._ws_cb.length; i++) {
             if (self._ws_cb[i].active === false) {
-              self.ws.addEventListener(self._ws_cb[i].name, self._ws_cb[i].callback);
+              self.ws['on'+self._ws_cb[i].name] = self._ws_cb[i].callback;
               self._ws_cb[i].active = true;
             }
           }
