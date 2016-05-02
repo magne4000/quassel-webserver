@@ -9,11 +9,6 @@ angular.module('quassel')
     $scope.networks = [];
     $scope.buffer = null;
     $scope.messages = [];
-    $scope.messagesp = {};
-    $scope.messagesp.get = function(index, count, success) {
-        console.log(index, count);
-        success($scope.messages.slice(index, count));
-    };
     $scope.showhidden = false;
 
     var MT = require('message').Type;
@@ -51,7 +46,7 @@ angular.module('quassel')
         if ($scope.buffer) {
             var messages = [];
             if ($scope.buffer.messages.__mapValuesData__) {
-                messages = $scope.buffer.messages.__mapValuesData__;
+                messages = Array.from($scope.buffer.messages.__mapValuesData__);
             } else {
                 messages = Array.from($scope.buffer.messages.values());
             }
