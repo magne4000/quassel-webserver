@@ -334,7 +334,6 @@ html, body, .container {
     margin-left: 0.5em;
 }
 
-@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
 .connecting .quassel-logo {
@@ -557,9 +556,6 @@ html, body, .container {
     color: @state-info-text;
     border: 1px solid @state-info-border;
 
-    -webkit-transition: top 0.5s ease-out,opacity 0.2s ease-out;
-    -moz-transition: top 0.5s ease-out,opacity 0.2s ease-out;
-    -o-transition: top 0.5s ease-out,opacity 0.2s ease-out;
     transition: top 0.5s ease-out,opacity 0.2s ease-out;
 
     visibility: hidden;
