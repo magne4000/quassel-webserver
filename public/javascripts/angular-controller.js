@@ -118,7 +118,7 @@ angular.module('quassel')
         if (oldValue !== null && (newValue === null || newValue.id !== oldValue.id)) {
             if ($config.get('emptybufferonswitch', false)) {
                 loadingMoreBacklogs.delete(oldValue.id);
-                oldValue.clearMessages();
+                oldValue.trimMessages($config.get('emptybufferonswitchvalue', 0));
             }
         }
     });
@@ -712,6 +712,13 @@ angular.module('quassel')
             $config.set('emptybufferonswitch', newValue);
         }
         return $config.get('emptybufferonswitch', false);
+    };
+    
+    $scope.gsemptybufferonswitchvalue = function(newValue) {
+        if (arguments.length > 0) {
+            $config.set('emptybufferonswitchvalue', newValue);
+        }
+        return $config.get('emptybufferonswitchvalue', 0);
     };
 
     $scope.configGeneral = function() {

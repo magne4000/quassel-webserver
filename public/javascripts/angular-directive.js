@@ -70,7 +70,7 @@ angular.module('quassel')
                 break;
             case MT.Nick:
                 if (message.sender === message.content) {
-                    content = $compile("You are now known as " +  nickplaceholder(message.content))(scope);
+                    content = "You are now known as " +  nickplaceholder(message.content);
                 } else {
                     content = nickplaceholder(message.sender) + " is now known as " + nickplaceholder(message.content);
                 }
@@ -82,10 +82,18 @@ angular.module('quassel')
                 content = nickplaceholder(message.sender) + " has joined";
                 break;
             case MT.Part:
-                content = nickplaceholder(message.sender) + " has left (" + message.content + ")";
+                if (message.content) {
+                    content = nickplaceholder(message.sender) + " has left (" + message.content + ")";
+                } else {
+                    content = nickplaceholder(message.sender) + " has left";
+                }
                 break;
             case MT.Quit:
-                content = nickplaceholder(message.sender) + " has quit (" + message.content + ")";
+                if (message.content) {
+                    content = nickplaceholder(message.sender) + " has quit (" + message.content + ")";
+                } else {
+                    content = nickplaceholder(message.sender) + " has quit";
+                }
                 break;
             case MT.Kick:
                 var ind = message.content.indexOf(" ");
@@ -110,7 +118,7 @@ angular.module('quassel')
                 shouldCompile = false;
         }
         if (shouldCompile) {
-            return $compile(content + '<br>')(scope);
+            return $compile('<span>' + content + '</span><br>')(scope);
         }
         return content + '<br>';
     }
