@@ -41,7 +41,7 @@ angular.module('quassel')
         }
     };
 }])
-.directive('ircMessage', ['$filter', '$parse', function($filter, $parse){
+.directive('ircMessage', ['$filter', '$parse', '$compile', function($filter, $parse, $compile){
 
     var MT = require('message').Type;
     var dateFormat;
@@ -61,15 +61,16 @@ angular.module('quassel')
         return '<span data-nickhash="' + nickhash + '" ng-nick="' + sender + '"></span>';
     }
 
-    function getmessagetemplate(message) {
-        var content, arr, servers;
+    function getmessagetemplate(message, scope) {
+        var content, arr, servers, shouldCompile = true;
         switch(message.type) {
             case MT.Plain:
                 content = $filter('color')($filter('linky')(message.content, '_blank'));
+                shouldCompile = false;
                 break;
             case MT.Nick:
                 if (message.sender === message.content) {
-                    content = "You are now known as " +  nickplaceholder(message.content);
+                    content = $compile("You are now known as " +  nickplaceholder(message.content))(scope);
                 } else {
                     content = nickplaceholder(message.sender) + " is now known as " + nickplaceholder(message.content);
                 }
@@ -102,9 +103,14 @@ angular.module('quassel')
                 break;
             case MT.DayChange:
                 content = "{Day changed to " + dateFormat.format(message.datetime) + "}";
+                shouldCompile = false;
                 break;
             default:
                 content = message.content;
+                shouldCompile = false;
+        }
+        if (shouldCompile) {
+            return $compile(content + '<br>')(scope);
         }
         return content + '<br>';
     }
@@ -114,7 +120,7 @@ angular.module('quassel')
         require: '?message',
         link: function (scope, element, attrs) {
             var message = $parse(attrs.message)(scope);
-            element.html(getmessagetemplate(message));
+            element.html(getmessagetemplate(message, scope));
         }
     };
 }])
