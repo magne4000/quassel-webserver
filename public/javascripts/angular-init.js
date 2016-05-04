@@ -5,6 +5,11 @@
 /* global $ */
 
 angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 'dragAndDrop', 'cgNotify'])
+.config(['$compileProvider', function ($compileProvider) {
+    if (!localStorage.getItem('debug')) {
+        $compileProvider.debugInfoEnabled(false);
+    }
+}])
 .factory('$ignore', ['$quassel', function($quassel){
     var IgnoreList = require('ignore').IgnoreList;
     var IgnoreItem = require('ignore').IgnoreItem;
