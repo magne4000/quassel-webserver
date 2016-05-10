@@ -40,13 +40,7 @@ If `prefixpath` is not empty, the webserver will not be accessible at https://se
 `initialBacklogLimit` defines the number of messages that will de retrieved for each buffer on connection.  
 `backlogLimit` defines the number of messages that will be retrieved for a buffer on each request to fetch additional backlogs.  
 
-### Usage
-See the output of the command `node app.js --help`
-
-### In the browser
-Just go to https://yourserver:64443 and enter your quasselcore informations and credentials
-
-### Certificate
+#### Certificate
 You can use your own certificate for HTTPS mode. The key file is located at ssl/key.pem, and the certificate ssl/cert.pem.
 
 You can generate a new self signed certificate with the following command:
@@ -54,12 +48,18 @@ You can generate a new self signed certificate with the following command:
 openssl req -x509 -newkey rsa:2048 -keyout ssl/key.pem -out ssl/cert.pem -nodes
 ```
 
-### Init script
+#### Usage
+See the output of the command `node app.js --help`
+
+#### Init script
 You can use a startup script to the app at system startup.
 ```
 cp scripts/startup /etc/init.d/quasselweb
 ```
 and then edit the file /etc/init.d/quasselweb and change `BASEDIR`, `RUNASUSER` and `RUNASGROUP` vars.
+
+### In the browser
+Just go to https://yourserver:64443 and enter your quasselcore information and credentials
 
 ### Reverse proxy snippets
 In you run behind `/quassel` location on your webserver, do not forget to edit `settings-user.js` file
@@ -89,6 +89,11 @@ RewriteEngine on
 RewriteRule /quassel/p/socket(.*) ws://127.0.0.1:64080/quassel/p/socket$1 [P,L]
 ProxyPass /quassel http://127.0.0.1:64080/quassel
 ```
+
+### Troubleshooting
+#### Slow buffer display after some time
+This is a [known issue](https://github.com/magne4000/quassel-webserver/issues/83) but there is a workaround:
+ * go to the `General Configuration` and check `Trim buffer when switching to another buffer`
 
 ## License
 Copyright (c) 2014-2016 Joël Charles  
