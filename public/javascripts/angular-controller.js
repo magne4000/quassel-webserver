@@ -842,6 +842,18 @@ angular.module('quassel')
             $favico.reset();
         }
     });
+    
+    $quassel.on('error', function(msg) {
+        console.log('ERROR', msg);
+        $alert.error(msg);
+        if ($scope.connecting) {
+            $quassel.disconnect();
+            $scope.$apply(function(){
+                $scope.connecting = false;
+                $scope.disconnected = null;
+            });
+        }
+    });
 
     $quassel.on('ws.close', function() {
         console.log('DISCONNECTED');
