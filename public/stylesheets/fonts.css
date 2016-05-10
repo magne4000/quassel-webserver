@@ -96,6 +96,6 @@
 .icon-filter:before { content: '\e812'; } /* '' */
 .icon-eraser:before { content: '\e813'; } /* '' */
 .icon-brush:before { content: '\e814'; } /* '' */
-.icon-arrow-up:before { content: '\e816'; } /* '' */
-.icon-arrow-down:before { content: '\e817'; } /* '' */
+.icon-arrow-up:before { content: '\e815'; }
+.icon-arrow-down:before { content: '\e816'; }
 .icon-lock:before { content: '\e817'; } /* '' */

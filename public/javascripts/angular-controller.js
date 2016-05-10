@@ -498,6 +498,11 @@ angular.module('quassel')
     $scope.saveIdentities = function() {
         $uibModalInstance.close($scope.identities);
     };
+    
+    // At initialization, if we have no identity, just add one so the user doesn't have an empty modal
+    if ($scope.identities.length === 0) {
+        $scope.createIdentity();
+    }
 })
 .controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, networks, identities) {
     $scope.networks = networks;
@@ -570,13 +575,42 @@ angular.module('quassel')
         network.ServerList.splice(index, 1);
         $scope.selectServer(network, 0);
     };
+    
+    // At initialization, if we have no network, just add one so the user doesn't have an empty modal
+    if ($scope.networks.length === 0) {
+        $scope.createNetwork();
+    }
+})
+.controller('modalSetupWizardInstanceCtrl', function ($scope, $uibModalInstance, data) {
+    $scope.step = 0;
+    $scope.username = '';
+    $scope.password = '';
+    $scope.repeatpassword = '';
+    $scope.backends = data;
+    $scope.selectedBackend = null;
+    $scope.properties = {};
+    
+    $scope.moveStep = function(moveto) {
+        $scope.step = moveto;
+    };
+    
+    $scope.commit = function() {
+        var properties = {}, key;
+        for (var i=0; i<$scope.selectedBackend.SetupKeys.length; i++) {
+            key = $scope.selectedBackend.SetupKeys[i];
+            properties[key] = $scope.selectedBackend.SetupDefaults[key] || '';
+            if ($scope.properties[key]) {
+                properties[key] = $scope.properties[key];
+            }
+        }
+        $uibModalInstance.close([$scope.selectedBackend.DisplayName, properties, $scope.username, $scope.password]);
+    };
 })
 .controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $timeout) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
     $scope.displayIgnoreListConfigItem = false;
-    $scope.displayNetworksConfigItem = false;
     $scope.displayIdentitiesConfigItem = false;
     $scope.activeIndice = 0;
     var modal, dbg = require("debug");
@@ -759,19 +793,14 @@ angular.module('quassel')
         });
     });
     
-    $quassel.on('network.init', function() {
-        $scope.$apply(function(){
-            $scope.displayNetworksConfigItem = true;
-        });
-    });
-    
     $quassel.on('identities.init', function() {
         $scope.$apply(function(){
             $scope.displayIdentitiesConfigItem = true;
         });
     });
 }])
-.controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', '$config', '$favico', '$rootScope', function($scope, $quassel, $timeout, $window, $alert, $config, $favico, $rootScope) {
+.controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', '$config', '$favico', '$rootScope', '$uibModal',
+            function($scope, $quassel, $timeout, $window, $alert, $config, $favico, $rootScope, $uibModal) {
     $scope.disconnected = false;
     $scope.connecting = false;
     $scope.logged = false;
@@ -839,8 +868,8 @@ angular.module('quassel')
             $scope.secure = $quassel.get().useSSL;
         });
     });
-
-    $quassel.on('coreinfo', function(coreinfo) {
+    
+    $quassel.on('coreinfoinit', function(coreinfo) {
         if (coreinfo.CoreFeatures && coreinfo.CoreFeatures < 4) {
             $alert.error('Your quasselcore is not supported by quassel-webserver (version too old)');
         }
@@ -861,6 +890,47 @@ angular.module('quassel')
         $scope.$apply(function(){
             $scope.disconnected = false;
         });
+    });
+    
+    $quassel.once('setup', function(data) {
+        
+        var modalParameters = {
+            templateUrl: 'modalSetupWizard.html',
+            controller: 'modalSetupWizardInstanceCtrl',
+            keyboard: false,
+            backdrop: 'static',
+            scope: $scope.$new(true),
+            size: 'lg',
+            resolve: {
+                data: function() {
+                    return data;
+                }
+            }
+        };
+        var cb = function (result) {
+            $quassel.get().setupCore(result[0], result[2], result[3], result[1]);
+            $scope.user = result[2];
+            $scope.password = result[3];
+        };
+        var modalInstance = $uibModal.open(modalParameters);
+        
+        $quassel.on('setupfailed', function(data) {
+            $alert.error('Core configuration failed: ' + data);
+            modalInstance = $uibModal.open(modalParameters);
+            modalInstance.result.then(cb);
+        });
+    
+        $quassel.once('setupok', function(data) {
+            $quassel.removeAllListeners('setupfailed');
+            $alert.info('Core successfully configured');
+            
+            $quassel.once('init', function() {
+                $scope.configIdentities();
+            });
+            $scope.login();
+        });
+
+        modalInstance.result.then(cb);
     });
 
     $scope.reload = function(){

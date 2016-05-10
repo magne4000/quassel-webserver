@@ -24,6 +24,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       include ./ng-templates/modalNetworks.jade
       include ./ng-templates/modalIdentities.jade
       include ./ng-templates/modalIgnoreList.jade
+      include ./ng-templates/modalSetupWizard.jade
       #container(ng-controller="QuasselController", ng-class="{connecting: connecting, disconnected: disconnected}")
         #header.dropdown(uib-dropdown)
           span.quassel-logo
@@ -39,7 +40,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
             li
               a(href="#", ng-click="configIdentities()", ng-show="displayIdentitiesConfigItem") Identities
             li
-              a(href="#", ng-click="configNetworks()", ng-show="displayNetworksConfigItem") Networks
+              a(href="#", ng-click="configNetworks()", ng-show="logged") Networks
             li
               a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreListConfigItem") Ignore List
             li(class="dropdown-header") Themes
@@ -98,139 +99,141 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   span.sr-only Loading
             .col-md-3
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
-            #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
-              .buffer-container(highlight-container)
-                .network(
-                      id="network-{{network.networkName}}"
-                      class="buffer-highlight-{{network.statusBuffer.highlight}}"
-                      ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id}"
-                      ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId"
+          #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
+            .buffer-container(highlight-container)
+              .well(ng-if="networks.length == 0") You haven't configured a network yet
+                button.btn.btn-block.btn-default(type="button", ng-click="configNetworks()") Add a network
+              .network(
+                    id="network-{{network.networkName}}"
+                    class="buffer-highlight-{{network.statusBuffer.highlight}}"
+                    ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id}"
+                    ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId"
+                    uib-dropdown
+                )
+                span.collapsable(ng-click="network.collapsed = !network.collapsed")
+                  i.icon-qws(ng-class="network.collapsed ? 'icon-up-open' : 'icon-down-open'")
+                span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
+                a.dropdown-network.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
+                  i.icon-qws.icon-menu
+                ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
+                  li
+                    a(href="#", ng-click="openModalJoinChannel(network)") Join channel
+                  li(ng-if="network.isConnected")
+                    a(href="#", ng-click="disconnect(network)") Disconnect
+                  li(ng-if="!network.isConnected")
+                    a(href="#", ng-click="connect(network)") Connect
+                  li
+                    a(href="#", ng-click="showhidden = !showhidden") Show / Hide chats
+              .network-channels.clearfix(id="{{network.networkName}}-channels", uib-collapse="network.collapsed", ng-repeat-end)
+                .channel(
+                      ng-model="channel"
+                      drag
+                      drop="onDropComplete"
+                      class="buffer-highlight-{{channel.highlight}}"
+                      ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
+                      ng-repeat="channel in network._buffers | channelsFilter track by channel.id"
+                      ng-if="showhidden || (!channel.isPermanentlyRemoved && !channel.isTemporarilyRemoved)"
                       uib-dropdown
                   )
-                  span.collapsable(ng-click="network.collapsed = !network.collapsed")
-                    i.icon-qws(ng-class="network.collapsed ? 'icon-up-open' : 'icon-down-open'")
-                  span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
-                  a.dropdown-network.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
+                  span.channel-icon
+                    i.icon-qws(
+                        ng-show="showhidden"
+                        ng-class="channel.isPermanentlyRemoved || channel.isTemporarilyRemoved ? 'icon-eye-off' : 'icon-eye'"
+                        title="{{channel.isPermanentlyRemoved ? 'Permanently hidden' : channel.isTemporarilyRemoved ? 'Temporarily hidden' : 'Unhidden'}}"
+                      )
+                  span.channel-name(ng-click="showBuffer(channel)", title="{{channel.name}}") {{channel.name}}
+                  a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
                     i.icon-qws.icon-menu
                   ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
-                    li
-                      a(href="#", ng-click="openModalJoinChannel(network)") Join channel
-                    li(ng-if="network.isConnected")
-                      a(href="#", ng-click="disconnect(network)") Disconnect
-                    li(ng-if="!network.isConnected")
-                      a(href="#", ng-click="connect(network)") Connect
-                    li
-                      a(href="#", ng-click="showhidden = !showhidden") Show / Hide chats
-                .network-channels.clearfix(id="{{network.networkName}}-channels", uib-collapse="network.collapsed", ng-repeat-end)
-                  .channel(
-                        ng-model="channel"
-                        drag
-                        drop="onDropComplete"
-                        class="buffer-highlight-{{channel.highlight}}"
-                        ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
-                        ng-repeat="channel in network._buffers | channelsFilter track by channel.id"
-                        ng-if="showhidden || (!channel.isPermanentlyRemoved && !channel.isTemporarilyRemoved)"
-                        uib-dropdown
-                    )
-                    span.channel-icon
-                      i.icon-qws(
-                          ng-show="showhidden"
-                          ng-class="channel.isPermanentlyRemoved || channel.isTemporarilyRemoved ? 'icon-eye-off' : 'icon-eye'"
-                          title="{{channel.isPermanentlyRemoved ? 'Permanently hidden' : channel.isTemporarilyRemoved ? 'Temporarily hidden' : 'Unhidden'}}"
-                        )
-                    span.channel-name(ng-click="showBuffer(channel)", title="{{channel.name}}") {{channel.name}}
-                    a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
-                      i.icon-qws.icon-menu
-                    ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
-                      li(ng-if="channel.active && channel.isChannel()")
-                        a(href="#", ng-click="channelPart(channel)") Part
-                      li(ng-if="!channel.active && channel.isChannel()")
-                        a(href="#", ng-click="channelJoin(channel)") Join
-                      li(ng-if="!channel.active || !channel.isChannel()")
-                        a(href="#", ng-confirm-click="Are you sure you want to delete this buffer permanently ?", ng-ok-click="channelDelete(channel)") Delete
-                      li(class="dropdown-header") Show / Hide
-                      li(ng-if="!channel.isPermanentlyRemoved")
-                        a(href="#", ng-click="channelHidePermanently(channel)") Hide permanently
-                      li(ng-if="!channel.isTemporarilyRemoved")
-                        a(href="#", ng-click="channelHideTemporarily(channel)") Hide temporarily
-                      li(ng-if="channel.isPermanentlyRemoved || channel.isTemporarilyRemoved")
-                        a(href="#", ng-click="channelUnhide(channel)") Unhide
-              .buffer-bottom-bar
-                a.btn.showhide.right(href="javascript:void(0)", ng-click="shown = !shown")
-                  i.icon-qws(ng-class="shown ? 'icon-left-open' : 'icon-right-open'")
-            #center.animation(ng-controller="FilterController")
-              .topic
-                #topic {{buffer.topic}}
-                .btn-group.prefs(uib-dropdown)
-                  button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown", uib-dropdown-toggle)
-                    i.icon-qws.icon-filter
-                  ul.dropdown-menu(role="menu", uib-dropdown-menu)
-                    li.dropdown-header Hide events
-                    li(ng-repeat="fil in currentFilter")
-                      a(href="#")
-                        label.checkbox
-                          input(type="checkbox", data-message-type="{{::fil.type}}", ng-model="fil.value")
-                          | {{::fil.label}}
-                    li.divider
-                    li
-                      a.btn(ng-click="setAsDefault()", href="#") Set as default
-                    li
-                      a.btn(ng-click="useDefault()", href="#") Use default
-              ul.backlog(backlog="loadMore")
-                li.irc-message(
-                      scrollme="ul.backlog"
-                      ng-repeat-start="message in messages track by message.sid"
-                      class="type-{{::message.type}}"
-                      ng-class="{highlighted: message.isHighlighted()}"
-                      ng-if="!currentFilter2[message.type]"
-                  )
-                  span.timestamp
-                    span {{::message.datetime | duration}}
-                  span.nick(data-nickhash="{{message.type == 1 ? message.sender : '' | hash}}") {{::message | decoratenick}}
-                  irc-message.message(message="::message")
-                li.markerline.irc-message(irc-markerline, ng-if="buffer.markerline == message.id", ng-repeat-end)
-                  span
-                  span
-                  span
-              .input(ng-controller="InputController")
-                form#messageform(ng-submit="sendMessage()")
-                  #messagebox(contenteditable, mimic-input="true", focusonfocus, ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", caret)
-                  .formatter
-                    button.btn.btn-default.btn-xs.handle(type="button", ng-click="formattervisible = !formattervisible", title="Format")
-                      i.icon-qws.icon-brush
-                    .formatter-content.btn-group(ng-show="formattervisible", role="group")
-                      button.btn.btn-default.btn-sm(ng-click="execCommand('removeFormat')", type="button", title="Remove format")
-                        i.icon-qws.icon-eraser
-                      button.btn.btn-default.btn-sm(ng-click="execCommand('bold')", type="button", title="Bold")
-                        i.icon-qws.icon-bold
-                      button.btn.btn-default.btn-sm(ng-click="execCommand('italic')", type="button", title="Italic")
-                        i.icon-qws.icon-italic
-                      button.btn.btn-default.btn-sm(ng-click="execCommand('underline')", type="button", title="Underline")
-                        i.icon-qws.icon-underline
-                      .btn-group.formatter-content.formatter-color.dropup(role="group", uib-dropdown)
-                        button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown", uib-dropdown-toggle)
-                          i.icon-qws.icon-tint
-                        ul.dropdown-menu.dropdown-menu-right.list-group(role="menu", uib-dropdown-menu)
-                          li.list-group-item
-                            h4.list-group-item-heading Foreground color
-                            colorpicker.list-group-item-text(colopicker-mode="foreColor")
-                          li.list-group-item
-                            h4.list-group-item-heading Background color
-                            colorpicker.list-group-item-text(colopicker-mode="backColor")
-            #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
-              .buffer-container
-                .user(ng-repeat="user in buffer.users | ordernicks:buffer track by user.nick", uib-dropdown)
-                  span.user-icon
-                    i.icon-qws.icon-circle(ng-class="user.away ? 'user-away' : 'user-not-away'")
-                  span.user-name(ng-class="{'user-op': buffer.isOp(user.nick), 'user-voiced': buffer.isVoiced(user.nick)}") {{user.nick}}
-                  a.dropdown-user.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
-                    i.icon-qws.icon-menu
-                  ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
-                    li
-                      a(href="#", ng-click="userQuery(user)") Query
-              .buffer-bottom-bar
-                a.btn.showhide.left(href="javascript:void(0)", ng-click="shown2 = !shown2")
-                  i.icon-qws(ng-class="shown2 ? 'icon-right-open' : 'icon-left-open'")
+                    li(ng-if="channel.active && channel.isChannel()")
+                      a(href="#", ng-click="channelPart(channel)") Part
+                    li(ng-if="!channel.active && channel.isChannel()")
+                      a(href="#", ng-click="channelJoin(channel)") Join
+                    li(ng-if="!channel.active || !channel.isChannel()")
+                      a(href="#", ng-confirm-click="Are you sure you want to delete this buffer permanently ?", ng-ok-click="channelDelete(channel)") Delete
+                    li(class="dropdown-header") Show / Hide
+                    li(ng-if="!channel.isPermanentlyRemoved")
+                      a(href="#", ng-click="channelHidePermanently(channel)") Hide permanently
+                    li(ng-if="!channel.isTemporarilyRemoved")
+                      a(href="#", ng-click="channelHideTemporarily(channel)") Hide temporarily
+                    li(ng-if="channel.isPermanentlyRemoved || channel.isTemporarilyRemoved")
+                      a(href="#", ng-click="channelUnhide(channel)") Unhide
+            .buffer-bottom-bar
+              a.btn.showhide.right(href="javascript:void(0)", ng-click="shown = !shown")
+                i.icon-qws(ng-class="shown ? 'icon-left-open' : 'icon-right-open'")
+          #center.animation(ng-controller="FilterController")
+            .topic
+              #topic {{buffer.topic}}
+              .btn-group.prefs(uib-dropdown)
+                button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown", uib-dropdown-toggle)
+                  i.icon-qws.icon-filter
+                ul.dropdown-menu(role="menu", uib-dropdown-menu)
+                  li.dropdown-header Hide events
+                  li(ng-repeat="fil in currentFilter")
+                    a(href="#")
+                      label.checkbox
+                        input(type="checkbox", data-message-type="{{::fil.type}}", ng-model="fil.value")
+                        | {{::fil.label}}
+                  li.divider
+                  li
+                    a.btn(ng-click="setAsDefault()", href="#") Set as default
+                  li
+                    a.btn(ng-click="useDefault()", href="#") Use default
+            ul.backlog(backlog="loadMore")
+              li.irc-message(
+                    scrollme="ul.backlog"
+                    ng-repeat-start="message in messages track by message.sid"
+                    class="type-{{::message.type}}"
+                    ng-class="{highlighted: message.isHighlighted()}"
+                    ng-if="!currentFilter2[message.type]"
+                )
+                span.timestamp
+                  span {{::message.datetime | duration}}
+                span.nick(data-nickhash="{{message.type == 1 ? message.sender : '' | hash}}") {{::message | decoratenick}}
+                irc-message.message(message="::message")
+              li.markerline.irc-message(irc-markerline, ng-if="buffer.markerline == message.id", ng-repeat-end)
+                span
+                span
+                span
+            .input(ng-controller="InputController")
+              form#messageform(ng-submit="sendMessage()")
+                #messagebox(contenteditable, mimic-input="true", focusonfocus, ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", caret)
+                .formatter
+                  button.btn.btn-default.btn-xs.handle(type="button", ng-click="formattervisible = !formattervisible", title="Format")
+                    i.icon-qws.icon-brush
+                  .formatter-content.btn-group(ng-show="formattervisible", role="group")
+                    button.btn.btn-default.btn-sm(ng-click="execCommand('removeFormat')", type="button", title="Remove format")
+                      i.icon-qws.icon-eraser
+                    button.btn.btn-default.btn-sm(ng-click="execCommand('bold')", type="button", title="Bold")
+                      i.icon-qws.icon-bold
+                    button.btn.btn-default.btn-sm(ng-click="execCommand('italic')", type="button", title="Italic")
+                      i.icon-qws.icon-italic
+                    button.btn.btn-default.btn-sm(ng-click="execCommand('underline')", type="button", title="Underline")
+                      i.icon-qws.icon-underline
+                    .btn-group.formatter-content.formatter-color.dropup(role="group", uib-dropdown)
+                      button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown", uib-dropdown-toggle)
+                        i.icon-qws.icon-tint
+                      ul.dropdown-menu.dropdown-menu-right.list-group(role="menu", uib-dropdown-menu)
+                        li.list-group-item
+                          h4.list-group-item-heading Foreground color
+                          colorpicker.list-group-item-text(colopicker-mode="foreColor")
+                        li.list-group-item
+                          h4.list-group-item-heading Background color
+                          colorpicker.list-group-item-text(colopicker-mode="backColor")
+          #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
+            .buffer-container
+              .user(ng-repeat="user in buffer.users | ordernicks:buffer track by user.nick", uib-dropdown)
+                span.user-icon
+                  i.icon-qws.icon-circle(ng-class="user.away ? 'user-away' : 'user-not-away'")
+                span.user-name(ng-class="{'user-op': buffer.isOp(user.nick), 'user-voiced': buffer.isVoiced(user.nick)}") {{user.nick}}
+                a.dropdown-user.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
+                  i.icon-qws.icon-menu
+                ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
+                  li
+                    a(href="#", ng-click="userQuery(user)") Query
+            .buffer-bottom-bar
+              a.btn.showhide.left(href="javascript:void(0)", ng-click="shown2 = !shown2")
+                i.icon-qws(ng-class="shown2 ? 'icon-right-open' : 'icon-left-open'")
 
       script(src='#{settings.prefixpath}/javascripts/jquery-2.2.0.min.js')
       script(src='#{settings.prefixpath}/javascripts/angular.min.js')
