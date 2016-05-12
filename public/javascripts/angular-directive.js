@@ -359,7 +359,7 @@ angular.module('quassel')
         return function() {
             var nick = nicks[pos];
             pos = (pos + 1) % nicks.length;
-            return tokenStart === 0 ? nick + ': ' /* non-breaking space */ : nick;
+            return tokenStart === 0 ? nick + ':\xa0' /* non-breaking space */ : nick;
         };
     }
 
@@ -377,7 +377,7 @@ angular.module('quassel')
                 if ($event.keyCode == 9) { // Tab
                     $event.preventDefault();
                     var newTokens = null, tokenStart = null, tokenEnd = null;
-                    var message = $hiddendiv.get().html(scope.inputmessage).text();
+                    var message = $hiddendiv.get().html(element.html()).text();
                     $hiddendiv.get().html("");
                     var messageLength = message.length;
                     if (lastTokens !== null) {
@@ -387,7 +387,7 @@ angular.module('quassel')
                     } else {
                         tokenEnd = getCaretPosition(element[0]).end;
                         var messageLeft = message.substr(0, tokenEnd);
-                        tokenStart = messageLeft.lastIndexOf(' ') + 1;
+                        tokenStart = Math.max(messageLeft.lastIndexOf(' '), messageLeft.lastIndexOf('\xa0')) + 1;
                         var token = messageLeft.substr(tokenStart);
                         newTokens = getTokenCompletion(scope, token, tokenStart);
                     }
