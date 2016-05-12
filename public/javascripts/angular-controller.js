@@ -339,10 +339,10 @@ angular.module('quassel')
             && (!loadingMoreBacklogs.has($scope.buffer.id)
                 ||  loadingMoreBacklogs.get($scope.buffer.id) === false)
             && loadingMoreBacklogs.get($scope.buffer.id) !== 'stop') {
-            var firstMessage = $scope.buffer.getFirstMessage();
+            var firstMessageId = $scope.buffer._firstMessageId;
             loadingMoreBacklogs.set($scope.buffer.id, true);
-            if (!firstMessage) firstMessage = {id: -1};
-            $quassel.moreBacklogs($scope.buffer.id, firstMessage.id);
+            if (!firstMessageId) firstMessageId = -1;
+            $quassel.moreBacklogs($scope.buffer.id,firstMessageId);
             return true;
         }
         return false;
