@@ -314,7 +314,7 @@ angular.module('quassel')
                 continue;
 
             var nick = message.getNick();
-            if (nick.length <= token.length)
+            if (nick.length < token.length)
                 continue;
 
             if (!scope.buffer.users.has(nick))
@@ -341,7 +341,7 @@ angular.module('quassel')
 
         for (var i = 0; i < subjects.length; i++) {
             var nick = subjects[i];
-            if (nick.length <= token.length)
+            if (nick.length < token.length)
                 continue;
 
             if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length) && nicks.indexOf(nick) === -1) {
