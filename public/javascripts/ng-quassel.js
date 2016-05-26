@@ -48,7 +48,13 @@
         requestConnectNetwork: requestConnectNetwork,
         requestRemoveBuffer: requestRemoveBuffer,
         requestMergeBuffersPermanently: requestMergeBuffersPermanently,
-        requestUpdate: requestUpdate,
+        requestUpdateIdentity: requestUpdateIdentity,
+        requestUpdateIgnoreListManager: requestUpdateIgnoreListManager,
+        requestSetNetworkInfo: requestSetNetworkInfo,
+        createNetwork: createNetwork,
+        removeNetwork: removeNetwork,
+        createIdentity: createIdentity,
+        removeIdentity: removeIdentity,
         connect: connect,
         disconnect: disconnect,
         login: login,
@@ -85,10 +91,11 @@
               nobacklogs: $config.get('initialBacklogLimit', 0),
               initialbackloglimit: $config.get('initialBacklogLimit', 20),
               backloglimit: $config.get('backlogLimit', 50),
-              unsecurecore: $config.get('securecore', true)  // tls-browserify module doesn't respect tls API of nodejs
+              highlightmode: $config.get('highlightmode', 2),
+              securecore: $config.get('securecore', true)  // tls-browserify module doesn't respect tls API of nodejs
           }, function(next) {
               next(self.login, self.password);
-              var istls = !$config.get('securecore', true);
+              var istls = self.quassel.useSSL;
               if (istls) {
                 self.ws = self.quassel.qtsocket.socket._socket._ws;
               } else {
@@ -200,8 +207,32 @@
         self.quassel.requestHideBufferPermanently(bufferId);
       }
       
-      function requestUpdate(ignoreList) {
-        self.quassel.requestUpdate(ignoreList);
+      function requestUpdateIgnoreListManager(ignoreList) {
+        self.quassel.requestUpdateIgnoreListManager(ignoreList);
+      }
+      
+      function requestSetNetworkInfo(networkId, network) {
+        self.quassel.requestSetNetworkInfo(networkId, network);
+      }
+      
+      function createNetwork(networkName, identityId, initialServer, optionsopt) {
+        self.quassel.createNetwork(networkName, identityId, initialServer, optionsopt);
+      }
+      
+      function removeNetwork(networkId) {
+        self.quassel.removeNetwork(networkId);
+      }
+      
+      function createIdentity(identityName, options) {
+        self.quassel.createIdentity(identityName, options);
+      }
+      
+      function removeIdentity(identityId) {
+        self.quassel.removeIdentity(identityId);
+      }
+      
+      function requestUpdateIdentity(identityId, identity) {
+        self.quassel.requestUpdateIdentity(identityId, identity);
       }
       
       function connect() {

@@ -1,4 +1,7 @@
 /* global angular */
+/* global Intl */
+/* global $ */
+
 angular.module('quassel')
 .directive('input', function ($parse) {
     return {
@@ -38,7 +41,7 @@ angular.module('quassel')
         }
     };
 }])
-.directive('ircMessage', ['$compile', '$filter', function($compile, $filter){
+.directive('ircMessage', ['$filter', '$parse', '$compile', function($filter, $parse, $compile){
 
     var MT = require('message').Type;
     var dateFormat;
@@ -52,43 +55,49 @@ angular.module('quassel')
         };
     }
 
-    function nickplaceholder(val) {
-        if (typeof val != 'undefined') {
-            var nickhash=$filter('hash')(val);
-            val = val.replace('"', '\\"');
-            return '<span data-nickhash="'+nickhash+'" ng-nick="'+val+'"></span>';
-        }
-        return '<span data-nickhash="{{::message.sender | hash}}" ng-nick="{{::message.sender}}"></span>';
+    function nickplaceholder(sender) {
+        var nickhash = $filter('hash')(sender);
+        sender = sender.replace('"', '\\"');
+        return '<span data-nickhash="' + nickhash + '" ng-nick="' + sender + '"></span>';
     }
 
-    function getmessagetemplate(scope, message) {
-        var content, arr, servers;
+    function getmessagetemplate(message, scope) {
+        var content, arr, servers, shouldCompile = true;
         switch(message.type) {
             case MT.Plain:
                 content = $filter('color')($filter('linky')(message.content, '_blank'));
+                shouldCompile = false;
                 break;
             case MT.Nick:
                 if (message.sender === message.content) {
                     content = "You are now known as " +  nickplaceholder(message.content);
                 } else {
-                    content = nickplaceholder() + " is now known as " + nickplaceholder(message.content);
+                    content = nickplaceholder(message.sender) + " is now known as " + nickplaceholder(message.content);
                 }
                 break;
             case MT.Mode:
-                content = "Mode {{::message.content}} by " + nickplaceholder();
+                content = "Mode " + message.content + " by " + nickplaceholder(message.sender);
                 break;
             case MT.Join:
-                content = nickplaceholder() + " has joined";
+                content = nickplaceholder(message.sender) + " has joined";
                 break;
             case MT.Part:
-                content = nickplaceholder() + " has left (" + message.content + ")";
+                if (message.content) {
+                    content = nickplaceholder(message.sender) + " has left (" + message.content + ")";
+                } else {
+                    content = nickplaceholder(message.sender) + " has left";
+                }
                 break;
             case MT.Quit:
-                content = nickplaceholder() + " has quit (" + message.content + ")";
+                if (message.content) {
+                    content = nickplaceholder(message.sender) + " has quit (" + message.content + ")";
+                } else {
+                    content = nickplaceholder(message.sender) + " has quit";
+                }
                 break;
             case MT.Kick:
                 var ind = message.content.indexOf(" ");
-                content = nickplaceholder() + " has kicked " + message.content.slice(0, ind) + " (" + message.content.slice(ind+1) + ")";
+                content = nickplaceholder(message.sender) + " has kicked " + message.content.slice(0, ind) + " (" + message.content.slice(ind+1) + ")";
                 break;
             case MT.NetsplitJoin:
                 arr = message.content.split("#:#");
@@ -102,27 +111,28 @@ angular.module('quassel')
                 break;
             case MT.DayChange:
                 content = "{Day changed to " + dateFormat.format(message.datetime) + "}";
+                shouldCompile = false;
                 break;
             default:
-                content = "{{::message.content}}";
+                content = message.content;
+                shouldCompile = false;
+        }
+        if (shouldCompile) {
+            return $compile('<span>' + content + '</span><br>')(scope);
         }
         return content + '<br>';
     }
 
     return {
-        scope: {
-            message: "="
-        },
         restrict: 'E',
         require: '?message',
         link: function (scope, element, attrs) {
-            var msg = getmessagetemplate(scope, scope.message);
-            element.html(msg);
-            $compile(element.contents())(scope);
+            var message = $parse(attrs.message)(scope);
+            element.html(getmessagetemplate(message, scope));
         }
     };
 }])
-.directive('ngNick', ['$filter', '$compile', '$rootScope', '$config', function ($filter, $compile, $rootScope, $config) {
+.directive('ngNick', ['$filter', '$rootScope', '$config', function ($filter, $rootScope, $config) {
     return {
         scope: {},
         link: function (scope, element, attrs) {
@@ -145,7 +155,7 @@ angular.module('quassel')
         template: "{{nick}}"
     };
 }])
-.directive('theme', ['$theme', '$parse', function ($theme, $parse) {
+.directive('theme', ['$theme', function ($theme) {
     var regex = /(.*theme-).*\.css$/;
 
     return {
@@ -178,7 +188,7 @@ angular.module('quassel')
         }
     };
 })
-.directive('ircMarkerline', function ($parse) {
+.directive('ircMarkerline', function () {
     var lastElement = null;
     return {
         link: function (scope, element, attrs) {
@@ -187,7 +197,7 @@ angular.module('quassel')
         }
     };
 })
-.directive('highlightContainer', function ($parse) {
+.directive('highlightContainer', function () {
     function compareViewport(el, parent) {
         var rect = el.getBoundingClientRect();
         if (rect.top < 0) return rect.top;
@@ -200,7 +210,7 @@ angular.module('quassel')
 
             function updateHighlights() {
                 var parent = element[0], highlightTop = 0, highlightBottom = 0, val;
-                $('.buffer-highlight').each(function(){
+                $('.buffer-highlight-high').each(function(){
                     val = compareViewport(this, parent);
                     if (val < highlightTop) highlightTop = val;
                     if (val > highlightBottom) highlightBottom = val;
@@ -304,7 +314,7 @@ angular.module('quassel')
                 continue;
 
             var nick = message.getNick();
-            if (nick.length <= token.length)
+            if (nick.length < token.length)
                 continue;
 
             if (!scope.buffer.users.has(nick))
@@ -331,7 +341,7 @@ angular.module('quassel')
 
         for (var i = 0; i < subjects.length; i++) {
             var nick = subjects[i];
-            if (nick.length <= token.length)
+            if (nick.length < token.length)
                 continue;
 
             if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length) && nicks.indexOf(nick) === -1) {
@@ -349,7 +359,7 @@ angular.module('quassel')
         return function() {
             var nick = nicks[pos];
             pos = (pos + 1) % nicks.length;
-            return tokenStart === 0 ? nick + ': ' /* non-breaking space */ : nick;
+            return tokenStart === 0 ? nick + ':\xa0' /* non-breaking space */ : nick;
         };
     }
 
@@ -367,7 +377,7 @@ angular.module('quassel')
                 if ($event.keyCode == 9) { // Tab
                     $event.preventDefault();
                     var newTokens = null, tokenStart = null, tokenEnd = null;
-                    var message = $hiddendiv.get().html(scope.inputmessage).text();
+                    var message = $hiddendiv.get().html(element.html()).text();
                     $hiddendiv.get().html("");
                     var messageLength = message.length;
                     if (lastTokens !== null) {
@@ -377,7 +387,7 @@ angular.module('quassel')
                     } else {
                         tokenEnd = getCaretPosition(element[0]).end;
                         var messageLeft = message.substr(0, tokenEnd);
-                        tokenStart = messageLeft.lastIndexOf(' ') + 1;
+                        tokenStart = Math.max(messageLeft.lastIndexOf(' '), messageLeft.lastIndexOf('\xa0')) + 1;
                         var token = messageLeft.substr(tokenStart);
                         newTokens = getTokenCompletion(scope, token, tokenStart);
                     }
@@ -411,37 +421,33 @@ angular.module('quassel')
     };
 }])
 .directive('scrollme', [function () {
-    var parent = $("ul.backlog")[0];
     var promise = null;
-    var heightsum = 0;
+    var subjects = [];
     return {
         link: function (scope, element, attr) {
+            var parent = $(attr.scrollme)[0];
             clearTimeout(promise);
-            if (element.is(':last-child')) {
-                heightsum += element.height();
+            if (parent.lastElementChild.isEqualNode(element[0])) {
+                subjects.push(element[0]);
                 promise = setTimeout(function(){
-                    if (!element.is(':hidden')) {
-                        if (parent.offsetHeight + parent.scrollTop + heightsum + 10 >= parent.scrollHeight) {
-                            parent.scrollTop = parent.scrollHeight;
-                            heightsum = 0;
-                        }
+                    var cumulativeHeight = 0;
+                    for (var i=0; i<subjects.length; i++) {
+                        cumulativeHeight += subjects[i].offsetHeight + 1;
                     }
+                    if (parent.scrollHeight - parent.scrollTop - parent.clientHeight <= cumulativeHeight) {
+                        parent.scrollTop = parent.scrollHeight;
+                    }
+                    subjects = [];
                 }, 50);
             }
         }
     };
 }])
-.directive('backlog', ['$timeout', '$compile', '$quassel', function (timeout, $compile, $quassel) {
+.directive('backlog', ['$timeout', '$compile', '$quassel', '$parse', function (timeout, $compile, $quassel, $parse) {
     return {
-        scope: {
-            backlog: "=",
-            buffer: "=parentBuffer",
-            currentFilter: "="
-        },
-        template: "",
         link: function (scope, element, attr) {
             var lengthThreshold = attr.scrollThreshold || 20;
-            var handler = scope.backlog;
+            var handler = $parse(attr.backlog)(scope);
             var promiseFetching = null;
             var promiseScroll = null;
             var lastScrolled = -9999;
@@ -597,4 +603,59 @@ angular.module('quassel')
             }
         }
     };
-}]);
+}])
+.directive('convertToNumber', function() {
+  return {
+    require: 'ngModel',
+    link: function(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function(val) {
+        return parseInt(val, 10);
+      });
+      ngModel.$formatters.push(function(val) {
+        return '' + val;
+      });
+    }
+  };
+})
+.directive('arrayToTextarea', function() {
+  return {
+    require: 'ngModel',
+    link: function(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function(val) {
+        return val.split('\n');
+      });
+      ngModel.$formatters.push(function(val) {
+        return val.join('\n');
+      });
+    }
+  };
+})
+.directive('stringToNumber', function() {
+  return {
+    require: 'ngModel',
+    link: function(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function(value) {
+        return '' + value;
+      });
+      ngModel.$formatters.push(function(value) {
+        return parseFloat(value, 10);
+      });
+    }
+  };
+})
+.directive('compareTo', function() {
+  return {
+    require: "ngModel",
+    scope: {
+      otherModelValue: "=compareTo"
+    },
+    link: function(scope, element, attributes, ngModel) {
+      ngModel.$validators.compareTo = function(modelValue) {
+        return modelValue == scope.otherModelValue;
+      };
+      scope.$watch("otherModelValue", function() {
+        ngModel.$validate();
+      });
+    }
+  };
+});

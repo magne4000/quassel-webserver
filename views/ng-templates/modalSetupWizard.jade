@@ -1,0 +1,39 @@
+script(type="text/ng-template", id="modalSetupWizard.html")
+  form.form-horizontal(name="setupWizardForm")
+    .modal-header
+      h4#myModalLabel.modal-title Core Configuration Wizard
+        small  This wizard will guide you through the configuration of your Quassel core
+    .modal-body(ng-if="step == 0")
+      h5 First, we will create a user on the core. This first user will have administrator privileges
+      .form-group(ng-class="{'has-error': setupWizardForm.username.$invalid}")
+        label.control-label.col-md-3(for="username") Username
+        .col-md-9
+          input.form-control(type="text", id="username", name="username", ng-model="$parent.username", required)
+      .form-group(ng-class="{'has-error': setupWizardForm.password.$invalid}")
+        label.control-label.col-md-3(for="password") Password
+        .col-md-9
+          input.form-control(type="password", id="password", name="password", ng-model="$parent.password", required)
+      .form-group(ng-class="{'has-error': setupWizardForm.repeatpassword.$invalid}")
+        label.control-label.col-md-3(for="repeatpassword") Repeat password
+        .col-md-9
+          input.form-control(type="password", id="repeatpassword", name="repeatpassword", ng-model="$parent.repeatpassword", compare-to="$parent.password", required)
+    .modal-body(ng-if="step == 1")
+      h5 Now you must choose one backend to store your data
+      p(ng-class="{'has-error': setupWizardForm.backend.$invalid}")
+        label.control-label(for="backend") Backend
+        select.form-control(id="backend", name="backend", ng-options="backend.DisplayName for backend in backends track by backend.DisplayName", ng-model="$parent.selectedBackend", required)
+      .panel.panel-default(ng-if="selectedBackend.Description")
+        .panel-heading Description
+        .panel-body {{selectedBackend.Description}}
+      .panel.panel-default(ng-if="selectedBackend.SetupKeys.length > 0")
+        .panel-heading Connection Properties
+        .panel-body
+          .form-group(ng-repeat="key in selectedBackend.SetupKeys track by $index")
+            label.control-label.col-md-2 {{key}}
+            .col-md-10
+              input.form-control(type="text", ng-model="$parent.properties[key]", ng-attr-placeholder="{{selectedBackend.SetupDefaults[key]}}", ng-if="key != 'Port'")
+              input.form-control(type="number", ng-model="$parent.properties[key]", ng-attr-placeholder="{{selectedBackend.SetupDefaults[key]}}", min="1", max="65535", ng-if="key == 'Port'")
+    .modal-footer
+      button.btn.btn-default(ng-if="step == 0", ng-click='moveStep(1)', ng-disabled="setupWizardForm.$invalid") Next
+      button.btn.btn-default(ng-if="step == 1", ng-click='moveStep(0)', ng-disabled="setupWizardForm.$invalid") Previous
+      button.btn.btn-success(ng-if="step == 1", ng-click='commit()', ng-disabled="setupWizardForm.$invalid") Commit

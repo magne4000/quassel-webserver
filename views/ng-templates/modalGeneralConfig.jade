@@ -1,0 +1,28 @@
+script(type="text/ng-template", id="modalGeneralConfig.html")
+    .modal-header
+      button.close(type='button', ng-click='$dismiss("close")') ×
+      h4#myModalLabel.modal-title General configuration
+    .modal-body
+      .form-group.checkbox
+        label
+          input(type="checkbox", ng-model="gsdebug", ng-model-options="{ getterSetter: true }")
+          | Display debug information in console ? (needs a refresh to take effect)
+      .form-group.checkbox
+        label
+          input(type="checkbox", ng-model="gsdisplayfullhostmask", ng-model-options="{ getterSetter: true }")
+          | Display full hostmask on join/part/quit ?
+      .form-group.checkbox
+        label
+          input(type="checkbox", ng-model="gsemptybufferonswitch", ng-model-options="{ getterSetter: true }")
+          | Trim buffer when switching to another buffer (check this if you have slowdowns after some time)
+      small.form-group.col-md-offset-1(ng-show="gsemptybufferonswitch()") ↳ Leave only 
+        input.input-xs(type="number", ng-model="gsemptybufferonswitchvalue", ng-model-options="{ getterSetter: true }", min="0", max="999", ng-readonly="!gsemptybufferonswitch()")
+        |  messages.
+      h4 Highlight nicks
+        small  if logged, needs a refresh to take effect
+      .btn-group
+        label.btn.btn-primary(ng-model="gshighlightmode", ng-model-options="{ getterSetter: true }", uib-btn-radio="1") None
+        label.btn.btn-primary(ng-model="gshighlightmode", ng-model-options="{ getterSetter: true }", uib-btn-radio="2") Current nick
+        label.btn.btn-primary(ng-model="gshighlightmode", ng-model-options="{ getterSetter: true }", uib-btn-radio="3") All nicks from identity
+    .modal-footer
+      button.btn.btn-default(ng-click='$dismiss("close")') Close
