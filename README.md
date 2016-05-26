@@ -23,7 +23,7 @@ git clone https://github.com/magne4000/quassel-webserver.git
 cd quassel-webserver
 npm install --production
 ```
-or to update `git pull && npm update`
+or to update `git pull && npm prune && npm update`
 
 and run the following command: `node app.js`
 
