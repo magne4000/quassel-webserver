@@ -88,14 +88,14 @@ angular.module('quassel')
                 break;
             case MT.Part:
                 if (message.content) {
-                    content = nickplaceholder(message.sender) + " has left (" + message.content + ")";
+                    content = nickplaceholder(message.sender) + " has left (" + $filter('linky')(message.content, '_blank') + ")";
                 } else {
                     content = nickplaceholder(message.sender) + " has left";
                 }
                 break;
             case MT.Quit:
                 if (message.content) {
-                    content = nickplaceholder(message.sender) + " has quit (" + message.content + ")";
+                    content = nickplaceholder(message.sender) + " has quit (" + $filter('linky')(message.content, '_blank') + ")";
                 } else {
                     content = nickplaceholder(message.sender) + " has quit";
                 }
