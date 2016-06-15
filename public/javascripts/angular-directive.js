@@ -64,6 +64,10 @@ angular.module('quassel')
     function getmessagetemplate(message, scope) {
         var content, arr, servers, shouldCompile = true;
         switch(message.type) {
+            case MT.Topic:
+                content = $filter('linky')(message.content, '_blank');
+                shouldCompile = false;
+                break;
             case MT.Action:
             case MT.Plain:
                 content = $filter('color')($filter('linky')(message.content, '_blank'));

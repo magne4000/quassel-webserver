@@ -163,7 +163,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                 i.icon-qws(ng-class="shown ? 'icon-left-open' : 'icon-right-open'")
           #center.animation(ng-controller="FilterController")
             .topic
-              #topic {{buffer.topic}}
+              #topic(ng-bind-html="buffer.topic | linky:'_blank'")
               .btn-group.prefs(uib-dropdown)
                 button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown", uib-dropdown-toggle)
                   i.icon-qws.icon-filter
