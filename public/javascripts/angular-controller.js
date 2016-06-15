@@ -1176,6 +1176,9 @@ angular.module('quassel')
                         $mirc.getMIRCValidColor(cs['background-color']) || modifiersByLevel[level-1].color[1]
                     ]
                 };
+                if (this.tagName === 'BR') {
+                    message += '\n';
+                }
             } else if (this.nodeType === 3) {  // Text Node
                 message += applyModifiersToString(modifiersByLevel[level-1], contextModifiers, rootModifiers);
                 message += this.textContent;
