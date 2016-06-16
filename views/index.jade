@@ -231,6 +231,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
                 ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
                   li
                     a(href="#", ng-click="userQuery(user)") Query
+                  li
+                    a(href="#", ng-click="whois(user)") Whois
             .buffer-bottom-bar
               a.btn.showhide.left(href="javascript:void(0)", ng-click="shown2 = !shown2")
                 i.icon-qws(ng-class="shown2 ? 'icon-right-open' : 'icon-left-open'")

@@ -427,6 +427,12 @@ angular.module('quassel')
             }
         }
     };
+    
+    $scope.whois = function(user) {
+        if ($scope.buffer !== null) {
+            $quassel.sendMessage($scope.buffer.id, '/whois ' + user.nick);
+        }
+    };
 }])
 .controller('ModalJoinChannelInstanceCtrl', function ($scope, $uibModalInstance, network) {
     $scope.name = '';
