@@ -392,7 +392,8 @@ angular.module('quassel')
                     } else {
                         tokenEnd = getCaretPosition(element[0]).end;
                         var messageLeft = message.substr(0, tokenEnd);
-                        tokenStart = Math.max(messageLeft.lastIndexOf(' '), messageLeft.lastIndexOf('\xa0')) + 1;
+                        var match = messageLeft.match(/[^#\w\d-_\[\]{}|`^.\\]/gi);
+                        tokenStart = !match ? 0 : messageLeft.lastIndexOf(match[match.length - 1]) + 1;
                         var token = messageLeft.substr(tokenStart);
                         newTokens = getTokenCompletion(scope, token, tokenStart);
                     }
