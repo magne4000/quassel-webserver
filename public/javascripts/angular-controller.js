@@ -644,7 +644,7 @@ angular.module('quassel')
         });
         
         modalInstance.result.then(function (identities) {
-            var im = new Map($quassel.get().identities), i=0, identity, areEquals = false;
+            var im = new Map($quassel.get().identities), i=0, identity, areEquals = false, acount = [0, 0, 0];
             for (;i<identities.length; i++) {
                 if (typeof identities[i].identityId === 'number' && identities[i].identityId > -1) {
                     identity = im.get(identities[i].identityId);
@@ -653,19 +653,37 @@ angular.module('quassel')
                     if (!areEquals) {
                         // Update identity information
                         $quassel.requestUpdateIdentity(identity.identityId, identities[i]);
+                        acount[1] = acount[1] + 1;
                     }
                 } else {
                     // Create the new identity
                     $quassel.createIdentity(identities[i].identityName, identities[i]);
+                    acount[0] = acount[0] + 1;
                 }
             }
             im.forEach(function(identity) {
                 $quassel.removeIdentity(identity.identityId);
+                acount[2] = acount[2] + 1;
             });
+            if (typeof callback === 'function') {
+                callback(acount[0], acount[1], acount[2]);
+            }
         });
     };
     
     $scope.configNetworks = function() {
+        if ($quassel.get().identities.size === 0) {
+            $quassel.once('identity.new', function() {
+                $scope.configNetworks();
+            });
+            $scope.configIdentities(function(nbcreate){
+                if (nbcreate === 0) {
+                    $quassel.removeListener('identity.new');
+                }
+            });
+            return;
+        }
+        
         var modalInstance = $uibModal.open({
             templateUrl: 'modalNetworks.html',
             controller: 'ModalNetworkInstanceCtrl',
@@ -803,6 +821,9 @@ angular.module('quassel')
         $scope.$apply(function(){
             $scope.displayIdentitiesConfigItem = true;
         });
+        if ($quassel.get().identities.size === 0) {
+            $scope.configIdentities();
+        }
     });
 }])
 .controller('QuasselController', ['$scope', '$quassel', '$timeout', '$window', '$alert', '$config', '$favico', '$rootScope', '$uibModal',
