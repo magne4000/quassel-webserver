@@ -84,10 +84,14 @@ location /quassel {
 ```
 #### Apache
 Needs activated mod_proxy_wstunnel and mod_rewrite
-```
+```apache
+<VirtualHost ...>
+...
 RewriteEngine on
 RewriteRule /quassel/p/socket(.*) ws://127.0.0.1:64080/quassel/p/socket$1 [P,L]
 ProxyPass /quassel http://127.0.0.1:64080/quassel
+...
+</VirtualHost>
 ```
 
 ### Troubleshooting
