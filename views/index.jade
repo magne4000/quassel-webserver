@@ -225,7 +225,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
               .user(ng-repeat="user in buffer.users | ordernicks:buffer track by user.nick", uib-dropdown)
                 span.user-icon
                   i.icon-qws.icon-circle(ng-class="user.away ? 'user-away' : 'user-not-away'")
-                span.user-name(ng-class="{'user-op': buffer.isOp(user.nick), 'user-voiced': buffer.isVoiced(user.nick)}") {{user.nick}}
+                span.user-name(ng-class="userClass(buffer, user.nick)") {{user.nick}}
                 a.dropdown-user.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
                   i.icon-qws.icon-menu
                 ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)

@@ -428,6 +428,16 @@ angular.module('quassel')
         }
     };
     
+    $scope.userClass = function(buffer, nick) {
+        var uclass = '';
+        if (buffer.isOwner(nick)) uclass = 'user-owner';
+        else if (buffer.isAdmin(nick)) uclass = 'user-admin';
+        else if (buffer.isOp(nick)) uclass = 'user-op';
+        else if (buffer.isHalfOp(nick)) uclass = 'user-half-op';
+        else if (buffer.isVoiced(nick)) uclass = 'user-voiced';
+        return uclass;
+    }
+    
     $scope.whois = function(user) {
         if ($scope.buffer !== null) {
             $quassel.sendMessage($scope.buffer.id, '/whois ' + user.nick);

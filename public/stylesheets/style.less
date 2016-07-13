@@ -257,6 +257,16 @@ html, body, .container {
     color: green;
 }
 
+.user-owner:before {
+    content: '~ ';
+    font-size: 0.9em;
+}
+
+.user-admin:before {
+    content: '& ';
+    font-size: 0.9em;
+}
+
 .user-voiced:before {
     content: '\e810 ';
     font-size: 0.9em;
@@ -270,6 +280,11 @@ html, body, .container {
 
 .user-op:before {
     content: '@ ';
+    font-size: 0.9em;
+}
+
+.user-half-op:before {
+    content: '% ';
     font-size: 0.9em;
 }
 

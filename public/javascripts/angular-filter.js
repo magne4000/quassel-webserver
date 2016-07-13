@@ -224,11 +224,15 @@ angular.module('quassel')
 .filter('ordernicks', function() {
     return function(users, buffer) {
         if (!users || buffer === null) return users;
-        var op = [], voiced = [], other = [];
+        var owner = [], admin = [], op = [], halfop = [], voiced = [], other = [];
 
         users.forEach(function(value) {
             var user = value.user;
-            if (buffer.isOp(user.nick)) op.push(user);
+            
+            if (buffer.isOwner(user.nick)) owner.push(user);
+            else if (buffer.isAdmin(user.nick)) admin.push(user);
+            else if (buffer.isOp(user.nick)) op.push(user);
+            else if (buffer.isHalfOp(user.nick)) halfop.push(user);
             else if (buffer.isVoiced(user.nick)) voiced.push(user);
             else other.push(user);
         });
@@ -237,9 +241,12 @@ angular.module('quassel')
             return a.nick.toLowerCase().localeCompare(b.nick.toLowerCase());
         }
 
+        owner.sort(sortNicks);
+        admin.sort(sortNicks);
         op.sort(sortNicks);
+        halfop.sort(sortNicks);
         voiced.sort(sortNicks);
         other.sort(sortNicks);
-        return op.concat(voiced, other);
+        return owner.concat(admin, op, halfop, voiced, other);
     };
 });
