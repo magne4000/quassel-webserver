@@ -1065,6 +1065,8 @@ angular.module('quassel')
         if (this._next()) {
             this.rpointer += 1;
             return this._get();
+        } else if (this.rpointer === 0) {
+            this.rpointer += 1;
         }
         return this.volatile;
     };
@@ -1088,7 +1090,7 @@ angular.module('quassel')
     $scope.showPreviousMessage = function(bufferId) {
         if (typeof messagesHistory[''+bufferId] !== 'undefined') {
             if (messagesHistory[''+bufferId]._previous()) {
-                if (!messagesHistory[''+bufferId]._next() && $scope.inputmessage.length > 0 && $scope.inputmessage !== messagesHistory[''+bufferId]._get()) {
+                if (!messagesHistory[''+bufferId]._next() && $scope.inputmessage !== messagesHistory[''+bufferId]._get()) {
                     $scope.addMessageVolatile($scope.inputmessage, bufferId);
                 }
                 var msg = messagesHistory[''+bufferId].previous();
@@ -1107,6 +1109,10 @@ angular.module('quassel')
                     $scope.inputmessage = msg;
                 });
             }
+        } else {
+            $scope.$apply(function(){
+                $scope.inputmessage = "";
+            });
         }
     };
 
