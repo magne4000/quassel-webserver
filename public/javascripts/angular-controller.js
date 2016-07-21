@@ -1039,6 +1039,12 @@ angular.module('quassel')
         this.volatile = item;
     };
     
+    CircularBuffer.prototype.getVolatile = function(item){
+        var volatile = this.volatile;
+        this.volatile = "";
+        return volatile;
+    };
+    
     CircularBuffer.prototype._get = function(){
         return this.buffer[(this.wpointer + this.rpointer) % this.buffer.length];
     };
@@ -1068,7 +1074,7 @@ angular.module('quassel')
         } else if (this.rpointer === 0) {
             this.rpointer += 1;
         }
-        return this.volatile;
+        return this.getVolatile();
     };
 
     $scope.addMessageHistory = function(message, bufferId) {

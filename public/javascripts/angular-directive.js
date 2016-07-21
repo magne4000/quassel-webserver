@@ -259,6 +259,22 @@ angular.module('quassel')
         }
         return out;
     }
+    
+    function getRangeBoundingClientRect(elem) {
+        return window.getSelection().getRangeAt(0).getBoundingClientRect();
+    }
+    
+    function getInnerBoundingClientRect(elem) {
+        var rect = elem.getBoundingClientRect();
+        var style = window.getComputedStyle(elem, null);
+        return {
+            top: rect.top + parseInt(style.getPropertyValue('padding-top'), 10),
+            right: rect.right - parseInt(style.getPropertyValue('padding-right'), 10),
+            bottom: rect.bottom - parseInt(style.getPropertyValue('padding-bottom'), 10),
+            left: rect.left + parseInt(style.getPropertyValue('padding-left'), 10),
+            width: rect.width
+        };
+    }
 
     function getCaretPosition(elem) {
         var range = window.getSelection().getRangeAt(0);
@@ -415,11 +431,19 @@ angular.module('quassel')
                     lastTokenStart = null;
                     lastTokenEnd = null;
                     if ($event.keyCode == 38) { // Arrow up
-                        $event.preventDefault();
-                        scope.showPreviousMessage(scope.buffer.id);
+                        var bdrange = getRangeBoundingClientRect(element[0]);
+                        var bdinput = getInnerBoundingClientRect(element[0]);
+                        if (bdrange.top - bdinput.top <= 5) {
+                            $event.preventDefault();
+                            scope.showPreviousMessage(scope.buffer.id);
+                        }
                     } else if ($event.keyCode == 40) { // Arrow down
-                        $event.preventDefault();
-                        scope.showNextMessage(scope.buffer.id);
+                        var bdrange = getRangeBoundingClientRect(element[0]);
+                        var bdinput = getInnerBoundingClientRect(element[0]);
+                        if (bdinput.bottom - bdrange.bottom <= 5) {
+                            $event.preventDefault();
+                            scope.showNextMessage(scope.buffer.id);
+                        }
                     }
                 }
             });
