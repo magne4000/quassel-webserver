@@ -322,7 +322,7 @@ angular.module('quassel')
     function getMostRecentNick(scope, token) {
         if (!scope.buffer) return [];
 
-        var keys = Array.from(scope.buffer.messages.keys()), nicks = [];
+        var keys = Array.from(scope.buffer.messages.keys()), nicks = [], ltoken = token.toLowerCase();
         keys.sort();
         keys.reverse();
 
@@ -341,8 +341,8 @@ angular.module('quassel')
             if (!scope.buffer.users.has(nick))
                 continue;
 
-            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length)) {
-                nicks.push(nick);
+            if (ltoken == nick.toLowerCase().substr(0, ltoken.length)) {
+                nicks.push(nick.substr(ltoken.length));
             }
         }
         return uniq(nicks);
@@ -352,7 +352,7 @@ angular.module('quassel')
     function completeNicksAlphabetically(nicks, scope, token) {
         if (!scope.buffer) return nicks;
 
-        var subjects = Array.from(scope.buffer.users.keys());
+        var subjects = Array.from(scope.buffer.users.keys()), ltoken = token.toLowerCase();
         if (subjects.length === 0) {
             subjects = [scope.buffer.name, scope.nick];
         }
@@ -365,8 +365,8 @@ angular.module('quassel')
             if (nick.length < token.length)
                 continue;
 
-            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length) && nicks.indexOf(nick) === -1) {
-                nicks.push(nick);
+            if (ltoken == nick.toLowerCase().substr(0, ltoken.length) && nicks.indexOf(nick) === -1) {
+                nicks.push(nick.substr(ltoken.length));
             }
         }
         return uniq(nicks);
@@ -383,53 +383,65 @@ angular.module('quassel')
             return tokenStart === 0 ? nick + ':\xa0' /* non-breaking space */ : nick;
         };
     }
+    
+    function CompletionState() {
+        this._tokens = null;
+        this._start = null;
+        this._end = null;
+        this._original = null;
+    }
+    
+    CompletionState.prototype.end = function() {
+        this._tokens = null;
+        this._start = null;
+        this._end = null;
+        this._original = null;
+    }
+    
+    CompletionState.prototype.start = function(o, tokens, s, e) {
+        this._original = o;
+        this._tokens = tokens;
+        this._start = s;
+        this._end = e;
+    }
+    
+    CompletionState.prototype.hasTokens = function() {
+        return this._tokens !== null;
+    }
+    
+    CompletionState.prototype.next = function() {
+        return this._tokens();
+    }
 
     return {
         link: function(scope, element, attrs) {
-            var lastTokens = null, lastTokenStart = null, lastTokenEnd = null;
+            var completion = new CompletionState();
 
             // Nick completion
-            element.on('blur', function(){
-                lastTokens = null;
-                lastTokenStart = null;
-                lastTokenEnd = null;
-            });
+            element.on('blur', completion.end.bind(completion));
             element.on('keydown', function($event) {
                 if ($event.keyCode == 9) { // Tab
                     $event.preventDefault();
-                    var newTokens = null, tokenStart = null, tokenEnd = null;
-                    var message = $hiddendiv.get().html(element.html()).text();
+                    var token = "", newTokens = null, tokenStart = null, elementHtml = element.html();
+                    var message = $hiddendiv.get().html(elementHtml).text();
                     $hiddendiv.get().html("");
-                    var messageLength = message.length;
-                    if (lastTokens !== null) {
-                        newTokens = lastTokens;
-                        tokenStart = lastTokenStart;
-                        tokenEnd = lastTokenEnd;
-                    } else {
-                        tokenEnd = getCaretPosition(element[0]).end;
-                        var messageLeft = message.substr(0, tokenEnd);
+                    if (!completion.hasTokens()) {
+                        var carentEnd = getCaretPosition(element[0]).end;
+                        var messageLeft = message.substr(0, getCaretPosition(element[0]).end);
                         var match = messageLeft.match(/[^#\w\d-_\[\]{}|`^.\\]/gi);
                         tokenStart = !match ? 0 : messageLeft.lastIndexOf(match[match.length - 1]) + 1;
-                        var token = messageLeft.substr(tokenStart);
+                        token = messageLeft.substr(tokenStart);
                         newTokens = getTokenCompletion(scope, token, tokenStart);
+                        completion.start(elementHtml, newTokens, tokenStart, carentEnd);
                     }
-                    if (newTokens) {
-                        var newToken = newTokens();
-                        var newMessage = message.substr(0, tokenStart) + newToken + message.substr(tokenEnd);
-                        scope.$apply(function(){
-                            scope.inputmessage = newMessage;
-                        });
-                        var newTokenEnd = tokenEnd + newMessage.length - messageLength;
-                        setCaretPosition(element[0], newTokenEnd);
-
-                        lastTokens = newTokens;
-                        lastTokenStart = tokenStart;
-                        lastTokenEnd = newTokenEnd;
+                    if (completion.hasTokens()) {
+                        var newToken = completion.next();
+                        element.html(completion._original);
+                        setCaretPosition(element[0], completion._end);
+                        document.execCommand("insertText", false, newToken);
                     }
                 } else {
-                    lastTokens = null;
-                    lastTokenStart = null;
-                    lastTokenEnd = null;
+                    completion.end();
                     if ($event.keyCode == 38) { // Arrow up
                         var bdrange = getRangeBoundingClientRect(element[0]);
                         var bdinput = getInnerBoundingClientRect(element[0]);
