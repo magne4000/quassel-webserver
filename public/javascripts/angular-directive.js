@@ -282,26 +282,30 @@ angular.module('quassel')
         preSelectionRange.selectNodeContents(elem);
         preSelectionRange.setEnd(range.startContainer, range.startOffset);
         var start = preSelectionRange.toString().length;
-
+        
         return {
             start: start,
             end: start + range.toString().length
         };
     }
 
-    function setCaretPosition(elem, caretPos) {
+    function setCaretPosition(elem, caretPos, caretPosEnd) {
         if (elem !== null) {
             var charIndex = 0, range = document.createRange();
             range.setStart(elem, 0);
             range.collapse(true);
-            var nodeStack = [elem], node, foundStart = false;
+            var nodeStack = [elem], node, foundStart = false, foundEnd = (typeof caretPosEnd === "undefined") ? true : false;
 
-            while (!foundStart && (node = nodeStack.pop())) {
+            while (!(foundStart && foundEnd) && (node = nodeStack.pop())) {
                 if (node.nodeType == 3) {
                     var nextCharIndex = charIndex + node.length;
                     if (!foundStart && caretPos >= charIndex && caretPos <= nextCharIndex) {
                         range.setStart(node, caretPos - charIndex);
                         foundStart = true;
+                    }
+                    if (!foundEnd && caretPosEnd >= charIndex && caretPosEnd <= nextCharIndex) {
+                        range.setEnd(node, caretPosEnd - charIndex);
+                        foundEnd = true;
                     }
                     charIndex = nextCharIndex;
                 } else {
@@ -342,7 +346,7 @@ angular.module('quassel')
                 continue;
 
             if (ltoken == nick.toLowerCase().substr(0, ltoken.length)) {
-                nicks.push(nick.substr(ltoken.length));
+                nicks.push(nick);
             }
         }
         return uniq(nicks);
@@ -366,7 +370,7 @@ angular.module('quassel')
                 continue;
 
             if (ltoken == nick.toLowerCase().substr(0, ltoken.length) && nicks.indexOf(nick) === -1) {
-                nicks.push(nick.substr(ltoken.length));
+                nicks.push(nick);
             }
         }
         return uniq(nicks);
@@ -385,6 +389,7 @@ angular.module('quassel')
     }
     
     function CompletionState() {
+        this._token = null;
         this._tokens = null;
         this._start = null;
         this._end = null;
@@ -392,26 +397,28 @@ angular.module('quassel')
     }
     
     CompletionState.prototype.end = function() {
+        this._token = null;
         this._tokens = null;
         this._start = null;
         this._end = null;
         this._original = null;
-    }
+    };
     
-    CompletionState.prototype.start = function(o, tokens, s, e) {
+    CompletionState.prototype.start = function(o, token, tokens, s, e) {
         this._original = o;
+        this._token = token;
         this._tokens = tokens;
         this._start = s;
         this._end = e;
-    }
+    };
     
     CompletionState.prototype.hasTokens = function() {
         return this._tokens !== null;
-    }
+    };
     
     CompletionState.prototype.next = function() {
         return this._tokens();
-    }
+    };
 
     return {
         link: function(scope, element, attrs) {
@@ -422,9 +429,7 @@ angular.module('quassel')
             element.on('keydown', function($event) {
                 if ($event.keyCode == 9) { // Tab
                     $event.preventDefault();
-                    var token = "", newTokens = null, tokenStart = null, elementHtml = element.html();
-                    var message = $hiddendiv.get().html(elementHtml).text();
-                    $hiddendiv.get().html("");
+                    var token = "", newTokens = null, tokenStart = null, elementHtml = element.html(), message = element[0].innerText;
                     if (!completion.hasTokens()) {
                         var carentEnd = getCaretPosition(element[0]).end;
                         var messageLeft = message.substr(0, getCaretPosition(element[0]).end);
@@ -432,16 +437,21 @@ angular.module('quassel')
                         tokenStart = !match ? 0 : messageLeft.lastIndexOf(match[match.length - 1]) + 1;
                         token = messageLeft.substr(tokenStart);
                         newTokens = getTokenCompletion(scope, token, tokenStart);
-                        completion.start(elementHtml, newTokens, tokenStart, carentEnd);
+                        completion.start(elementHtml, token, newTokens, tokenStart, carentEnd);
                     }
                     if (completion.hasTokens()) {
                         var newToken = completion.next();
                         element.html(completion._original);
-                        setCaretPosition(element[0], completion._end);
+                        if (completion._token.length > 0) {
+                            setCaretPosition(element[0], completion._end - completion._token.length, completion._end);
+                        } else {
+                            setCaretPosition(element[0], completion._end);
+                        }
                         document.execCommand("insertText", false, newToken);
+                    } else {
+                        completion.end();
                     }
                 } else {
-                    completion.end();
                     if ($event.keyCode == 38) { // Arrow up
                         var bdrange = getRangeBoundingClientRect(element[0]);
                         var bdinput = getInnerBoundingClientRect(element[0]);
@@ -452,11 +462,12 @@ angular.module('quassel')
                     } else if ($event.keyCode == 40) { // Arrow down
                         var bdrange = getRangeBoundingClientRect(element[0]);
                         var bdinput = getInnerBoundingClientRect(element[0]);
-                        if (bdinput.bottom - bdrange.bottom <= 5) {
+                        if ((bdrange.top === 0 && bdrange.left === 0) || bdinput.bottom - bdrange.bottom <= 5) {
                             $event.preventDefault();
                             scope.showNextMessage(scope.buffer.id);
                         }
                     }
+                    completion.end();
                 }
             });
         }

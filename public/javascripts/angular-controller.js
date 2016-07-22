@@ -622,7 +622,7 @@ angular.module('quassel')
         $uibModalInstance.close([$scope.selectedBackend.DisplayName, properties, $scope.username, $scope.password]);
     };
 })
-.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $timeout) {
+.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
@@ -1018,86 +1018,133 @@ angular.module('quassel')
     $scope.inputmessage = '';
     $scope.nick = null;
     $scope.formattervisible = false;
+    
+    var BufferListElement = function(value, prev, next) {
+        this.prev = prev || null;
+        if (this.prev !== null) {
+            this.prev.next = this;
+        }
+        this.next = next || null;
+        if (this.next !== null) {
+            this.next.prev = this;
+        }
+        this.value = value;
+    }
 
-    var CircularBuffer = function(length){
-        this.wpointer = 0;
-        this.rpointer = 0;
-        this.buffer = [];
-        this.volatile = "";
+    var CircularBuffer = function(length) {
+        this.first = null;
+        this.last = null;
+        this.current = null;
         this.max = length;
-    };
-
-    CircularBuffer.prototype.push = function(item){
-        this.buffer[this.wpointer] = item;
-        this.wpointer = (this.wpointer + 1) % this.max;
-        this.rpointer = this.buffer.length;
-        this.volatile = "";
+        this.length = 0;
     };
     
-    CircularBuffer.prototype.pushVolatile = function(item){
-        this.rpointer = this.buffer.length;
-        this.volatile = item;
-    };
-    
-    CircularBuffer.prototype.getVolatile = function(item){
-        var volatile = this.volatile;
-        this.volatile = "";
-        return volatile;
-    };
-    
-    CircularBuffer.prototype._get = function(){
-        return this.buffer[(this.wpointer + this.rpointer) % this.buffer.length];
-    };
 
-    CircularBuffer.prototype._previous = function(){
-        return this.rpointer > 0;
-    };
-
-    CircularBuffer.prototype.previous = function(){
-        if (this.buffer.length === 0) return null;
-        if (this._previous()) {
-            this.rpointer -= 1;
-            return this._get();
+    CircularBuffer.prototype.push = function(item, avoidSameAsLast) {
+        this.current = null;
+        if (avoidSameAsLast && this.hasPrevious()) {
+            var isSame = this.previous() === item;
+            this.current = null;
+            if (isSame) {
+                return;
+            }
         }
-        return null;
-    };
-
-    CircularBuffer.prototype._next = function(key){
-        return this.rpointer < this.buffer.length - 1;
-    };
-
-    CircularBuffer.prototype.next = function(){
-        if (this.buffer.length === 0) return null;
-        if (this._next()) {
-            this.rpointer += 1;
-            return this._get();
-        } else if (this.rpointer === 0) {
-            this.rpointer += 1;
+        if (this.length === this.max) {
+            var borrowed = this.first;
+            this.first = this.first.next;
+            this.first.previous = null;
+            this.last.next = borrowed;
+            this.last = this.last.next;
+            this.last.value = item;
+            this.last.next = null;
+        } else {
+            var ble = new BufferListElement(item, this.last);
+            if (this.last !== null) {
+                this.last = this.last.next;
+            } else {
+                this.first = ble;
+                this.last = ble;
+            }
+            this.length += 1;
         }
-        return this.getVolatile();
+    };
+    
+    CircularBuffer.prototype.get = function() {
+        return this.current.value;
+    };
+    
+    CircularBuffer.prototype.set = function(item) {
+        this.current.value = item;
+    };
+
+    CircularBuffer.prototype.hasPrevious = function() {
+        if (this.current === null) {
+            return this.length > 0;
+        }
+        return this.current.prev !== null;
+    };
+    
+    CircularBuffer.prototype.hasNext = function() {
+        if (this.current === null) {
+            return false;
+        }
+        return this.current.next !== null;
+    };
+
+    CircularBuffer.prototype.previous = function() {
+        if (this.hasPrevious()) {
+            if (this.current === null) {
+                this.current = this.last;
+            } else {
+                this.current = this.current.prev;
+            }
+            return this.get();
+        }
+        return "";
+    };
+
+    CircularBuffer.prototype.next = function() {
+        if (this.hasNext()) {
+            this.current = this.current.next;
+            return this.get();
+        }
+        this.current = null;
+        return "";
+    };
+    
+    CircularBuffer.prototype.update = function(item) {
+        if (this.current === null) {
+            this.push(item, true);
+        } else {
+            this.set(item);
+        }
+    };
+    
+    CircularBuffer.prototype.clean = function() {
+        this.current = null;
+    };
+    
+    CircularBuffer.prototype.shouldUpdate = function(item) {
+        return item !== "" && (this.current === null || this.current.value !== item);
     };
 
     $scope.addMessageHistory = function(message, bufferId) {
         if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
-        messagesHistory[''+bufferId].push(message);
-    };
-    
-    $scope.addMessageVolatile = function(message, bufferId) {
-        if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
-        messagesHistory[''+bufferId].pushVolatile(message);
+        messagesHistory[''+bufferId].push(message, true);
     };
 
-    $scope.clearMessageHistory = function(bufferId) {
+    $scope.cleanMessageHistory = function(bufferId) {
         if (typeof messagesHistory[''+bufferId] !== 'undefined') {
-            messagesHistory[''+bufferId].rpointer = 0;
+            messagesHistory[''+bufferId].clean();
         }
     };
 
     $scope.showPreviousMessage = function(bufferId) {
         if (typeof messagesHistory[''+bufferId] !== 'undefined') {
-            if (messagesHistory[''+bufferId]._previous()) {
-                if (!messagesHistory[''+bufferId]._next() && $scope.inputmessage !== messagesHistory[''+bufferId]._get()) {
-                    $scope.addMessageVolatile($scope.inputmessage, bufferId);
+            if (messagesHistory[''+bufferId].hasPrevious()) {
+                if (messagesHistory[''+bufferId].shouldUpdate($scope.inputmessage)) {
+                    messagesHistory[''+bufferId].update($scope.inputmessage);
+                    messagesHistory[''+bufferId].previous();
                 }
                 var msg = messagesHistory[''+bufferId].previous();
                 $scope.$apply(function(){
@@ -1108,18 +1155,14 @@ angular.module('quassel')
     };
 
     $scope.showNextMessage = function(bufferId) {
-        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
-            var msg = messagesHistory[''+bufferId].next();
-            if (msg !== null) {
-                $scope.$apply(function(){
-                    $scope.inputmessage = msg;
-                });
-            }
-        } else {
-            $scope.$apply(function(){
-                $scope.inputmessage = "";
-            });
+        if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
+        if (messagesHistory[''+bufferId].shouldUpdate($scope.inputmessage)) {
+            messagesHistory[''+bufferId].update($scope.inputmessage);
         }
+        var msg = messagesHistory[''+bufferId].next();
+        $scope.$apply(function(){
+            $scope.inputmessage = msg;
+        });
     };
 
     $scope.sendMessage = function() {
@@ -1131,7 +1174,7 @@ angular.module('quassel')
             if (message) {
                 var lines = message.match(/[^\r\n]+/gm);
                 if (lines && lines.length > 0) {
-                    $scope.clearMessageHistory($scope.buffer.id);
+                    $scope.cleanMessageHistory($scope.buffer.id);
                     for (var idx in lines) {
                         $quassel.sendMessage($scope.buffer.id, lines[idx]);
                     }
