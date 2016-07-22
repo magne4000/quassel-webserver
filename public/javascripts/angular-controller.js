@@ -1144,7 +1144,6 @@ angular.module('quassel')
             if (messagesHistory[''+bufferId].hasPrevious()) {
                 if (messagesHistory[''+bufferId].shouldUpdate($scope.inputmessage)) {
                     messagesHistory[''+bufferId].update($scope.inputmessage);
-                    messagesHistory[''+bufferId].previous();
                 }
                 var msg = messagesHistory[''+bufferId].previous();
                 $scope.$apply(function(){

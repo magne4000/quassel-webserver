@@ -242,7 +242,7 @@ angular.module('quassel')
         }
     };
 })
-.directive('caret', ['$hiddendiv', function($hiddendiv) {
+.directive('caret', [function() {
     var MT = require('message').Type;
 
     function uniq(a) {
@@ -391,7 +391,6 @@ angular.module('quassel')
     function CompletionState() {
         this._token = null;
         this._tokens = null;
-        this._start = null;
         this._end = null;
         this._original = null;
     }
@@ -399,16 +398,14 @@ angular.module('quassel')
     CompletionState.prototype.end = function() {
         this._token = null;
         this._tokens = null;
-        this._start = null;
         this._end = null;
         this._original = null;
     };
     
-    CompletionState.prototype.start = function(o, token, tokens, s, e) {
+    CompletionState.prototype.start = function(o, token, tokens, e) {
         this._original = o;
         this._token = token;
         this._tokens = tokens;
-        this._start = s;
         this._end = e;
     };
     
@@ -437,7 +434,7 @@ angular.module('quassel')
                         tokenStart = !match ? 0 : messageLeft.lastIndexOf(match[match.length - 1]) + 1;
                         token = messageLeft.substr(tokenStart);
                         newTokens = getTokenCompletion(scope, token, tokenStart);
-                        completion.start(elementHtml, token, newTokens, tokenStart, carentEnd);
+                        completion.start(elementHtml, token, newTokens, carentEnd);
                     }
                     if (completion.hasTokens()) {
                         var newToken = completion.next();
