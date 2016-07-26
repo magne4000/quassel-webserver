@@ -42,7 +42,7 @@
     "less-middleware": "^2.2.0",
     "libquassel": "~1.1.11",
     "morgan": "^1.7.0",
-    "net-browserify-alt": "^0.6.2",
+    "net-browserify-alt": "^1.0.0",
     "serve-favicon": "~2.3.0"
   },
   "optionalDependencies": {
