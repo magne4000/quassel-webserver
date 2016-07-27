@@ -1029,6 +1029,7 @@ angular.module('quassel')
             this.next.prev = this;
         }
         this.value = value;
+        this._original_value = value;
     }
 
     var CircularBuffer = function(length) {
@@ -1120,6 +1121,14 @@ angular.module('quassel')
         }
     };
     
+    CircularBuffer.prototype.revert = function() {
+        var curitem = this.first;
+        while (curitem !== null) {
+            curitem.value = curitem._original_value;
+            curitem = curitem.next;
+        }
+    };
+    
     CircularBuffer.prototype.clean = function() {
         this.current = null;
     };
@@ -1130,6 +1139,7 @@ angular.module('quassel')
 
     $scope.addMessageHistory = function(message, bufferId) {
         if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
+        messagesHistory[''+bufferId].revert();
         messagesHistory[''+bufferId].push(message, true);
     };
 
