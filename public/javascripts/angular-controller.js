@@ -1012,7 +1012,7 @@ angular.module('quassel')
     }
 }])
 .controller('InputController', ['$scope', '$quassel', '$hiddendiv', '$mirc', function($scope, $quassel, $hiddendiv, $mirc) {
-    var messagesHistory = [];
+    var messagesHistory = new Map;
     var MT = require('message').Type;
 
     $scope.inputmessage = '';
@@ -1138,24 +1138,25 @@ angular.module('quassel')
     };
 
     $scope.addMessageHistory = function(message, bufferId) {
-        if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
-        messagesHistory[''+bufferId].revert();
-        messagesHistory[''+bufferId].push(message, true);
+        if (!messagesHistory.has(bufferId)) messagesHistory.set(bufferId, new CircularBuffer(50));
+        messagesHistory.get(bufferId).revert();
+        messagesHistory.get(bufferId).push(message, true);
     };
 
     $scope.cleanMessageHistory = function(bufferId) {
-        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
-            messagesHistory[''+bufferId].clean();
+        if (messagesHistory.has(bufferId)) {
+            messagesHistory.get(bufferId).clean();
         }
     };
 
     $scope.showPreviousMessage = function(bufferId) {
-        if (typeof messagesHistory[''+bufferId] !== 'undefined') {
-            if (messagesHistory[''+bufferId].hasPrevious()) {
-                if (messagesHistory[''+bufferId].shouldUpdate($scope.inputmessage)) {
-                    messagesHistory[''+bufferId].update($scope.inputmessage);
+        if (messagesHistory.has(bufferId)) {
+            var history = messagesHistory.get(bufferId);
+            if (history.hasPrevious()) {
+                if (history.shouldUpdate($scope.inputmessage)) {
+                    history.update($scope.inputmessage);
                 }
-                var msg = messagesHistory[''+bufferId].previous();
+                var msg = history.previous();
                 $scope.$apply(function(){
                     $scope.inputmessage = msg;
                 });
@@ -1164,11 +1165,12 @@ angular.module('quassel')
     };
 
     $scope.showNextMessage = function(bufferId) {
-        if (typeof messagesHistory[''+bufferId] === 'undefined') messagesHistory[''+bufferId] = new CircularBuffer(50);
-        if (messagesHistory[''+bufferId].shouldUpdate($scope.inputmessage)) {
-            messagesHistory[''+bufferId].update($scope.inputmessage);
+        if (!messagesHistory.has(bufferId)) messagesHistory.set(bufferId, new CircularBuffer(50));
+        var history = messagesHistory.get(bufferId);
+        if (history.shouldUpdate($scope.inputmessage)) {
+            history.update($scope.inputmessage);
         }
-        var msg = messagesHistory[''+bufferId].next();
+        var msg = history.next();
         $scope.$apply(function(){
             $scope.inputmessage = msg;
         });
