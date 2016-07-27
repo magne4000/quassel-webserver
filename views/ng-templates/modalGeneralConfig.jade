@@ -9,6 +9,10 @@ script(type="text/ng-template", id="modalGeneralConfig.html")
           | Display debug information in console ? (needs a refresh to take effect)
       .form-group.checkbox
         label
+          input(type="checkbox", ng-model="gsperchathistory", ng-model-options="{ getterSetter: true }")
+          | Enable per chat history ?
+      .form-group.checkbox
+        label
           input(type="checkbox", ng-model="gsdisplayfullhostmask", ng-model-options="{ getterSetter: true }")
           | Display full hostmask on join/part/quit ?
       .form-group.checkbox

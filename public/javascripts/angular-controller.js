@@ -788,6 +788,13 @@ angular.module('quassel')
         }
         return $config.get('emptybufferonswitchvalue', 0);
     };
+    
+    $scope.gsperchathistory = function(newValue) {
+        if (arguments.length > 0) {
+            $config.set('perchathistory', newValue);
+        }
+        return $config.get('perchathistory', true);
+    };
 
     $scope.configGeneral = function() {
         modal = $uibModal.open({
@@ -1011,13 +1018,7 @@ angular.module('quassel')
         $scope.login();
     }
 }])
-.controller('InputController', ['$scope', '$quassel', '$hiddendiv', '$mirc', function($scope, $quassel, $hiddendiv, $mirc) {
-    var messagesHistory = new Map;
-    var MT = require('message').Type;
-
-    $scope.inputmessage = '';
-    $scope.nick = null;
-    $scope.formattervisible = false;
+.controller('InputController', ['$scope', '$quassel', '$hiddendiv', '$mirc', '$config', function($scope, $quassel, $hiddendiv, $mirc, $config) {
     
     var BufferListElement = function(value, prev, next) {
         this.prev = prev || null;
@@ -1040,6 +1041,30 @@ angular.module('quassel')
         this.length = 0;
     };
     
+    var inputMessages = new Map;
+    var MAX_CIRCULARBUFFER_SIZE = 50;
+    var messagesHistory = new Map;
+    var messagesHistoryGlobal = new CircularBuffer(MAX_CIRCULARBUFFER_SIZE * 10);
+    var MT = require('message').Type;
+
+    $scope.inputmessage = '';
+    $scope.nick = null;
+    $scope.formattervisible = false;
+    
+    function getMessagesHistory(bufferid, init) {
+        var history = null;
+        if ($config.get('perchathistory', true)) {
+            if (messagesHistory.has(bufferid)) {
+                history = messagesHistory.get(bufferid);
+            } else if (init) {
+                history = new CircularBuffer(MAX_CIRCULARBUFFER_SIZE);
+                messagesHistory.set(bufferid, history);
+            }
+        } else {
+            history = messagesHistoryGlobal;
+        }
+        return history;
+    }
 
     CircularBuffer.prototype.push = function(item, avoidSameAsLast) {
         this.current = null;
@@ -1138,20 +1163,21 @@ angular.module('quassel')
     };
 
     $scope.addMessageHistory = function(message, bufferId) {
-        if (!messagesHistory.has(bufferId)) messagesHistory.set(bufferId, new CircularBuffer(50));
-        messagesHistory.get(bufferId).revert();
-        messagesHistory.get(bufferId).push(message, true);
+        var history = getMessagesHistory(bufferId, true);
+        history.revert();
+        history.push(message, true);
     };
 
     $scope.cleanMessageHistory = function(bufferId) {
-        if (messagesHistory.has(bufferId)) {
-            messagesHistory.get(bufferId).clean();
+        var history = getMessagesHistory(bufferId);
+        if (history) {
+            history.clean();
         }
     };
 
     $scope.showPreviousMessage = function(bufferId) {
-        if (messagesHistory.has(bufferId)) {
-            var history = messagesHistory.get(bufferId);
+        var history = getMessagesHistory(bufferId);
+        if (history) {
             if (history.hasPrevious()) {
                 if (history.shouldUpdate($scope.inputmessage)) {
                     history.update($scope.inputmessage);
@@ -1165,8 +1191,7 @@ angular.module('quassel')
     };
 
     $scope.showNextMessage = function(bufferId) {
-        if (!messagesHistory.has(bufferId)) messagesHistory.set(bufferId, new CircularBuffer(50));
-        var history = messagesHistory.get(bufferId);
+        var history = getMessagesHistory(bufferId, true);
         if (history.shouldUpdate($scope.inputmessage)) {
             history.update($scope.inputmessage);
         }
@@ -1309,6 +1334,16 @@ angular.module('quassel')
                     $scope.nick = network.nick;
                     valid = true;
                 }
+            }
+        }
+        if ($config.get('perchathistory', true)) {
+            if (oldValue !== null) {
+                inputMessages.set(oldValue, $scope.inputmessage);
+            }
+            if (inputMessages.has(newValue)) {
+                $scope.inputmessage = inputMessages.get(newValue);
+            } else {
+                $scope.inputmessage = "";
             }
         }
         if (!valid) $scope.nick = null;
