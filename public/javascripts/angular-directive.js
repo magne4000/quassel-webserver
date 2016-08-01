@@ -242,7 +242,7 @@ angular.module('quassel')
         }
     };
 })
-.directive('caret', ['$hiddendiv', function($hiddendiv) {
+.directive('caret', [function() {
     var MT = require('message').Type;
 
     function uniq(a) {
@@ -282,26 +282,30 @@ angular.module('quassel')
         preSelectionRange.selectNodeContents(elem);
         preSelectionRange.setEnd(range.startContainer, range.startOffset);
         var start = preSelectionRange.toString().length;
-
+        
         return {
             start: start,
             end: start + range.toString().length
         };
     }
 
-    function setCaretPosition(elem, caretPos) {
+    function setCaretPosition(elem, caretPos, caretPosEnd) {
         if (elem !== null) {
             var charIndex = 0, range = document.createRange();
             range.setStart(elem, 0);
             range.collapse(true);
-            var nodeStack = [elem], node, foundStart = false;
+            var nodeStack = [elem], node, foundStart = false, foundEnd = (typeof caretPosEnd === "undefined") ? true : false;
 
-            while (!foundStart && (node = nodeStack.pop())) {
+            while (!(foundStart && foundEnd) && (node = nodeStack.pop())) {
                 if (node.nodeType == 3) {
                     var nextCharIndex = charIndex + node.length;
                     if (!foundStart && caretPos >= charIndex && caretPos <= nextCharIndex) {
                         range.setStart(node, caretPos - charIndex);
                         foundStart = true;
+                    }
+                    if (!foundEnd && caretPosEnd >= charIndex && caretPosEnd <= nextCharIndex) {
+                        range.setEnd(node, caretPosEnd - charIndex);
+                        foundEnd = true;
                     }
                     charIndex = nextCharIndex;
                 } else {
@@ -322,7 +326,7 @@ angular.module('quassel')
     function getMostRecentNick(scope, token) {
         if (!scope.buffer) return [];
 
-        var keys = Array.from(scope.buffer.messages.keys()), nicks = [];
+        var keys = Array.from(scope.buffer.messages.keys()), nicks = [], ltoken = token.toLowerCase();
         keys.sort();
         keys.reverse();
 
@@ -341,7 +345,7 @@ angular.module('quassel')
             if (!scope.buffer.users.has(nick))
                 continue;
 
-            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length)) {
+            if (ltoken == nick.toLowerCase().substr(0, ltoken.length)) {
                 nicks.push(nick);
             }
         }
@@ -352,7 +356,7 @@ angular.module('quassel')
     function completeNicksAlphabetically(nicks, scope, token) {
         if (!scope.buffer) return nicks;
 
-        var subjects = Array.from(scope.buffer.users.keys());
+        var subjects = Array.from(scope.buffer.users.keys()), ltoken = token.toLowerCase();
         if (subjects.length === 0) {
             subjects = [scope.buffer.name, scope.nick];
         }
@@ -365,7 +369,7 @@ angular.module('quassel')
             if (nick.length < token.length)
                 continue;
 
-            if (token.toLowerCase() == nick.toLowerCase().substr(0, token.length) && nicks.indexOf(nick) === -1) {
+            if (ltoken == nick.toLowerCase().substr(0, ltoken.length) && nicks.indexOf(nick) === -1) {
                 nicks.push(nick);
             }
         }
@@ -383,53 +387,68 @@ angular.module('quassel')
             return tokenStart === 0 ? nick + ':\xa0' /* non-breaking space */ : nick;
         };
     }
+    
+    function CompletionState() {
+        this._token = null;
+        this._tokens = null;
+        this._end = null;
+        this._original = null;
+    }
+    
+    CompletionState.prototype.end = function() {
+        this._token = null;
+        this._tokens = null;
+        this._end = null;
+        this._original = null;
+    };
+    
+    CompletionState.prototype.start = function(o, token, tokens, e) {
+        this._original = o;
+        this._token = token;
+        this._tokens = tokens;
+        this._end = e;
+    };
+    
+    CompletionState.prototype.hasTokens = function() {
+        return this._tokens !== null;
+    };
+    
+    CompletionState.prototype.next = function() {
+        return this._tokens();
+    };
 
     return {
         link: function(scope, element, attrs) {
-            var lastTokens = null, lastTokenStart = null, lastTokenEnd = null;
+            var completion = new CompletionState();
 
             // Nick completion
-            element.on('blur', function(){
-                lastTokens = null;
-                lastTokenStart = null;
-                lastTokenEnd = null;
-            });
+            element.on('blur', completion.end.bind(completion));
             element.on('keydown', function($event) {
                 if ($event.keyCode == 9) { // Tab
                     $event.preventDefault();
-                    var newTokens = null, tokenStart = null, tokenEnd = null;
-                    var message = $hiddendiv.get().html(element.html()).text();
-                    $hiddendiv.get().html("");
-                    var messageLength = message.length;
-                    if (lastTokens !== null) {
-                        newTokens = lastTokens;
-                        tokenStart = lastTokenStart;
-                        tokenEnd = lastTokenEnd;
-                    } else {
-                        tokenEnd = getCaretPosition(element[0]).end;
-                        var messageLeft = message.substr(0, tokenEnd);
+                    var token = "", newTokens = null, tokenStart = null, elementHtml = element.html(), message = element[0].innerText;
+                    if (!completion.hasTokens()) {
+                        var carentEnd = getCaretPosition(element[0]).end;
+                        var messageLeft = message.substr(0, getCaretPosition(element[0]).end);
                         var match = messageLeft.match(/[^#\w\d-_\[\]{}|`^.\\]/gi);
                         tokenStart = !match ? 0 : messageLeft.lastIndexOf(match[match.length - 1]) + 1;
-                        var token = messageLeft.substr(tokenStart);
+                        token = messageLeft.substr(tokenStart);
                         newTokens = getTokenCompletion(scope, token, tokenStart);
+                        completion.start(elementHtml, token, newTokens, carentEnd);
                     }
-                    if (newTokens) {
-                        var newToken = newTokens();
-                        var newMessage = message.substr(0, tokenStart) + newToken + message.substr(tokenEnd);
-                        scope.$apply(function(){
-                            scope.inputmessage = newMessage;
-                        });
-                        var newTokenEnd = tokenEnd + newMessage.length - messageLength;
-                        setCaretPosition(element[0], newTokenEnd);
-
-                        lastTokens = newTokens;
-                        lastTokenStart = tokenStart;
-                        lastTokenEnd = newTokenEnd;
+                    if (completion.hasTokens()) {
+                        var newToken = completion.next();
+                        element.html(completion._original);
+                        if (completion._token.length > 0) {
+                            setCaretPosition(element[0], completion._end - completion._token.length, completion._end);
+                        } else {
+                            setCaretPosition(element[0], completion._end);
+                        }
+                        document.execCommand("insertText", false, newToken);
+                    } else {
+                        completion.end();
                     }
                 } else {
-                    lastTokens = null;
-                    lastTokenStart = null;
-                    lastTokenEnd = null;
                     if ($event.keyCode == 38) { // Arrow up
                         var bdrange = getRangeBoundingClientRect(element[0]);
                         var bdinput = getInnerBoundingClientRect(element[0]);
@@ -440,11 +459,12 @@ angular.module('quassel')
                     } else if ($event.keyCode == 40) { // Arrow down
                         var bdrange = getRangeBoundingClientRect(element[0]);
                         var bdinput = getInnerBoundingClientRect(element[0]);
-                        if (bdinput.bottom - bdrange.bottom <= 5) {
+                        if ((bdrange.top === 0 && bdrange.left === 0) || bdinput.bottom - bdrange.bottom <= 5) {
                             $event.preventDefault();
                             scope.showNextMessage(scope.buffer.id);
                         }
                     }
+                    completion.end();
                 }
             });
         }
