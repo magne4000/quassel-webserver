@@ -11,13 +11,14 @@ var netBrowserify = require('net-browserify-alt');
 
 var routes = require('./routes/index');
 
-var settings = require('./lib/utils').settings(true);
 opts
   .version('1.4.0')
   .option('-l, --listen <value>', 'listening address', undefined, null)
   .option('-p, --port <value>', 'HTTP(S) port to use', parseInt, null)
   .option('-m, --mode <value>', 'HTTP mode (http|https) [https]', undefined, 'https')
+  .option('-c, --config <value>', 'path to config file', undefined, null)
   .parse(process.argv);
+var settings = require('./lib/utils').settings(true, opts.config);
 
 var app = express();
 var server = null;
