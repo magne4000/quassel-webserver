@@ -100,6 +100,15 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             set('backlogLimit', data.settings.backlogLimit);
             set('securecore', data.settings.securecore || true);
             set('theme', data.settings.theme);
+            set('perchathistory', data.settings.perchathistory);
+            set('displayfullhostmask', data.settings.displayfullhostmask);
+            set('highlightmode', data.settings.highlightmode);
+            if (typeof data.settings.emptybufferonswitch === 'number') {
+                set('emptybufferonswitch', true);
+                set('emptybufferonswitchvalue', data.settings.emptybufferonswitch);
+            } else {
+                set('emptybufferonswitch', false);
+            }
         }
         set('themes', data.themes || ['default', 'darksolarized']);
         $rootScope.$emit('defaultsettings', true);
@@ -112,6 +121,10 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             set('backlogLimit', 100);
             set('unsecurecore', false);
             set('theme', 'default');
+            set('perchathistory',true);
+            set('displayfullhostmask', false);
+            set('highlightmode', 2);
+            set('emptybufferonswitch', false);
         }
         set('themes', ['default', 'darksolarized']);
         $rootScope.$emit('defaultsettings', false);

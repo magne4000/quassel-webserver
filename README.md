@@ -16,14 +16,18 @@ n latest
 #### Solarized
 ![solarized theme](https://github.com/magne4000/magne4000.github.com/raw/master/images/quassel-solarized-1.png)
 
-### On the server
+### Installation
 Install the server with: 
-```
+```sh
 git clone https://github.com/magne4000/quassel-webserver.git
 cd quassel-webserver
 npm install --production
 ```
-or to update `git pull && npm prune && npm update`
+#### Update
+Update the server with: 
+```sh
+git pull && npm prune && npm update
+```
 
 and run the following command: `node app.js`
 
@@ -41,7 +45,7 @@ If `prefixpath` is not empty, the webserver will not be accessible at https://se
 `backlogLimit` defines the number of messages that will be retrieved for a buffer on each request to fetch additional backlogs.  
 
 #### Certificate
-You can use your own certificate for HTTPS mode. The key file is located at ssl/key.pem, and the certificate ssl/cert.pem.
+You must use your own certificate for HTTPS mode. The key file is located at ssl/key.pem, and the certificate ssl/cert.pem.
 
 You can generate a new self signed certificate with the following command:
 ```
@@ -97,7 +101,7 @@ ProxyPass /quassel http://127.0.0.1:64080/quassel
 ### Troubleshooting
 #### Slow buffer display after some time
 This is a [known issue](https://github.com/magne4000/quassel-webserver/issues/83) but there is a workaround:
- * go to the `General Configuration` and check `Trim buffer when switching to another buffer`
+ * go to the `General Configuration` and check `Trim buffer when switching to another buffer`. This is also configurable in `settings-user.js` file (see `settings.js`)
 
 ## License
 Copyright (c) 2014-2016 Joël Charles  
