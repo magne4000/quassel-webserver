@@ -672,9 +672,11 @@ angular.module('quassel')
     require: 'ngModel',
     link: function(scope, element, attrs, ngModel) {
       ngModel.$parsers.push(function(val) {
+        if (!val) return '';
         return val.split('\n');
       });
       ngModel.$formatters.push(function(val) {
+        if (!val) return '';
         return val.join('\n');
       });
     }
