@@ -9,15 +9,16 @@ var fs = require('fs');
 var opts = require('commander');
 var netBrowserify = require('net-browserify-alt');
 
-var routes = require('./routes/index');
-
-var settings = require('./lib/utils').settings(true);
 opts
-  .version('1.4.0')
+  .version('2.1.0')
+  .option('-c, --config <value>', 'Path to configuration file', undefined, null)
   .option('-l, --listen <value>', 'listening address', undefined, null)
   .option('-p, --port <value>', 'HTTP(S) port to use', parseInt, null)
   .option('-m, --mode <value>', 'HTTP mode (http|https) [https]', undefined, 'https')
   .parse(process.argv);
+
+var settings = require('./lib/utils').settings(true, opts.config);
+var routes = require('./routes/index')(settings);
 
 var app = express();
 var server = null;
