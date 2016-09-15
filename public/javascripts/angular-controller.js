@@ -395,15 +395,27 @@ angular.module('quassel')
     };
 
     $scope.channelHidePermanently = function(channel) {
+        $quassel.requestUnhideBuffer(channel.id);
         $quassel.requestHideBufferPermanently(channel.id);
     };
 
     $scope.channelHideTemporarily = function(channel) {
+        $quassel.requestUnhideBuffer(channel.id);
         $quassel.requestHideBufferTemporarily(channel.id);
     };
 
     $scope.channelUnhide = function(channel) {
         $quassel.requestUnhideBuffer(channel.id);
+    };
+    
+    $scope.cycleHiddenState = function(channel) {
+        if (channel.isPermanentlyRemoved) {
+            $scope.channelHideTemporarily(channel);
+        } else if (channel.isTemporarilyRemoved) {
+            $scope.channelUnhide(channel);
+        } else {
+            $scope.channelHidePermanently(channel);
+        }
     };
 
     $scope.userQuery = function(user) {

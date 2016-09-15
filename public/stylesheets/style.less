@@ -335,6 +335,17 @@ html, body, .container {
     }
 }
 
+.hidden-status:before {
+    content: '\e801';  // eye open
+}
+.hidden-status.perm:before {
+    opacity: 0.5;
+    content: '\e802';  // eye open
+}
+.hidden-status.temp:before {
+    content: '\e802';  // eye open
+}
+
 .quassel-logo {
     width: 24px;
     height: 24px;
