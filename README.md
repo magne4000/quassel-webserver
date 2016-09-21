@@ -72,6 +72,7 @@ In you run behind `/quassel` location on your webserver, do not forget to edit `
 prefixpath: '/quassel',
 ...
 ```
+Also, be sure to launch quassel-webserver in http mode by adding `-m http` to the command line.
 #### nginx
 ```nginx
 # rewrite ^[/]quassel$ /quassel/ permanent;
@@ -87,7 +88,7 @@ location /quassel {
 }
 ```
 #### Apache
-Needs activated mod_proxy_wstunnel and mod_rewrite
+Needs activated mod_proxy_wstunnel and mod_rewrite.
 ```apache
 <VirtualHost ...>
 ...
