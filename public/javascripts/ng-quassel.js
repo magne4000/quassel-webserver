@@ -88,7 +88,7 @@
               path: window.location.pathname + 'p',
           });
           self.quassel = new Quassel(self.server, self.port, {
-              nobacklogs: $config.get('initialBacklogLimit', 0),
+              nobacklogs: $config.get('initialBacklogLimit', 0) === 0,
               initialbackloglimit: $config.get('initialBacklogLimit', 20),
               backloglimit: $config.get('backlogLimit', 50),
               highlightmode: $config.get('highlightmode', 2),

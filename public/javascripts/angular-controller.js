@@ -448,7 +448,7 @@ angular.module('quassel')
         else if (buffer.isHalfOp(nick)) uclass = 'user-half-op';
         else if (buffer.isVoiced(nick)) uclass = 'user-voiced';
         return uclass;
-    }
+    };
     
     $scope.whois = function(user) {
         if ($scope.buffer !== null) {
