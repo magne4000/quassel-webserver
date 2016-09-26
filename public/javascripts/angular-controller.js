@@ -110,6 +110,7 @@ angular.module('quassel')
         var networks = this.getNetworks();
         var network = networks.get(networkId);
         $scope.$apply(function(){
+            network.collapsed = !network.isConnected;
             $scope.networks.push(network);
         });
     });
@@ -141,6 +142,20 @@ angular.module('quassel')
     $quassel.on('network.addbuffer', function(networkId, bufferId) {
         var network = this.getNetworks().get(networkId);
         _updateBuffers(network);
+    });
+    
+    $quassel.on('network.disconnected', function(networkId) {
+        var network = this.getNetworks().get(networkId);
+        $scope.$apply(function(){
+            network.collapsed = true;
+        });
+    });
+    
+    $quassel.on('network.connected', function(networkId) {
+        var network = this.getNetworks().get(networkId);
+        $scope.$apply(function(){
+            network.collapsed = false;
+        });
     });
 
     $quassel.on('buffer.backlog', function(bufferId, messageIds) {
