@@ -195,34 +195,21 @@ angular.module('quassel')
                 initialLastSeenList[bufferId] = messageId;
             }
             if (typeof bufferLastMessage !== 'undefined' && messageId < bufferLastMessage.id) {
-                var found = true;
+                var somethingfound = false;
                 var it = buffer.messages.entries();
                 var entry = it.next();
-                while(!entry.done) {
-                    var val = entry[1], key = entry[0];
-                    if (key > messageId) {
-                        if (buffer.isStatusBuffer()) {
-                            setHighlight(buffer, 'low');
-                            found = false;
-                            break;
-                        } else if (!buffer.isChannel()) {
-                            if (setHighlight(buffer, 'high')) {
-                                incFavico(buffer);
-                            }
-                            found =  false;
-                            break;
-                        } else if (typeof val.isHighlighted === 'function' && val.isHighlighted()) {
-                            if (setHighlight(buffer, 'high')) {
-                                incFavico(buffer);
-                            }
-                            $desktop(buffer.name, val.content);
-                            found =  false;
-                            break;
+                while (!entry.done) {
+                    var message = entry.value[1], key = entry.value[0], highlightmode = null;
+                    if (key > messageId && message) {
+                        highlightmode = updateBufferHighlightOnMessage(buffer, message);
+                        if (highlightmode !== null) {
+                            somethingfound = true;
+                            if (highlightmode === 'high') break;
                         }
                     }
                     entry = it.next();
                 }
-                if (!found) {
+                if (!somethingfound) {
                     setHighlight(buffer, 'low');
                 }
             }
@@ -237,6 +224,35 @@ angular.module('quassel')
             });
         }
     });
+    
+    function updateBufferHighlightOnMessage(buffer, message) {
+        var highlightmode = null;
+        if (buffer.isStatusBuffer()) {
+            setHighlight(buffer, 'low');
+            highlightmode = 'low';
+        } else if (!buffer.isChannel()) {
+            if (!message.isSelf()) {
+                if (setHighlight(buffer, 'high')) {
+                    incFavico(buffer);
+                }
+                highlightmode = 'high';
+            }
+        } else if (!message.isSelf()) {
+            if (message.isHighlighted()) {
+                if (setHighlight(buffer, 'high')) {
+                    incFavico(buffer);
+                }
+                highlightmode = 'high';
+            } else if (message.type == MT.Plain || message.type == MT.Action) {
+                setHighlight(buffer, 'medium');
+                highlightmode = 'medium';
+            } else {
+                setHighlight(buffer, 'low');
+                highlightmode = 'low';
+            }
+        }
+        return highlightmode;
+    }
 
     $quassel.on('buffer.message', function(bufferId, messageId) {
         var buffer = this.getNetworks().findBuffer(bufferId);
@@ -250,26 +266,8 @@ angular.module('quassel')
                         $quassel.markBufferAsRead(bufferId, messageId);
                     });
                 }
-                if (buffer.isStatusBuffer()) {
-                    setHighlight(buffer, 'low');
-                } else if (!buffer.isChannel()) {
-                    if (!message.isSelf()) {
-                        if (setHighlight(buffer, 'high')) {
-                            incFavico(buffer);
-                        }
-                        $desktop(buffer.name, message.content);
-                    }
-                } else if (!message.isSelf()) {
-                    if (message.isHighlighted()) {
-                        if (setHighlight(buffer, 'high')) {
-                            incFavico(buffer);
-                        }
-                        $desktop(buffer.name, message.content);
-                    } else if (message.type == MT.Plain || message.type == MT.Action) {
-                        setHighlight(buffer, 'medium');
-                    } else {
-                        setHighlight(buffer, 'low');
-                    }
+                if (updateBufferHighlightOnMessage(buffer, message) === 'high') {
+                    $desktop(buffer.name, message.content);
                 }
             }
         }
