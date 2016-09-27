@@ -7,7 +7,6 @@ angular.module('quassel')
         ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config',
             function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config) {
     $scope.networks = [];
-    $scope.bufferView = null;
     $scope.buffer = null;
     $scope.messages = [];
     $scope.showhidden = false;
@@ -114,13 +113,6 @@ angular.module('quassel')
             network.collapsed = !network.isConnected;
             $scope.networks.push(network);
         });
-    });
-    
-    $quassel.on('bufferview.init', function(bufferViewId) {
-        if ($scope.bufferView === null && bufferViewId === $config.get('bufferview', 0)) {
-            $scope.bufferView = this.bufferViews.get(bufferViewId);
-            $scope.$apply();
-        }
     });
     
     $scope.$watch('buffer', function(newValue, oldValue) {
@@ -891,6 +883,8 @@ angular.module('quassel')
     $scope.initialBacklogLimit = $config.get('initialBacklogLimit', 20);
     $scope.backlogLimit = $config.get('backlogLimit', 100);
     $scope.alert = "";
+    $scope.bufferView = null;
+    $scope.bufferViews = [];
 
     $rootScope.$on('defaultsettings', function() {
         $scope.securecoreconnection = $config.get('securecore', $scope.securecoreconnection);
@@ -930,6 +924,18 @@ angular.module('quassel')
                 $scope.disconnected = null;
             });
         }
+    });
+    
+    $quassel.on('bufferview.init', function(bufferViewId) {
+        if ($scope.bufferView === null && bufferViewId === $config.get('bufferview', 0)) {
+            $scope.bufferView = this.bufferViews.get(bufferViewId);
+        }
+        if (this.bufferViews.__mapValuesData__) {
+            $scope.bufferViews = Array.from(this.bufferViews.__mapValuesData__);
+        } else {
+            $scope.bufferViews = Array.from(this.bufferViews.values());
+        }
+        $scope.$apply();
     });
 
     $quassel.on('ws.close', function() {
@@ -1021,6 +1027,10 @@ angular.module('quassel')
 
         modalInstance.result.then(cb);
     });
+    
+    $scope.setBufferView = function(bv) {
+        $scope.bufferView = bv;
+    };
 
     $scope.reload = function(){
         $window.location.reload();
