@@ -20,6 +20,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/theme-#{settings.default.theme || settings.theme}.css', theme)
     body.login-page
       include ./ng-templates/modalJoinChannel.jade
+      include ./ng-templates/modalRenameBuffer.jade
       include ./ng-templates/modalGeneralConfig.jade
       include ./ng-templates/modalNetworks.jade
       include ./ng-templates/modalIdentities.jade
@@ -162,6 +163,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       a(href="#", ng-click="channelHideTemporarily(channel)") Hide temporarily
                     li(ng-if="bufferView.isHidden(channel.id)")
                       a(href="#", ng-click="channelUnhide(channel)") Unhide
+                    li(ng-if="!channel.isChannel()")
+                      a(href="#", ng-click="openModalRenameBuffer(channel)") Rename
             .buffer-bottom-bar
               a.btn.showhide.right(href="javascript:void(0)", ng-click="shown = !shown")
                 i.icon-qws(ng-class="shown ? 'icon-left-open' : 'icon-right-open'")

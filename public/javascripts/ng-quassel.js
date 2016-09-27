@@ -60,7 +60,8 @@
         login: login,
         requestUnhideBuffer: requestUnhideBuffer,
         requestHideBufferPermanently: requestHideBufferPermanently,
-        requestHideBufferTemporarily: requestHideBufferTemporarily
+        requestHideBufferTemporarily: requestHideBufferTemporarily,
+        requestRenameBuffer: requestRenameBuffer
       };
 
       return service;
@@ -205,6 +206,10 @@
       
       function requestHideBufferPermanently(bufferId) {
         self.quassel.requestHideBufferPermanently(bufferId);
+      }
+      
+      function requestRenameBuffer(bufferId, name) {
+        self.quassel.requestRenameBuffer(bufferId, name);
       }
       
       function requestUpdateIgnoreListManager(ignoreList) {

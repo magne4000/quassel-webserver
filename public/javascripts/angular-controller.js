@@ -338,6 +338,10 @@ angular.module('quassel')
         $scope.$apply();
     });
     
+    $quassel.on('buffer.rename', function() {
+        $scope.$apply();
+    });
+    
     $scope.showBuffer = function(channel) {
         $scope.buffer = channel;
         if ($scope.buffer !== null) {
@@ -430,6 +434,22 @@ angular.module('quassel')
             $scope.channelHidePermanently(channel);
         }
     };
+    
+    $scope.openModalRenameBuffer = function(buffer) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'modalRenameBuffer.html',
+            controller: 'ModalRenameBufferInstanceCtrl',
+            resolve: {
+                name: function(){return buffer.name;}
+            }
+        });
+
+        modalInstance.result.then(function (name) {
+            if (name) {
+                $quassel.requestRenameBuffer(buffer.id, name);
+            }
+        });
+    };
 
     $scope.userQuery = function(user) {
         var network = $quassel.get().getNetworks().get($scope.buffer.network);
@@ -472,6 +492,17 @@ angular.module('quassel')
 .controller('ModalJoinChannelInstanceCtrl', function ($scope, $uibModalInstance, network) {
     $scope.name = '';
     $scope.network = network;
+
+    $scope.ok = function () {
+        $uibModalInstance.close($scope.name);
+    };
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+})
+.controller('ModalRenameBufferInstanceCtrl', function ($scope, $uibModalInstance, name) {
+    $scope.name = name;
 
     $scope.ok = function () {
         $uibModalInstance.close($scope.name);
