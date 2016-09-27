@@ -7,6 +7,7 @@ angular.module('quassel')
         ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config',
             function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config) {
     $scope.networks = [];
+    $scope.bufferView = null;
     $scope.buffer = null;
     $scope.messages = [];
     $scope.showhidden = false;
@@ -113,6 +114,13 @@ angular.module('quassel')
             network.collapsed = !network.isConnected;
             $scope.networks.push(network);
         });
+    });
+    
+    $quassel.on('bufferview.init', function(bufferViewId) {
+        if ($scope.bufferView === null && bufferViewId === $config.get('bufferview', 0)) {
+            $scope.bufferView = this.bufferViews.get(bufferViewId);
+            $scope.$apply();
+        }
     });
     
     $scope.$watch('buffer', function(newValue, oldValue) {
@@ -408,23 +416,23 @@ angular.module('quassel')
     };
 
     $scope.channelHidePermanently = function(channel) {
-        $quassel.requestUnhideBuffer(channel.id);
-        $quassel.requestHideBufferPermanently(channel.id);
+        $quassel.requestUnhideBuffer($scope.bufferView.id, channel.id);
+        $quassel.requestHideBufferPermanently($scope.bufferView.id, channel.id);
     };
 
     $scope.channelHideTemporarily = function(channel) {
-        $quassel.requestUnhideBuffer(channel.id);
-        $quassel.requestHideBufferTemporarily(channel.id);
+        $quassel.requestUnhideBuffer($scope.bufferView.id, channel.id);
+        $quassel.requestHideBufferTemporarily($scope.bufferView.id, channel.id);
     };
 
     $scope.channelUnhide = function(channel) {
-        $quassel.requestUnhideBuffer(channel.id);
+        $quassel.requestUnhideBuffer($scope.bufferView.id, channel.id);
     };
     
     $scope.cycleHiddenState = function(channel) {
-        if (channel.isPermanentlyRemoved) {
+        if ($scope.bufferView.isPermanentlyRemoved(channel.id)) {
             $scope.channelHideTemporarily(channel);
-        } else if (channel.isTemporarilyRemoved) {
+        } else if ($scope.bufferView.isTemporarilyRemoved(channel.id)) {
             $scope.channelUnhide(channel);
         } else {
             $scope.channelHidePermanently(channel);
