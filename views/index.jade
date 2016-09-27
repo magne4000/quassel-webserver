@@ -43,6 +43,9 @@ html(ng-app="quassel", ng-controller="ConfigController")
               a(href="#", ng-click="configNetworks()", ng-show="logged") Networks
             li
               a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreListConfigItem") Ignore List
+            li(class="dropdown-header", ng-show="bufferViews.length") Chat lists
+            li(ng-repeat="bv in bufferViews", ng-class="{active: bv.id == bufferView.id}")
+              a(href="#", ng-click="setBufferView(bv)") {{bv.bufferViewName}}
             li(class="dropdown-header") Themes
             li(ng-repeat="theme in getAllThemes()", ng-class="{active: activeTheme == theme}")
               a(href="#", ng-click="setTheme(theme)") {{theme}}
