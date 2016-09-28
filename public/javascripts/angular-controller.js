@@ -503,6 +503,7 @@ angular.module('quassel')
     };
 })
 .controller('ModalAliasesInstanceCtrl', function ($scope, $uibModalInstance, aliases) {
+    var alias = require('alias');
     $scope.aliases = aliases;
 
     $scope.ok = function () {
@@ -511,6 +512,14 @@ angular.module('quassel')
 
     $scope.cancel = function () {
         $uibModalInstance.dismiss('cancel');
+    };
+    
+    $scope.add = function() {
+        $scope.aliases.push(new alias.AliasItem("", ""));
+    };
+    
+    $scope.remove = function(ind) {
+        $scope.aliases.splice(ind, 1);
     };
 })
 .controller('ModalIdentitiesInstanceCtrl', function ($scope, $uibModalInstance, identities) {
@@ -679,7 +688,7 @@ angular.module('quassel')
         $uibModalInstance.close([$scope.selectedBackend.DisplayName, properties, $scope.username, $scope.password]);
     };
 })
-.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config) {
+.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', '$alert', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $alert) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
@@ -805,6 +814,11 @@ angular.module('quassel')
         });
 
         modalInstance.result.then(function (aliases) {
+            $quassel.onceWithTimeout('aliases', 15000, function() {
+                $alert.info('Aliases saved');
+            }, function() {
+                $alert.error('Fail to save aliases');
+            });
             $quassel.requestUpdateAliasManager(alias.toCoreObject(aliases));
         });
     };

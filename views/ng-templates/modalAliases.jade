@@ -1,17 +1,29 @@
 script(type="text/ng-template", id="modalAliases.html")
-  form(name="aliasesForm")
+  form.form-alias(name="aliasesForm")
     .modal-header
       button.close(type='button', ng-click='cancel()') ×
       h4.modal-title Aliases
     .modal-body
-      .form-group.row(ng-repeat="alias in aliases")
-        .col-md-6
-            input.form-control(type='text', placeholder='alias', ng-model="alias.name")
-        .col-md-6
-            input.form-control(type='text', placeholder='expansion', ng-model="alias.expansion")
-        // TODO Add line
-        // TODO Remove line
-        // TODO make list more compact
+      .panel.panel-default
+        table.table.fill
+          thead
+            tr
+              th Alias
+              th Expansion
+              th
+          tbody
+            tr(ng-repeat="alias in aliases")
+              td
+                input.form-control.input-sm(type='text', placeholder='alias', ng-model="alias.name")
+              td
+                input.form-control.input-sm(type='text', placeholder='expansion', ng-model="alias.expansion")
+              td
+                button.btn.btn-sm.btn-default(type='button', ng-click='remove($index)')
+                  i.icon-qws.icon-trash
+        .panel-body
+          button.btn.btn-sm.btn-default(type='button', ng-click='add()')
+            i.icon-qws.icon-plus
+            | New
     .modal-footer
       button.btn.btn-default(type='button', ng-click='cancel()') Cancel
       button.btn.btn-primary(type='button', ng-click='ok()') Save
