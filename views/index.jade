@@ -108,9 +108,13 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
           #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
             .buffer-container(highlight-container)
-              .well(ng-if="networks.length == 0") You haven't configured a network yet
+              .loader(ng-if='bufferView === null')
+                span.quassel-logo.mini
+                | Loading
+              .well(ng-if="bufferView !== null && networks.length == 0") You haven't configured a network yet
                 button.btn.btn-block.btn-default(type="button", ng-click="configNetworks()") Add a network
               .network(
+                    ng-show='bufferView !== null'
                     id="network-{{network.networkName}}"
                     class="buffer-highlight-{{network.statusBuffer.highlight}}"
                     ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id}"
@@ -131,7 +135,12 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     a(href="#", ng-click="connect(network)") Connect
                   li
                     a(href="#", ng-click="showhidden = !showhidden") Show / Hide chats
-              .network-channels.clearfix(id="{{network.networkName}}-channels", uib-collapse="network.collapsed", ng-repeat-end)
+              .network-channels.clearfix(
+                    ng-show='bufferView !== null'
+                    id="{{network.networkName}}-channels"
+                    uib-collapse="network.collapsed"
+                    ng-repeat-end
+                )
                 .channel(
                       ng-model="channel"
                       drag

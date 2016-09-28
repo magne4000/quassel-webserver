@@ -1092,6 +1092,7 @@ angular.module('quassel')
     
     $scope.setBufferView = function(bv) {
         $scope.bufferView = bv;
+        $config.set('bufferview', bv.id);
     };
 
     $scope.reload = function(){

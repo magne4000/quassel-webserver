@@ -356,6 +356,13 @@ html, body, .container {
     background-image: url(../images/quassel-logo.png);
 }
 
+.quassel-logo.mini {
+    width: 18px;
+    height: 18px;
+    margin-left: 0;
+    background-size: 18px 18px;
+}
+
 .icon-secure {
     margin-left: 0.5em;
 }
@@ -840,4 +847,17 @@ colorpicker .colors .btn {
     width: 21px;
     height: 21px;
     border-radius: inherit !important;
+}
+
+// Loader
+.loader {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loader .quassel-logo {
+    .animation(spin 1s linear infinite);
 }
