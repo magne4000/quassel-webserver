@@ -1,0 +1,17 @@
+script(type="text/ng-template", id="modalAliases.html")
+  form(name="aliasesForm")
+    .modal-header
+      button.close(type='button', ng-click='cancel()') ×
+      h4.modal-title Aliases
+    .modal-body
+      .form-group.row(ng-repeat="alias in aliases")
+        .col-md-6
+            input.form-control(type='text', placeholder='alias', ng-model="alias.name")
+        .col-md-6
+            input.form-control(type='text', placeholder='expansion', ng-model="alias.expansion")
+        // TODO Add line
+        // TODO Remove line
+        // TODO make list more compact
+    .modal-footer
+      button.btn.btn-default(type='button', ng-click='cancel()') Cancel
+      button.btn.btn-primary(type='button', ng-click='ok()') Save

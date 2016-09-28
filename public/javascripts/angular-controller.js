@@ -329,14 +329,6 @@ angular.module('quassel')
             updateMessages();
         });
     });
-
-    $quassel.on('buffer.hidden', function() {
-        $scope.$apply();
-    });
-
-    $quassel.on('buffer.unhide', function() {
-        $scope.$apply();
-    });
     
     $quassel.on('buffer.rename', function() {
         $scope.$apply();
@@ -412,12 +404,10 @@ angular.module('quassel')
     };
 
     $scope.channelHidePermanently = function(channel) {
-        $quassel.requestUnhideBuffer($scope.bufferView.id, channel.id);
         $quassel.requestHideBufferPermanently($scope.bufferView.id, channel.id);
     };
 
     $scope.channelHideTemporarily = function(channel) {
-        $quassel.requestUnhideBuffer($scope.bufferView.id, channel.id);
         $quassel.requestHideBufferTemporarily($scope.bufferView.id, channel.id);
     };
 
@@ -506,6 +496,17 @@ angular.module('quassel')
 
     $scope.ok = function () {
         $uibModalInstance.close($scope.name);
+    };
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+})
+.controller('ModalAliasesInstanceCtrl', function ($scope, $uibModalInstance, aliases) {
+    $scope.aliases = aliases;
+
+    $scope.ok = function () {
+        $uibModalInstance.close($scope.aliases);
     };
 
     $scope.cancel = function () {
@@ -685,7 +686,7 @@ angular.module('quassel')
     $scope.displayIgnoreListConfigItem = false;
     $scope.displayIdentitiesConfigItem = false;
     $scope.activeIndice = 0;
-    var modal, dbg = require("debug");
+    var modal, dbg = require("debug"), alias = require('alias');
 
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
@@ -731,9 +732,6 @@ angular.module('quassel')
                 $quassel.removeIdentity(identity.identityId);
                 acount[2] = acount[2] + 1;
             });
-            if (typeof callback === 'function') {
-                callback(acount[0], acount[1], acount[2]);
-            }
         });
     };
     
@@ -793,6 +791,21 @@ angular.module('quassel')
             nm.forEach(function(network) {
                 $quassel.removeNetwork(network.networkId);
             });
+        });
+    };
+    
+    $scope.configAliases = function() {
+        var aliases = $quassel.get().aliases;
+        var modalInstance = $uibModal.open({
+            templateUrl: 'modalAliases.html',
+            controller: 'ModalAliasesInstanceCtrl',
+            resolve: {
+                aliases: function(){return aliases;}
+            }
+        });
+
+        modalInstance.result.then(function (aliases) {
+            $quassel.requestUpdateAliasManager(alias.toCoreObject(aliases));
         });
     };
 
@@ -916,6 +929,18 @@ angular.module('quassel')
     $scope.alert = "";
     $scope.bufferView = null;
     $scope.bufferViews = [];
+    
+    function updateBufferViews(bufferViewId) {
+        var quassel = $quassel.get();
+        if (bufferViewId === $config.get('bufferview', 0)) {
+            $scope.bufferView = quassel.bufferViews.get(bufferViewId);
+        }
+        if (quassel.bufferViews.__mapValuesData__) {
+            $scope.bufferViews = Array.from(quassel.bufferViews.__mapValuesData__);
+        } else {
+            $scope.bufferViews = Array.from(quassel.bufferViews.values());
+        }
+    }
 
     $rootScope.$on('defaultsettings', function() {
         $scope.securecoreconnection = $config.get('securecore', $scope.securecoreconnection);
@@ -957,16 +982,22 @@ angular.module('quassel')
         }
     });
     
-    $quassel.on('bufferview.init', function(bufferViewId) {
-        if ($scope.bufferView === null && bufferViewId === $config.get('bufferview', 0)) {
-            $scope.bufferView = this.bufferViews.get(bufferViewId);
-        }
-        if (this.bufferViews.__mapValuesData__) {
-            $scope.bufferViews = Array.from(this.bufferViews.__mapValuesData__);
-        } else {
-            $scope.bufferViews = Array.from(this.bufferViews.values());
-        }
-        $scope.$apply();
+    $quassel.on('bufferview.init', function(bufferViewId, bufferId) {
+        $scope.$apply(function() {
+            updateBufferViews(bufferViewId);
+        });
+    });
+    
+    $quassel.on('bufferview.bufferhidden', function(bufferViewId, bufferId) {
+        $scope.$apply(function() {
+            updateBufferViews(bufferViewId);
+        });
+    });
+
+    $quassel.on('bufferview.bufferunhide', function(bufferViewId, bufferId) {
+        $scope.$apply(function() {
+            updateBufferViews(bufferViewId);
+        });
     });
 
     $quassel.on('ws.close', function() {

@@ -61,7 +61,8 @@
         requestUnhideBuffer: requestUnhideBuffer,
         requestHideBufferPermanently: requestHideBufferPermanently,
         requestHideBufferTemporarily: requestHideBufferTemporarily,
-        requestRenameBuffer: requestRenameBuffer
+        requestRenameBuffer: requestRenameBuffer,
+        requestUpdateAliasManager: requestUpdateAliasManager
       };
 
       return service;
@@ -196,20 +197,24 @@
         self.quassel.requestMergeBuffersPermanently(bufferId1, bufferId2);
       }
       
-      function requestUnhideBuffer(bufferId) {
-        self.quassel.requestUnhideBuffer(bufferId);
+      function requestUnhideBuffer(bufferViewId, bufferId) {
+        self.quassel.requestUnhideBuffer(bufferViewId, bufferId);
       }
       
-      function requestHideBufferTemporarily(bufferId) {
-        self.quassel.requestHideBufferTemporarily(bufferId);
+      function requestHideBufferTemporarily(bufferViewId, bufferId) {
+        self.quassel.requestHideBufferTemporarily(bufferViewId, bufferId);
       }
       
-      function requestHideBufferPermanently(bufferId) {
-        self.quassel.requestHideBufferPermanently(bufferId);
+      function requestHideBufferPermanently(bufferViewId, bufferId) {
+        self.quassel.requestHideBufferPermanently(bufferViewId, bufferId);
       }
       
       function requestRenameBuffer(bufferId, name) {
         self.quassel.requestRenameBuffer(bufferId, name);
+      }
+      
+      function requestUpdateAliasManager(aliases) {
+        self.quassel.requestUpdateAliasManager(aliases);
       }
       
       function requestUpdateIgnoreListManager(ignoreList) {

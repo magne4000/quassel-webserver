@@ -2,7 +2,7 @@ script(type="text/ng-template", id="modalIdentities.html")
   form(name="identitiesForm")
     .modal-header
       button.close(type='button', ng-click='$dismiss("close")') ×
-      h4#myModalLabel.modal-title Identities
+      h4.modal-title Identities
     .modal-body.tab-margin
       uib-tabset
         uib-tab(heading="{{identity.identityName}}", ng-repeat="identity in identities", select="selectIdentity($index)", disable="identitiesForm.$invalid")

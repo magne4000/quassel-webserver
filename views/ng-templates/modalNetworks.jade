@@ -2,7 +2,7 @@ script(type="text/ng-template", id="modalNetworks.html")
   form(name="networksForm")
     .modal-header
       button.close(type='button', ng-click='$dismiss("close")') ×
-      h4#myModalLabel.modal-title Networks
+      h4.modal-title Networks
     .modal-body.tab-margin
       uib-tabset
         uib-tab(heading="{{network.networkName}}", ng-repeat="network in networks", select="selectNetwork($index); selectServer(network, 0)", disable="networksForm.$invalid")
