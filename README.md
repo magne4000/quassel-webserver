@@ -1,7 +1,7 @@
 # quassel-webserver
 A web client for Quassel (requires a running quasselcore)
 
-:exclamation: Your node (NOT quasselcore) version should be at least v0.12 (v4 and v5 are supported).
+:exclamation: Your node version should be at least v4.x (v4, v5 and v6 are supported).
 To install node last version, you can run :
 ```
 npm -g install n
