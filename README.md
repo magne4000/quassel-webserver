@@ -39,13 +39,10 @@ It is recommended to copy settings.js file to a new settings-user.js file
 cp settings.js settings-user.js
 ```
 File `settings-user.js` can then be modified to specify default quasselcore `host` and `port`.  
-If `forcedefault` is set to `true`, `host` and `port` will not be editable on client side.  
-If `prefixpath` is not empty, the webserver will not be accessible at https://server:64443/ but at https://server:64443`prefixpath`/;  
-`initialBacklogLimit` defines the number of messages that will de retrieved for each buffer on connection.  
-`backlogLimit` defines the number of messages that will be retrieved for a buffer on each request to fetch additional backlogs.  
+All available settings are described in `settings.js` file.
 
 #### Certificate
-You must use your own certificate for HTTPS mode. The key file is located at ssl/key.pem, and the certificate ssl/cert.pem.
+You must use your own certificate for https mode. The key file is located at ssl/key.pem, and the certificate ssl/cert.pem.
 
 You can generate a new self signed certificate with the following command:
 ```
@@ -53,26 +50,38 @@ openssl req -x509 -newkey rsa:2048 -keyout ssl/key.pem -out ssl/cert.pem -nodes
 ```
 
 #### Usage
-See the output of the command `node app.js --help`
+See the output of the command `node app.js --help`.
 
 #### Init script
-You can use a startup script to the app at system startup.
+Startup scripts are available in `scripts` directory.
 ```
+# SysVinit
 cp scripts/startup /etc/init.d/quasselweb
+# systemd
+cp scripts/quassel-webserver.service /lib/systemd/system/quassel-webserver.service
 ```
-and then edit the file /etc/init.d/quasselweb and change `BASEDIR`, `RUNASUSER` and `RUNASGROUP` vars.
+For the sysvinit script, be sure to change `BASEDIR`, `RUNASUSER` and `RUNASGROUP` vars.  
+For the systemd script, you must customize `ExecStart`, `User` and `Group` to suit your needs.
 
 ### In the browser
-Just go to https://yourserver:64443 and enter your quasselcore information and credentials
+Just go to https://your.tld:64443 and enter your quasselcore information and credentials.
 
-### Reverse proxy snippets
-In you run behind `/quassel` location on your webserver, do not forget to edit `settings-user.js` file
+### Reverse proxies
+If you want to access quassel-webserver behind a reverse proxy, here are some tips.
+
+#### HTTP mode
+You can launch quassel-webserver in http mode by adding `-m http` to the command line.
+This tells the webserver to run in `http` mode, and to listen on port `64080`.  
+This way you can let your `apache` or `nginx` server handle the SSL layer.
+
+#### Reverse proxy on https://your.tld/quassel
+If you run behind `/quassel` location on your webserver, do not forget to edit `settings-user.js` file
 ```json
 ...
 prefixpath: '/quassel',
 ...
 ```
-Also, be sure to launch quassel-webserver in http mode by adding `-m http` to the command line.
+
 #### nginx
 ```nginx
 # rewrite ^[/]quassel$ /quassel/ permanent;
@@ -87,8 +96,9 @@ location /quassel {
     proxy_redirect off;
 }
 ```
+
 #### Apache
-Needs activated mod_proxy_wstunnel and mod_rewrite.
+You will need mod_proxy_wstunnel and mod_rewrite.
 ```apache
 <VirtualHost ...>
 ...

@@ -11,21 +11,34 @@ var netBrowserify = require('net-browserify-alt');
 
 opts
   .version('2.1.0')
-  .option('-c, --config <value>', 'Path to configuration file', undefined, null)
-  .option('-l, --listen <value>', 'listening address', undefined, null)
-  .option('-p, --port <value>', 'HTTP(S) port to use', parseInt, null)
-  .option('-m, --mode <value>', 'HTTP mode (http|https) [https]', undefined, 'https')
+  .option('-c, --config <value>', 'Path to configuration file', undefined)
+  .option('-l, --listen <value>', 'listening address [0.0.0.0]', undefined)
+  .option('-p, --port <value>', 'http(s) port to use [64080|64443]', parseInt)
+  .option('-m, --mode <value>', 'http mode (http|https) [https]', undefined)
   .parse(process.argv);
 
 var settings = require('./lib/utils').settings(true, opts.config);
 var routes = require('./routes/index')(settings);
 
+if (settings.webserver) {
+    if (settings.webserver.listen && !opts.listen) {
+        opts.listen === settings.webserver.listen;
+    }
+    if (settings.webserver.port && !opts.port) {
+        opts.port = settings.webserver.port;
+    }
+    if (settings.webserver.mode && !opts.mode) {
+        opts.mode = settings.webserver.mode;
+    }
+}
+
 var app = express();
 var server = null;
-if (opts.mode === 'http'){
+if (!opts.mode) opts.mode = 'https';
+if (opts.mode === 'http') {
     server = require('http').Server(app);
-    if (opts.port === null) opts.port = 64080;
-} else {
+    if (!opts.port) opts.port = 64080;
+} else if (opts.mode === 'https') {
     var keypath = path.join(__dirname, 'ssl/key.pem');
     var certpath = path.join(__dirname, 'ssl/cert.pem');
     if (!fs.existsSync(keypath)) {
@@ -51,10 +64,13 @@ if (opts.mode === 'http'){
     } catch(e) {
         server = require('https').createServer(options, app);
     }
-    if (opts.port === null) opts.port = 64443;
+    if (!opts.port) opts.port = 64443;
+} else {
+    console.log(' Invalid mode \'' + opts.mode + '\'');
+    process.exit(5);
 }
 
-if (opts.listen === null) opts.listen = process.env.HOST || '';
+if (!opts.listen) opts.listen = process.env.HOST || '';
 
 // check that prefixpath do not contains ../, and it starts with / if not empty
 if (settings.prefixpath.length > 0) {
@@ -141,7 +157,7 @@ app.set('port', opts.port);
 app.set('host', opts.listen);
 
 server.listen(app.get('port'), app.get('host'), function() {
-    console.log('Express server listening on port', server.address().port);
+    console.log('Express server listening for', opts.mode , 'connections on port', server.address().port);
 });
 
 module.exports = app;
