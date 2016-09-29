@@ -629,7 +629,8 @@ angular.module('quassel')
             ProxyHost: '',
             ProxyPort: '',
             ProxyUser: '',
-            ProxyPass: ''
+            ProxyPass: '',
+            sslVerify: 1
         });
         return true;
     };
