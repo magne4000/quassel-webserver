@@ -521,6 +521,17 @@ angular.module('quassel')
     $scope.remove = function(ind) {
         $scope.aliases.splice(ind, 1);
     };
+    
+    $scope.isAliasUnique = function(aliases, name, index) {
+        var i = 0;
+        for (i; i<aliases.length; i++) {
+            if (i === index) continue;
+            if (aliases[i].name === name) {
+                return false;
+            }
+        }
+        return true;
+    };
 })
 .controller('ModalIdentitiesInstanceCtrl', function ($scope, $uibModalInstance, identities) {
     $scope.identities = identities;
@@ -804,12 +815,12 @@ angular.module('quassel')
     };
     
     $scope.configAliases = function() {
-        var aliases = $quassel.get().aliases;
         var modalInstance = $uibModal.open({
             templateUrl: 'modalAliases.html',
             controller: 'ModalAliasesInstanceCtrl',
+            scope: $scope.$new(true),
             resolve: {
-                aliases: function(){return aliases;}
+                aliases: function(){return angular.copy($quassel.get().aliases);}
             }
         });
 

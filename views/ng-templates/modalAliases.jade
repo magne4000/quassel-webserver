@@ -14,9 +14,9 @@ script(type="text/ng-template", id="modalAliases.html")
           tbody
             tr(ng-repeat="alias in aliases")
               td
-                input.form-control.input-sm(type='text', placeholder='alias', ng-model="alias.name")
+                input.form-control.input-sm(unique="isAliasUnique(aliases, model, $index)", type='text', placeholder='alias', ng-model="alias.name", required)
               td
-                input.form-control.input-sm(type='text', placeholder='expansion', ng-model="alias.expansion")
+                input.form-control.input-sm(type='text', placeholder='expansion', ng-model="alias.expansion", required)
               td
                 button.btn.btn-sm.btn-default(type='button', ng-click='remove($index)')
                   i.icon-qws.icon-trash
@@ -26,4 +26,4 @@ script(type="text/ng-template", id="modalAliases.html")
             | New
     .modal-footer
       button.btn.btn-default(type='button', ng-click='cancel()') Cancel
-      button.btn.btn-primary(type='button', ng-click='ok()') Save
+      button.btn.btn-primary(type='button', ng-click='ok()', ng-disabled="aliasesForm.$invalid") Save

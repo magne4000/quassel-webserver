@@ -710,4 +710,18 @@ angular.module('quassel')
       });
     }
   };
+})
+.directive('unique', function() {
+  return {
+    restrict: 'A',
+    scope: {
+      unique: "&"
+    },
+    require: 'ngModel',
+    link: function(scope, elm, attrs, ctrl) {
+      ctrl.$validators.unique = function(modelValue, viewValue) {
+        return scope.unique({model: viewValue});
+      };
+    }
+  };
 });

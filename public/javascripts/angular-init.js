@@ -329,9 +329,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
     };
 }])
-.run([function(){
-    console.log('AngularJS loaded');
-}]);
+.run([function(){}]);
 
 // Production steps of ECMA-262, Edition 6, 22.1.2.1
 // Reference: https://people.mozilla.org/~jorendorff/es6-draft.html#sec-array.from
