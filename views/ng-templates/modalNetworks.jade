@@ -146,5 +146,5 @@ script(type="text/ng-template", id="modalNetworks.html")
         button.btn.btn-success.btn-sm.pull-right(title="Add a network", ng-click="createNetwork()")
           i.icon-qws.icon-plus
     .modal-footer
-      button.btn.btn-default(ng-click='$dismiss("close")', type='button') Cancel
+      button.btn.btn-default(type='button', ng-click='$dismiss("close")') Cancel
       button.btn.btn-primary(ng-click="saveNetworks()", ng-disabled="networksForm.$invalid") Save
