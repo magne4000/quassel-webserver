@@ -63,7 +63,9 @@
         requestHideBufferPermanently: requestHideBufferPermanently,
         requestHideBufferTemporarily: requestHideBufferTemporarily,
         requestRenameBuffer: requestRenameBuffer,
-        requestUpdateAliasManager: requestUpdateAliasManager
+        requestUpdateAliasManager: requestUpdateAliasManager,
+        supports: supports,
+        Feature: Quassel.Feature
       };
 
       return service;
@@ -80,8 +82,6 @@
       function getQuassel() {
         return self.quassel;
       }
-      
-      ////////////////////////////////
 
       function initializeSocket() {
         //Check if socket is undefined
@@ -166,6 +166,10 @@
         } else {
             self.quassel.emit.apply(self.quassel, Array.prototype.slice.call(arguments));
         }
+      }
+      
+      function supports(feature) {
+        return self.quassel.supports(feature);
       }
       
       function markBufferAsRead(bufferId, lastMessageId) {

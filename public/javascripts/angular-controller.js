@@ -597,7 +597,7 @@ angular.module('quassel')
         $scope.createIdentity();
     }
 })
-.controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, networks, identities) {
+.controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, $quassel, networks, identities) {
     $scope.networks = networks;
     $scope.identities = identities;
     $scope.activeNetworkIndex = 0;
@@ -668,6 +668,8 @@ angular.module('quassel')
         network.ServerList.splice(index, 1);
         $scope.selectServer(network, 0);
     };
+    
+    $scope.supportSslVerify = $quassel.supports($quassel.Feature.VerifyServerSSL);
     
     // At initialization, if we have no network, just add one so the user doesn't have an empty modal
     if ($scope.networks.length === 0) {
@@ -774,6 +776,9 @@ angular.module('quassel')
             scope: $scope.$new(true),
             size: 'lg',
             resolve: {
+                $quassel: function() {
+                    return $quassel;
+                },
                 networks: function(){
                     var networks = $quassel.get().getNetworksMap();
                     if (networks.__mapValuesData__) {

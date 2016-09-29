@@ -824,6 +824,10 @@ html, body, .container {
   }
 }
 
+input[type="radio"]:disabled ~ span {
+  opacity: 0.5;
+}
+
 // Message styles
 .type-1 { .nick,.message {color: @type-1-color;}} // Plain
 .type-2 { .nick,.message {color: @type-2-color;}} // Notice
