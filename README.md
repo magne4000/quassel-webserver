@@ -50,7 +50,18 @@ openssl req -x509 -newkey rsa:2048 -keyout ssl/key.pem -out ssl/cert.pem -nodes
 ```
 
 #### Usage
-See the output of the command `node app.js --help`.
+```
+  Usage: app [options]
+
+  Options:
+
+    -h, --help            output usage information
+    -V, --version         output the version number
+    -c, --config <value>  Path to configuration file
+    -l, --listen <value>  listening address [0.0.0.0]
+    -p, --port <value>    http(s) port to use [64080|64443]
+    -m, --mode <value>    http mode (http|https) [https]
+```
 
 #### Init script
 Startup scripts are available in `scripts` directory.
