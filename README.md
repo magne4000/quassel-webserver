@@ -72,7 +72,7 @@ In you run behind `/quassel` location on your webserver, do not forget to edit `
 prefixpath: '/quassel',
 ...
 ```
-Also, be sure to launch quassel-webserver in http mode by adding `-m http` to the command line.
+Also, be sure to launch quassel-webserver in http mode by adding `-m http` to the command line, optionally including `-l localhost` to block direct outside connections from bypassing the proxy server.
 #### nginx
 ```nginx
 # rewrite ^[/]quassel$ /quassel/ permanent;
