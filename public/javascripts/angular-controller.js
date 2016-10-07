@@ -1524,7 +1524,38 @@ angular.module('quassel')
     var bufferFilters = [];
     $scope.currentFilter = [];
     $scope.currentFilter2 = {};
-    $scope.defaultFilter = filters;
+    $scope.defaultFilter = angular.copy(filters);
+    
+    function init() {
+        if ($config.has('filter')) {
+            var filter = $config.get('filter');
+            if (typeof filter === "number") {
+                $scope.defaultFilter = unserializeFilter(filter);
+            } else {
+                // Migrate from old format
+                $scope.defaultFilter = filter;
+                $config.set('filter', serializeFilter(filter));
+            }
+        }
+    }
+    
+    function serializeFilter(filter) {
+        var serialized = 0;
+        angular.forEach(filter, function(value, key) {
+            if (value.value) serialized = serialized | value.type;
+        });
+        return serialized;
+    }
+    
+    function unserializeFilter(serialized) {
+        var filter = [], filterItem;
+        angular.forEach(filters, function(value, key) {
+            filterItem = angular.copy(value);
+            filterItem.value = (filterItem.type & serialized) > 0;
+            filter.push(filterItem);
+        });
+        return filter;
+    }
 
     function onCurrentFilterUpdate() {
         angular.forEach($scope.currentFilter, function(value, key) {
@@ -1552,13 +1583,11 @@ angular.module('quassel')
 
     $scope.$watch('currentFilter', onCurrentFilterUpdate, true);
     
-    if ($config.has('filter')) {
-        $scope.defaultFilter = $config.get('filter');
-    }
+    init();
 
     $scope.setAsDefault = function() {
         $scope.defaultFilter = angular.copy($scope.currentFilter);
-        $config.set('filter', $scope.defaultFilter);
+        $config.set('filter', serializeFilter($scope.defaultFilter));
     };
 
     $scope.useDefault = function() {
