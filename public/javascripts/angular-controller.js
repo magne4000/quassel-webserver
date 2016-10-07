@@ -606,6 +606,14 @@ angular.module('quassel')
     $scope.activeNetworkIndex = 0;
     $scope.activeServerIndex = 0;
     $scope.activeServer = null;
+    
+    $scope.useSSLStateChanged = function (activeServer) {
+        if (activeServer.UseSSL) {
+            if (activeServer.Port == 6667) activeServer.Port = 6697;
+        } else {
+            if (activeServer.Port == 6697) activeServer.Port = 6667;
+        }
+    };
 
     $scope.saveNetworks = function () {
         $uibModalInstance.close($scope.networks);
