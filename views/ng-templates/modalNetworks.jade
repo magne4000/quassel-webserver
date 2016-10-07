@@ -2,7 +2,7 @@ script(type="text/ng-template", id="modalNetworks.html")
   form(name="networksForm")
     .modal-header
       button.close(type='button', ng-click='$dismiss("close")') ×
-      h4#myModalLabel.modal-title Networks
+      h4.modal-title Networks
     .modal-body.tab-margin
       uib-tabset
         uib-tab(heading="{{network.networkName}}", ng-repeat="network in networks", select="selectNetwork($index); selectServer(network, 0)", disable="networksForm.$invalid")
@@ -54,7 +54,13 @@ script(type="text/ng-template", id="modalNetworks.html")
                             .checkbox
                               label
                                 input(type="checkbox", ng-model="activeServer.UseSSL", ng-true-value="1", ng-false-value="0")
-                                | Use SSL
+                                | Use encrypted connection
+                        .form-group
+                          .col-sm-offset-2.col-sm-10
+                            .checkbox
+                              label
+                                input(type="checkbox", ng-model="activeServer.sslVerify", ng-true-value="1", ng-false-value="0", ng-disabled="!activeServer.UseSSL || !supportSslVerify")
+                                span Verify connection security
                         .form-group
                           .col-sm-offset-2.col-sm-10
                             button.btn.btn-danger.pull-right(title="Delete current server", ng-confirm-click="Are you sure you want to delete this server ?", ng-ok-click="deleteServer(network, activeServerIndex)")
@@ -140,5 +146,5 @@ script(type="text/ng-template", id="modalNetworks.html")
         button.btn.btn-success.btn-sm.pull-right(title="Add a network", ng-click="createNetwork()")
           i.icon-qws.icon-plus
     .modal-footer
-      button.btn.btn-default(ng-click='$dismiss("close")') Cancel
+      button.btn.btn-default(type='button', ng-click='$dismiss("close")') Cancel
       button.btn.btn-primary(ng-click="saveNetworks()", ng-disabled="networksForm.$invalid") Save

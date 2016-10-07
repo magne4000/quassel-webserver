@@ -11,7 +11,12 @@ module.exports = {
         emptybufferonswitch: false,  // Trim buffer when switching to another buffer. Can be `false` or a positive integer
         highlightmode: 2  // Highlight mode: 1: None, 2: Current nick, 3: All nicks from identity
     },
-    themes: ['default', 'darksolarized'],  //  Available themes
+    webserver: {
+        listen: null,  // Address on which to listen for connection, defaults to listening on all available IPs. Can be overhidden by '--listen' argument
+        port: null,  // Port on which to listen for connection, defaults to 64080 for http mode, 64443 for https. Can be overhidden by '--port' argument
+        mode: null  // can be 'http' or 'https', defaults to 'https'. Can be overhidden by '--mode' argument
+    },
+    themes: ['default', 'darksolarized'],  // Available themes
     forcedefault: false,  // Will force default host and port to be used, and will hide the corresponding fields in the UI
     prefixpath: ''  // Configure this if you use a reverse proxy
 };

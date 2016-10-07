@@ -20,6 +20,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
       link(rel='stylesheet', href='#{settings.prefixpath}/stylesheets/theme-#{settings.default.theme || settings.theme}.css', theme)
     body.login-page
       include ./ng-templates/modalJoinChannel.jade
+      include ./ng-templates/modalRenameBuffer.jade
+      include ./ng-templates/modalAliases.jade
       include ./ng-templates/modalGeneralConfig.jade
       include ./ng-templates/modalNetworks.jade
       include ./ng-templates/modalIdentities.jade
@@ -42,7 +44,12 @@ html(ng-app="quassel", ng-controller="ConfigController")
             li
               a(href="#", ng-click="configNetworks()", ng-show="logged") Networks
             li
+              a(href="#", ng-click="configAliases()", ng-show="logged") Aliases
+            li
               a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreListConfigItem") Ignore List
+            li(class="dropdown-header", ng-show="bufferViews.length") Chat lists
+            li(ng-repeat="bv in bufferViews", ng-class="{active: bv.id == bufferView.id}")
+              a(href="#", ng-click="setBufferView(bv)") {{bv.bufferViewName}}
             li(class="dropdown-header") Themes
             li(ng-repeat="theme in getAllThemes()", ng-class="{active: activeTheme == theme}")
               a(href="#", ng-click="setTheme(theme)") {{theme}}
@@ -101,9 +108,13 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
           #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
             .buffer-container(highlight-container)
-              .well(ng-if="networks.length == 0") You haven't configured a network yet
+              .loader(ng-if='bufferView === null && (networkscount === null || networkscount > 0)')
+                span.quassel-logo.mini
+                | Loading
+              .well(ng-if="networkscount === 0") You haven't configured a network yet
                 button.btn.btn-block.btn-default(type="button", ng-click="configNetworks()") Add a network
               .network(
+                    ng-show='bufferView !== null'
                     id="network-{{network.networkName}}"
                     class="buffer-highlight-{{network.statusBuffer.highlight}}"
                     ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id}"
@@ -124,23 +135,28 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     a(href="#", ng-click="connect(network)") Connect
                   li
                     a(href="#", ng-click="showhidden = !showhidden") Show / Hide chats
-              .network-channels.clearfix(id="{{network.networkName}}-channels", uib-collapse="network.collapsed", ng-repeat-end)
+              .network-channels.clearfix(
+                    ng-show='bufferView !== null'
+                    id="{{network.networkName}}-channels"
+                    uib-collapse="network.collapsed"
+                    ng-repeat-end
+                )
                 .channel(
                       ng-model="channel"
                       drag
                       drop="onDropComplete"
                       class="buffer-highlight-{{channel.highlight}}"
                       ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
-                      ng-repeat="channel in network._buffers | channelsFilter track by channel.id"
-                      ng-if="showhidden || (!channel.isPermanentlyRemoved && !channel.isTemporarilyRemoved)"
+                      ng-repeat="channel in network._buffers | channelsFilter | orderBy:'id':false:comparator track by channel.id"
+                      ng-if="showhidden || !bufferView.isHidden(channel.id)"
                       uib-dropdown
                   )
                   span.channel-icon(ng-click="cycleHiddenState(channel)")
                     i.icon-qws(
                         class="hidden-status"
                         ng-show="showhidden"
-                        ng-class="{'perm': channel.isPermanentlyRemoved, 'temp': channel.isTemporarilyRemoved}"
-                        title="{{channel.isPermanentlyRemoved ? 'Permanently hidden' : channel.isTemporarilyRemoved ? 'Temporarily hidden' : 'Visible'}}"
+                        ng-class="{'perm': bufferView.isPermanentlyRemoved(channel.id), 'temp': bufferView.isTemporarilyRemoved(channel.id)}"
+                        title="{{bufferView.isPermanentlyRemoved(channel.id) ? 'Permanently hidden' : bufferView.isTemporarilyRemoved(channel.id) ? 'Temporarily hidden' : 'Visible'}}"
                       )
                   span.channel-name(ng-click="showBuffer(channel)", title="{{channel.name}}") {{channel.name}}
                   a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
@@ -153,12 +169,14 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     li(ng-if="!channel.active || !channel.isChannel()")
                       a(href="#", ng-confirm-click="Are you sure you want to delete this buffer permanently ?", ng-ok-click="channelDelete(channel)") Delete
                     li(class="dropdown-header") Show / Hide
-                    li(ng-if="!channel.isPermanentlyRemoved")
+                    li(ng-if="!bufferView.isPermanentlyRemoved(channel.id)")
                       a(href="#", ng-click="channelHidePermanently(channel)") Hide permanently
-                    li(ng-if="!channel.isTemporarilyRemoved")
+                    li(ng-if="!bufferView.isTemporarilyRemoved(channel.id)")
                       a(href="#", ng-click="channelHideTemporarily(channel)") Hide temporarily
-                    li(ng-if="channel.isPermanentlyRemoved || channel.isTemporarilyRemoved")
+                    li(ng-if="bufferView.isHidden(channel.id)")
                       a(href="#", ng-click="channelUnhide(channel)") Unhide
+                    li(ng-if="!channel.isChannel()")
+                      a(href="#", ng-click="openModalRenameBuffer(channel)") Rename
             .buffer-bottom-bar
               a.btn.showhide.right(href="javascript:void(0)", ng-click="shown = !shown")
                 i.icon-qws(ng-class="shown ? 'icon-left-open' : 'icon-right-open'")

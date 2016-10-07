@@ -1,0 +1,29 @@
+script(type="text/ng-template", id="modalAliases.html")
+  form.form-alias(name="aliasesForm")
+    .modal-header
+      button.close(type='button', ng-click='cancel()') ×
+      h4.modal-title Aliases
+    .modal-body
+      .panel.panel-default
+        table.table.fill
+          thead
+            tr
+              th Alias
+              th Expansion
+              th
+          tbody
+            tr(ng-repeat="alias in aliases")
+              td
+                input.form-control.input-sm(unique="isAliasUnique(aliases, model, $index)", type='text', placeholder='alias', ng-model="alias.name", required)
+              td
+                input.form-control.input-sm(type='text', placeholder='expansion', ng-model="alias.expansion", required)
+              td
+                button.btn.btn-sm.btn-default(type='button', ng-click='remove($index)')
+                  i.icon-qws.icon-trash
+        .panel-body
+          button.btn.btn-sm.btn-default(type='button', ng-click='add()')
+            i.icon-qws.icon-plus
+            | New
+    .modal-footer
+      button.btn.btn-default(type='button', ng-click='cancel()') Cancel
+      button.btn.btn-primary(type='button', ng-click='ok()', ng-disabled="aliasesForm.$invalid") Save

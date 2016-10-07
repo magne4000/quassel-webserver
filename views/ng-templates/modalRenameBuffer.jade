@@ -1,0 +1,11 @@
+script(type="text/ng-template", id="modalRenameBuffer.html")
+    .modal-header
+      button.close(type='button', ng-click='cancel()') ×
+      h4.modal-title
+        | Rename buffer {{::name}}
+    .modal-body
+      .form-group
+        input.form-control(type='text', placeholder='New name', ng-model="name")
+    .modal-footer
+      button.btn.btn-default(type='button', ng-click='cancel()') Cancel
+      button.btn.btn-primary(type='button', ng-click='ok()') Confirm

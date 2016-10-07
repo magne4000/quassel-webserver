@@ -10,6 +10,7 @@ angular.module('quassel')
     $scope.buffer = null;
     $scope.messages = [];
     $scope.showhidden = false;
+    $scope.networkscount = null;
 
     var MT = require('message').Type;
     var MF = require('message').Flag;
@@ -102,7 +103,8 @@ angular.module('quassel')
         return messages;
     }
 
-    $quassel.on('init', function(networkId) {
+    $quassel.on('init', function(obj) {
+        $scope.networkscount = obj.SessionState.NetworkIds.length;
         $scope.networks = [];
     });
 
@@ -112,6 +114,7 @@ angular.module('quassel')
         $scope.$apply(function(){
             network.collapsed = !network.isConnected;
             $scope.networks.push(network);
+            $scope.networkscount = $scope.networks.length;
         });
     });
     
@@ -329,12 +332,8 @@ angular.module('quassel')
             updateMessages();
         });
     });
-
-    $quassel.on('buffer.hidden', function() {
-        $scope.$apply();
-    });
-
-    $quassel.on('buffer.unhide', function() {
+    
+    $quassel.on('buffer.rename', function() {
         $scope.$apply();
     });
     
@@ -408,27 +407,41 @@ angular.module('quassel')
     };
 
     $scope.channelHidePermanently = function(channel) {
-        $quassel.requestUnhideBuffer(channel.id);
-        $quassel.requestHideBufferPermanently(channel.id);
+        $quassel.requestHideBufferPermanently($scope.bufferView.id, channel.id);
     };
 
     $scope.channelHideTemporarily = function(channel) {
-        $quassel.requestUnhideBuffer(channel.id);
-        $quassel.requestHideBufferTemporarily(channel.id);
+        $quassel.requestHideBufferTemporarily($scope.bufferView.id, channel.id);
     };
 
     $scope.channelUnhide = function(channel) {
-        $quassel.requestUnhideBuffer(channel.id);
+        $quassel.requestUnhideBuffer($scope.bufferView.id, channel.id);
     };
     
     $scope.cycleHiddenState = function(channel) {
-        if (channel.isPermanentlyRemoved) {
+        if ($scope.bufferView.isPermanentlyRemoved(channel.id)) {
             $scope.channelHideTemporarily(channel);
-        } else if (channel.isTemporarilyRemoved) {
+        } else if ($scope.bufferView.isTemporarilyRemoved(channel.id)) {
             $scope.channelUnhide(channel);
         } else {
             $scope.channelHidePermanently(channel);
         }
+    };
+    
+    $scope.openModalRenameBuffer = function(buffer) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'modalRenameBuffer.html',
+            controller: 'ModalRenameBufferInstanceCtrl',
+            resolve: {
+                name: function(){return buffer.name;}
+            }
+        });
+
+        modalInstance.result.then(function (name) {
+            if (name) {
+                $quassel.requestRenameBuffer(buffer.id, name);
+            }
+        });
     };
 
     $scope.userQuery = function(user) {
@@ -479,6 +492,48 @@ angular.module('quassel')
 
     $scope.cancel = function () {
         $uibModalInstance.dismiss('cancel');
+    };
+})
+.controller('ModalRenameBufferInstanceCtrl', function ($scope, $uibModalInstance, name) {
+    $scope.name = name;
+
+    $scope.ok = function () {
+        $uibModalInstance.close($scope.name);
+    };
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+})
+.controller('ModalAliasesInstanceCtrl', function ($scope, $uibModalInstance, aliases) {
+    var alias = require('alias');
+    $scope.aliases = aliases;
+
+    $scope.ok = function () {
+        $uibModalInstance.close($scope.aliases);
+    };
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+    
+    $scope.add = function() {
+        $scope.aliases.push(new alias.AliasItem("", ""));
+    };
+    
+    $scope.remove = function(ind) {
+        $scope.aliases.splice(ind, 1);
+    };
+    
+    $scope.isAliasUnique = function(aliases, name, index) {
+        var i = 0;
+        for (i; i<aliases.length; i++) {
+            if (i === index) continue;
+            if (aliases[i].name === name) {
+                return false;
+            }
+        }
+        return true;
     };
 })
 .controller('ModalIdentitiesInstanceCtrl', function ($scope, $uibModalInstance, identities) {
@@ -545,7 +600,7 @@ angular.module('quassel')
         $scope.createIdentity();
     }
 })
-.controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, networks, identities) {
+.controller('ModalNetworkInstanceCtrl', function ($scope, $uibModalInstance, $quassel, networks, identities) {
     $scope.networks = networks;
     $scope.identities = identities;
     $scope.activeNetworkIndex = 0;
@@ -577,7 +632,8 @@ angular.module('quassel')
             ProxyHost: '',
             ProxyPort: '',
             ProxyUser: '',
-            ProxyPass: ''
+            ProxyPass: '',
+            sslVerify: 1
         });
         return true;
     };
@@ -617,6 +673,8 @@ angular.module('quassel')
         $scope.selectServer(network, 0);
     };
     
+    $scope.supportSslVerify = $quassel.supports($quassel.Feature.VerifyServerSSL);
+    
     // At initialization, if we have no network, just add one so the user doesn't have an empty modal
     if ($scope.networks.length === 0) {
         $scope.createNetwork();
@@ -647,14 +705,14 @@ angular.module('quassel')
         $uibModalInstance.close([$scope.selectedBackend.DisplayName, properties, $scope.username, $scope.password]);
     };
 })
-.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', function($scope, $uibModal, $theme, $ignore, $quassel, $config) {
+.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', '$alert', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $alert) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
     $scope.displayIgnoreListConfigItem = false;
     $scope.displayIdentitiesConfigItem = false;
     $scope.activeIndice = 0;
-    var modal, dbg = require("debug");
+    var modal, dbg = require("debug"), alias = require('alias');
 
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
@@ -700,9 +758,6 @@ angular.module('quassel')
                 $quassel.removeIdentity(identity.identityId);
                 acount[2] = acount[2] + 1;
             });
-            if (typeof callback === 'function') {
-                callback(acount[0], acount[1], acount[2]);
-            }
         });
     };
     
@@ -725,6 +780,9 @@ angular.module('quassel')
             scope: $scope.$new(true),
             size: 'lg',
             resolve: {
+                $quassel: function() {
+                    return $quassel;
+                },
                 networks: function(){
                     var networks = $quassel.get().getNetworksMap();
                     if (networks.__mapValuesData__) {
@@ -762,6 +820,26 @@ angular.module('quassel')
             nm.forEach(function(network) {
                 $quassel.removeNetwork(network.networkId);
             });
+        });
+    };
+    
+    $scope.configAliases = function() {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'modalAliases.html',
+            controller: 'ModalAliasesInstanceCtrl',
+            scope: $scope.$new(true),
+            resolve: {
+                aliases: function(){return angular.copy($quassel.get().aliases);}
+            }
+        });
+
+        modalInstance.result.then(function (aliases) {
+            $quassel.onceWithTimeout('aliases', 15000, function() {
+                $alert.info('Aliases saved');
+            }, function() {
+                $alert.error('Fail to save aliases');
+            });
+            $quassel.requestUpdateAliasManager(alias.toCoreObject(aliases));
         });
     };
 
@@ -883,6 +961,20 @@ angular.module('quassel')
     $scope.initialBacklogLimit = $config.get('initialBacklogLimit', 20);
     $scope.backlogLimit = $config.get('backlogLimit', 100);
     $scope.alert = "";
+    $scope.bufferView = null;
+    $scope.bufferViews = [];
+    
+    function updateBufferViews(bufferViewId) {
+        var quassel = $quassel.get();
+        if (bufferViewId === $config.get('bufferview', 0)) {
+            $scope.bufferView = quassel.bufferViews.get(bufferViewId);
+        }
+        if (quassel.bufferViews.__mapValuesData__) {
+            $scope.bufferViews = Array.from(quassel.bufferViews.__mapValuesData__);
+        } else {
+            $scope.bufferViews = Array.from(quassel.bufferViews.values());
+        }
+    }
 
     $rootScope.$on('defaultsettings', function() {
         $scope.securecoreconnection = $config.get('securecore', $scope.securecoreconnection);
@@ -922,6 +1014,24 @@ angular.module('quassel')
                 $scope.disconnected = null;
             });
         }
+    });
+    
+    $quassel.on('bufferview.init', function(bufferViewId, bufferId) {
+        $scope.$apply(function() {
+            updateBufferViews(bufferViewId);
+        });
+    });
+    
+    $quassel.on('bufferview.bufferhidden', function(bufferViewId, bufferId) {
+        $scope.$apply(function() {
+            updateBufferViews(bufferViewId);
+        });
+    });
+
+    $quassel.on('bufferview.bufferunhide', function(bufferViewId, bufferId) {
+        $scope.$apply(function() {
+            updateBufferViews(bufferViewId);
+        });
     });
 
     $quassel.on('ws.close', function() {
@@ -1013,6 +1123,11 @@ angular.module('quassel')
 
         modalInstance.result.then(cb);
     });
+    
+    $scope.setBufferView = function(bv) {
+        $scope.bufferView = bv;
+        $config.set('bufferview', bv.id);
+    };
 
     $scope.reload = function(){
         $window.location.reload();
@@ -1037,6 +1152,13 @@ angular.module('quassel')
         $config.set('initialBacklogLimit', $scope.initialBacklogLimit);
         $config.set('backlogLimit', $scope.backlogLimit);
         console.log('Connecting to quasselcore');
+    };
+    
+    $scope.comparator = function(id1, id2) {
+        if ($scope.bufferView) {
+            return $scope.bufferView.comparator(id1.value, id2.value);
+        }
+        return 0;
     };
 
     if ($scope.remember && $scope.user && $scope.password) {

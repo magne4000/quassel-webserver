@@ -1,7 +1,7 @@
 script(type="text/ng-template", id="modalIgnoreList.html")
     .modal-header
       button.close(type='button', ng-click='$dismiss("close")') ×
-      h4#myModalLabel.modal-title Ignore list
+      h4.modal-title Ignore list
     .modal-body
       uib-tabset
         uib-tab(heading="{{ignoreItem.ignoreRule}}", select="setActiveIndice($index)", ng-repeat="ignoreItem in ignoreList.list")
@@ -39,5 +39,5 @@ script(type="text/ng-template", id="modalIgnoreList.html")
         button.btn.btn-success.btn-sm.pull-right(title="Add a rule", ng-click="createIgnoreItem()")
           i.icon-qws.icon-plus
     .modal-footer
-      button.btn.btn-default(ng-click="cancelIgnoreList()") Cancel
+      button.btn.btn-default(type='button', ng-click="cancelIgnoreList()") Cancel
       button.btn.btn-primary(ng-click="saveIgnoreList()") Save

@@ -36,6 +36,7 @@
         addListener: addListener,
         on: addListener,
         once: addListenerOnce,
+        onceWithTimeout: onceWithTimeout,
         removeListener: removeListener,
         removeAllListeners: removeAllListeners,
         emit: emit,
@@ -60,7 +61,11 @@
         login: login,
         requestUnhideBuffer: requestUnhideBuffer,
         requestHideBufferPermanently: requestHideBufferPermanently,
-        requestHideBufferTemporarily: requestHideBufferTemporarily
+        requestHideBufferTemporarily: requestHideBufferTemporarily,
+        requestRenameBuffer: requestRenameBuffer,
+        requestUpdateAliasManager: requestUpdateAliasManager,
+        supports: supports,
+        Feature: Quassel.Feature
       };
 
       return service;
@@ -77,8 +82,6 @@
       function getQuassel() {
         return self.quassel;
       }
-      
-      ////////////////////////////////
 
       function initializeSocket() {
         //Check if socket is undefined
@@ -142,12 +145,12 @@
         self.quassel.once(name, angularCallback(callback));
       }
 
-      function removeListener(name) {
+      function removeListener(name, cb) {
         initializeSocket();
         if (name.substr(0, 3) == "ws.") {
-          self.ws.removeEventListener(name.substr(3));
+          self.ws.removeEventListener(name.substr(3), cb);
         } else {
-          self.quassel.removeListener(name);
+          self.quassel.removeListener(name, cb);
         }
       }
 
@@ -163,6 +166,10 @@
         } else {
             self.quassel.emit.apply(self.quassel, Array.prototype.slice.call(arguments));
         }
+      }
+      
+      function supports(feature) {
+        return self.quassel.supports(feature);
       }
       
       function markBufferAsRead(bufferId, lastMessageId) {
@@ -195,16 +202,24 @@
         self.quassel.requestMergeBuffersPermanently(bufferId1, bufferId2);
       }
       
-      function requestUnhideBuffer(bufferId) {
-        self.quassel.requestUnhideBuffer(bufferId);
+      function requestUnhideBuffer(bufferViewId, bufferId) {
+        self.quassel.requestUnhideBuffer(bufferViewId, bufferId);
       }
       
-      function requestHideBufferTemporarily(bufferId) {
-        self.quassel.requestHideBufferTemporarily(bufferId);
+      function requestHideBufferTemporarily(bufferViewId, bufferId) {
+        self.quassel.requestHideBufferTemporarily(bufferViewId, bufferId);
       }
       
-      function requestHideBufferPermanently(bufferId) {
-        self.quassel.requestHideBufferPermanently(bufferId);
+      function requestHideBufferPermanently(bufferViewId, bufferId) {
+        self.quassel.requestHideBufferPermanently(bufferViewId, bufferId);
+      }
+      
+      function requestRenameBuffer(bufferId, name) {
+        self.quassel.requestRenameBuffer(bufferId, name);
+      }
+      
+      function requestUpdateAliasManager(aliases) {
+        self.quassel.requestUpdateAliasManager(aliases);
       }
       
       function requestUpdateIgnoreListManager(ignoreList) {
@@ -257,6 +272,19 @@
             }
           }
         }
+      }
+      
+      function onceWithTimeout(name, timeout, callbackSuccess, callbackError) {
+        var timeoutId = null;
+        var callbackSuccessIntern = function() {
+          clearTimeout(timeoutId);
+          callbackSuccess();
+        };
+        timeoutId = setTimeout(function() {
+          removeListener(name, callbackSuccessIntern);
+          callbackError();
+        }, timeout);
+        addListenerOnce(name, callbackSuccessIntern);
       }
     }
   }
