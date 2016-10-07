@@ -1,5 +1,4 @@
 /* global angular */
-/* global localStorage */
 /* global $ */
 
 angular.module('quassel')
@@ -1512,7 +1511,7 @@ angular.module('quassel')
         }
     });
 }])
-.controller('FilterController', ['$scope', function($scope) {
+.controller('FilterController', ['$scope', '$config', function($scope, $config) {
     var filters = [
         {label: 'Join', type: 32, value: false},
         {label: 'Part', type: 64, value: false},
@@ -1538,10 +1537,6 @@ angular.module('quassel')
         });
     }
 
-    if (localStorage.filter) {
-        $scope.defaultFilter = JSON.parse(localStorage.filter);
-    }
-
     $scope.$watch('buffer', function(newValue, oldValue) {
         if (oldValue !== null) {
             bufferFilters[''+oldValue.id] = angular.copy($scope.currentFilter);
@@ -1556,10 +1551,14 @@ angular.module('quassel')
     });
 
     $scope.$watch('currentFilter', onCurrentFilterUpdate, true);
+    
+    if ($config.has('filter')) {
+        $scope.defaultFilter = $config.get('filter');
+    }
 
     $scope.setAsDefault = function() {
         $scope.defaultFilter = angular.copy($scope.currentFilter);
-        localStorage.filter = JSON.stringify($scope.defaultFilter);
+        $config.set('filter', $scope.defaultFilter);
     };
 
     $scope.useDefault = function() {

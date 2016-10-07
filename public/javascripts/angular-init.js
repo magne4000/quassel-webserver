@@ -74,6 +74,10 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
         return null;
     }
+    
+    function has(key) {
+        return key in localStorage;
+    }
 
     var keys = {};
     var configurationKeys = ['initialBacklogLimit', 'backlogLimit', 'securecore', 'theme', 'themes'];
@@ -133,7 +137,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     return {
         set: set,
         del: del,
-        get: get
+        get: get,
+        has: has
     };
 }])
 .factory('$favico', [function() {

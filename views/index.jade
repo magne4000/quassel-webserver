@@ -183,7 +183,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
           #center.animation(ng-controller="FilterController")
             .topic
               #topic(ng-bind-html="buffer.topic | linky:'_blank'")
-              .btn-group.prefs(uib-dropdown)
+              .btn-group.prefs(uib-dropdown, ng-show="currentFilter.length")
                 button.btn.btn-default.btn-sm.dropdown-toggle(type="button", data-toggle="dropdown", uib-dropdown-toggle)
                   i.icon-qws.icon-filter
                 ul.dropdown-menu(role="menu", uib-dropdown-menu)
