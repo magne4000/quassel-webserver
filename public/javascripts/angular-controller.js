@@ -10,6 +10,7 @@ angular.module('quassel')
     $scope.buffer = null;
     $scope.messages = [];
     $scope.showhidden = false;
+    $scope.networkscount = null;
 
     var MT = require('message').Type;
     var MF = require('message').Flag;
@@ -102,7 +103,8 @@ angular.module('quassel')
         return messages;
     }
 
-    $quassel.on('init', function(networkId) {
+    $quassel.on('init', function(obj) {
+        $scope.networkscount = obj.SessionState.NetworkIds.length;
         $scope.networks = [];
     });
 
@@ -112,6 +114,7 @@ angular.module('quassel')
         $scope.$apply(function(){
             network.collapsed = !network.isConnected;
             $scope.networks.push(network);
+            $scope.networkscount = $scope.networks.length;
         });
     });
     
@@ -1152,7 +1155,10 @@ angular.module('quassel')
     };
     
     $scope.comparator = function(id1, id2) {
-        return $scope.bufferView.comparator(id1.value, id2.value);
+        if ($scope.bufferView) {
+            return $scope.bufferView.comparator(id1.value, id2.value);
+        }
+        return 0;
     };
 
     if ($scope.remember && $scope.user && $scope.password) {
