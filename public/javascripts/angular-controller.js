@@ -1150,6 +1150,10 @@ angular.module('quassel')
         $config.set('backlogLimit', $scope.backlogLimit);
         console.log('Connecting to quasselcore');
     };
+    
+    $scope.comparator = function(id1, id2) {
+        return $scope.bufferView.comparator(id1.value, id2.value);
+    };
 
     if ($scope.remember && $scope.user && $scope.password) {
         $scope.login();
