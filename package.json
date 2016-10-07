@@ -1,7 +1,7 @@
 {
   "name": "quassel-webserver",
   "description": "Quassel web interface",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "homepage": "https://github.com/magne4000/quassel-webserver",
   "license": "MIT",
   "author": {
@@ -40,7 +40,7 @@
     "jade": "~1.11.0",
     "less": "^2.7.1",
     "less-middleware": "^2.2.0",
-    "libquassel": "~2.0.4",
+    "libquassel": "~2.0.5",
     "morgan": "^1.7.0",
     "net-browserify-alt": "^1.0.0",
     "serve-favicon": "~2.3.0"
