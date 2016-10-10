@@ -1527,6 +1527,11 @@ angular.module('quassel')
     $scope.defaultFilter = angular.copy(filters);
     
     function init() {
+        init_default();
+        init_filters();
+    }
+    
+    function init_default() {
         if ($config.has('filter')) {
             var filter = $config.get('filter');
             if (typeof filter === "number") {
@@ -1537,6 +1542,25 @@ angular.module('quassel')
                 $config.set('filter', serializeFilter(filter));
             }
         }
+    }
+    
+    function init_filters() {
+        var serialized = $config.get('filters'), elt;
+        if (serialized) {
+            serialized = serialized.split(',');
+            for (var i=0; i<serialized.length; i++) {
+                elt = serialized[i].split(':');
+                bufferFilters[elt[0]] = unserializeFilter(elt[1]);
+            }
+        }
+    }
+    
+    function save_filters() {
+        var serialized = [];
+        for (var bufferId in bufferFilters) {
+            serialized.push(bufferId + ':' + serializeFilter(bufferFilters[bufferId]));
+        }
+        $config.set('filters', serialized.join(','));
     }
     
     function serializeFilter(filter) {
@@ -1566,6 +1590,7 @@ angular.module('quassel')
                 $scope.currentFilter2['65536'] = value.value;
             }
         });
+        save_filters();
     }
 
     $scope.$watch('buffer', function(newValue, oldValue) {
