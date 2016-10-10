@@ -3,13 +3,15 @@
 
 angular.module('quassel')
 .controller('NetworkController',
-        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config',
-            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config) {
+        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config', '$responsive',
+            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config, $responsive) {
     $scope.networks = [];
     $scope.buffer = null;
     $scope.messages = [];
     $scope.showhidden = false;
     $scope.networkscount = null;
+    $scope.shown = true;
+    $scope.shown2 = $responsive.getBreakpoint() !== 'xs';
 
     var MT = require('message').Type;
     var MF = require('message').Flag;

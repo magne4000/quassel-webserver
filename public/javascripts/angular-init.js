@@ -10,6 +10,22 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         $compileProvider.debugInfoEnabled(false);
     }
 }])
+.factory('$responsive', ['$window', function ($window) {
+    return {
+        getBreakpoint: function () {
+            var w = $window.innerWidth;
+            if (w < 768) {
+                return 'xs';
+            } else if (w < 992) {
+                return 'sm';
+            } else if (w < 1200) {
+                return 'md';
+            } else {
+                return 'lg';
+            }
+        }
+    };
+}])
 .factory('$ignore', ['$quassel', function($quassel){
     var IgnoreList = require('ignore').IgnoreList;
     var IgnoreItem = require('ignore').IgnoreItem;

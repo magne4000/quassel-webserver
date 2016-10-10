@@ -106,7 +106,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   span.sr-only Loading
             .col-md-3
         .logged.ng-hide(ng-show="logged", ng-controller="NetworkController")
-          #buffer-pane.animation.pane(ng-init="shown = true", ng-class="{small: !shown}")
+          #buffer-pane.animation.pane(ng-class="{small: !shown}")
             .buffer-container(highlight-container)
               .loader(ng-if='bufferView === null && (networkscount === null || networkscount > 0)')
                 span.quassel-logo.mini
@@ -239,7 +239,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                         li.list-group-item
                           h4.list-group-item-heading Background color
                           colorpicker.list-group-item-text(colopicker-mode="backColor")
-          #nick-pane.animation.pane(ng-init="shown2 = true", ng-class="{small: !shown2}")
+          #nick-pane.animation.pane(ng-class="{small: !shown2}")
             .buffer-container
               .user(ng-repeat="user in buffer.users | ordernicks:buffer track by user.nick", uib-dropdown)
                 span.user-icon
