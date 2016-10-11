@@ -11,6 +11,7 @@ apps:
   server:
     command: node $SNAP/lib/node_modules/quassel-webserver/app.js
     plugs: [network, network-bind]
+    daemo: simple
 
 parts:
   quassel-webserver:
