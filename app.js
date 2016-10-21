@@ -1,3 +1,4 @@
+var net = require('net');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -10,8 +11,9 @@ var opts = require('commander');
 var netBrowserify = require('net-browserify-alt');
 
 opts
-  .version('2.1.0')
+  .version('2.1.2')
   .option('-c, --config <value>', 'Path to configuration file', undefined)
+  .option('-s, --socket <path>', 'listen on local socket. If this option is set, --listen, --port and --mode are ignored', undefined)
   .option('-l, --listen <value>', 'listening address [0.0.0.0]', undefined)
   .option('-p, --port <value>', 'http(s) port to use [64080|64443]', parseInt)
   .option('-m, --mode <value>', 'http mode (http|https) [https]', undefined)
@@ -21,6 +23,9 @@ var settings = require('./lib/utils').settings(true, opts.config);
 var routes = require('./routes/index')(settings);
 
 if (settings.webserver) {
+    if (settings.webserver.socket && !opts.socket) {
+        opts.socket === settings.webserver.socket;
+    }
     if (settings.webserver.listen && !opts.listen) {
         opts.listen === settings.webserver.listen;
     }
@@ -34,43 +39,51 @@ if (settings.webserver) {
 
 var app = express();
 var server = null;
-if (!opts.mode) opts.mode = 'https';
-if (opts.mode === 'http') {
-    server = require('http').Server(app);
-    if (!opts.port) opts.port = 64080;
-} else if (opts.mode === 'https') {
-    var keypath = path.join(__dirname, 'ssl/key.pem');
-    var certpath = path.join(__dirname, 'ssl/cert.pem');
-    if (!fs.existsSync(keypath)) {
-        console.log(' ! ssl/key.pem is mandatory in order to run with SSL');
-        process.exit(1);
-    }
-    if (!fs.existsSync(certpath)) {
-        console.log(' ! ssl/cert.pem is mandatory in order to run with SSL');
-        process.exit(2);
-    }
-    var options = {
-        key: fs.readFileSync(keypath, {encoding: 'utf8'}),
-        cert: fs.readFileSync(certpath, {encoding: 'utf8'})
-    };
-    try {
-        server = require('httpolyglot').createServer(options, app);
-        app.use(function(req, res, next) {
-            if (!req.secure) {
-                return res.redirect('https://' + req.headers.host + req.url);
-            }
-            next();
-        });
-    } catch(e) {
-        server = require('https').createServer(options, app);
-    }
-    if (!opts.port) opts.port = 64443;
+if (opts.socket) {
+    server = require('http').createServer(app);
+    app.set('socket', path.normalize(opts.socket));
 } else {
-    console.log(' Invalid mode \'' + opts.mode + '\'');
-    process.exit(5);
+    if (!opts.mode) opts.mode = 'https';
+    if (opts.mode === 'http') {
+        server = require('http').createServer(app);
+        if (!opts.port) opts.port = 64080;
+    } else if (opts.mode === 'https') {
+        var keypath = path.join(__dirname, 'ssl/key.pem');
+        var certpath = path.join(__dirname, 'ssl/cert.pem');
+        if (!fs.existsSync(keypath)) {
+            console.log(' ! ssl/key.pem is mandatory in order to run with SSL');
+            process.exit(1);
+        }
+        if (!fs.existsSync(certpath)) {
+            console.log(' ! ssl/cert.pem is mandatory in order to run with SSL');
+            process.exit(2);
+        }
+        var options = {
+            key: fs.readFileSync(keypath, {encoding: 'utf8'}),
+            cert: fs.readFileSync(certpath, {encoding: 'utf8'})
+        };
+        try {
+            server = require('httpolyglot').createServer(options, app);
+            app.use(function(req, res, next) {
+                if (!req.secure) {
+                    return res.redirect('https://' + req.headers.host + req.url);
+                }
+                next();
+            });
+        } catch(e) {
+            server = require('https').createServer(options, app);
+        }
+        if (!opts.port) opts.port = 64443;
+    } else {
+        console.log(' Invalid mode \'' + opts.mode + '\'');
+        process.exit(5);
+    }
+    
+    if (!opts.listen) opts.listen = process.env.HOST || '';
+    app.set('port', opts.port);
+    app.set('host', opts.listen);
+    app.set('socket', false);
 }
-
-if (!opts.listen) opts.listen = process.env.HOST || '';
 
 // check that prefixpath do not contains ../, and it starts with / if not empty
 if (settings.prefixpath.length > 0) {
@@ -153,11 +166,21 @@ if (app.get('env') === 'development') {
     });
 }
 
-app.set('port', opts.port);
-app.set('host', opts.listen);
+if (app.get('socket')) {
+    var socket = app.get('socket');
+    function gracefulExit() {
+        server.close();
+    }
+    process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit);
 
-server.listen(app.get('port'), app.get('host'), function() {
-    console.log('Express server listening for', opts.mode , 'connections on port', server.address().port);
-});
+    server.listen(socket, function() {
+        fs.chmodSync(socket, 0666);
+        console.log('quassel-webserver listening on local socket', socket);
+    });
+} else {
+    server.listen(app.get('port'), app.get('host'), function() {
+        console.log('quassel-webserver listening for', opts.mode, 'connections on port', server.address().port);
+    });
+}
 
 module.exports = app;

@@ -12,6 +12,7 @@ module.exports = {
         highlightmode: 2  // Highlight mode: 1: None, 2: Current nick, 3: All nicks from identity
     },
     webserver: {
+        socket: false,  // Tells the webserver to listen for connections on a local socket. This should be a path. Can be overhidden by '--socket' argument
         listen: null,  // Address on which to listen for connection, defaults to listening on all available IPs. Can be overhidden by '--listen' argument
         port: null,  // Port on which to listen for connection, defaults to 64080 for http mode, 64443 for https. Can be overhidden by '--port' argument
         mode: null  // can be 'http' or 'https', defaults to 'https'. Can be overhidden by '--mode' argument
