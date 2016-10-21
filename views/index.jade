@@ -59,7 +59,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
           .row.ng-cloak(ng-class="{'ng-cloak': connecting}")
             .col-md-3
             .col-md-6.row.well.login-container
-                uib-alert(ng-if="alert != ''", ng-cloak) {{alert}}
+                div(uib-alert, ng-if="alert != ''", ng-cloak, class="alert-warning") {{alert}}
                 form#logonform(role='form', ng-submit="login()")
                   h1 Connect to Quassel Core
                   .form-group(ng-cloak, ng-hide='#{settings.forcedefault}')
@@ -244,7 +244,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
               .user(ng-repeat="user in buffer.users | ordernicks:buffer track by user.nick", uib-dropdown)
                 span.user-icon
                   i.icon-qws.icon-circle(ng-class="user.away ? 'user-away' : 'user-not-away'")
-                span.user-name(ng-class="userClass(buffer, user.nick)") {{user.nick}}
+                span.user-name(ng-class="userClass(buffer, user.nick)", title="{{user | usertitle:buffer}}") {{user.nick}}
                 a.dropdown-user.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
                   i.icon-qws.icon-menu
                 ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)

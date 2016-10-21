@@ -221,6 +221,60 @@ angular.module('quassel')
         return Math.abs(hash) % 16;
     };
 })
+.filter('usertitle', function() {
+    
+    function getModesLine(user, buffer) {
+        var mapValue = buffer.users.get(user.nick);
+        return mapValue && mapValue.modes ? "Modes: " + mapValue.modes : null;
+    }
+    
+    function getAwayMessageLine(user) {
+        return user.away ? "Away message: " + (user.awayMessage ? user.awayMessage : "Unknown") : null;
+    }
+    
+    function getRealNameLine(user) {
+        return user.realName ? "Realname: " + user.realName : null;
+    }
+    
+    function getHostmaskLine(user) {
+        var hostmask = user.id.slice(user.id.indexOf('!') + 1);
+        return hostmask != "@" ? "Hostmask: " + hostmask : null;
+    }
+    
+    function getOperatorLine(user) {
+        return user.ircOperator ? "Operator: " + user.ircOperator.replace("is an ", "").replace("is a ", "") : null;
+    }
+    
+    function getServerLine(user) {
+        return user.server ? "Server: " + user.server : null;
+    }
+    
+    function genTitle(a) {
+        var s = '', newline = '';
+        for (var i=0; i<a.length; i++) {
+            if (a[i] !== null) {
+                s += newline + a[i];
+                newline = '\n';
+            }
+        }
+        return s;
+    }
+    
+    return function(user, buffer) {
+        var a = [];
+        a.push(getModesLine(user, buffer));
+        a.push(getAwayMessageLine(user));
+        a.push(getRealNameLine(user));
+        // TODO add account (account-notify functionnality)
+        // see https://github.com/quassel/quassel/blob/d29a6e9521e27e5d4d86fec82b5daa71085f87a5/src/client/networkmodel.cpp#L1146
+        a.push(getHostmaskLine(user));
+        a.push(getOperatorLine(user));
+        // TODO idle time
+        // TODO login time
+        a.push(getServerLine(user));
+        return genTitle(a);
+    };
+})
 .filter('ordernicks', function() {
     return function(users, buffer) {
         if (!users || buffer === null) return users;
