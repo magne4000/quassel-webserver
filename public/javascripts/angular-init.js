@@ -179,11 +179,16 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     var reset = function() {
         favico.reset();
     };
+    
+    var counter = function() {
+        return num;
+    };
 
     return {
         more: more,
         less: less,
-        reset: reset
+        reset: reset,
+        counter: counter
     };
 }])
 .factory('$alert', ['notify', function(notify) {
