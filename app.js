@@ -104,7 +104,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-app.use(settings.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
+if (process.env.SNAP_DATA) {
+    app.use(settings.prefixpath, lessMiddleware(path.join(__dirname, 'public'), {
+        dest: path.join(process.env.SNAP_DATA)
+    }));
+} else {
+    app.use(settings.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
+}
 app.get(settings.prefixpath+'/javascripts/libquassel.js', function(req, res) {
     res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.js'));
 });
