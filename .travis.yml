@@ -1,0 +1,7 @@
+sudo: required
+dist: trusty
+services:
+  - docker
+
+script:
+  - docker run -v $(pwd):/cwd snapcore/snapcraft sh -c 'cd /cwd && snapcraft'
