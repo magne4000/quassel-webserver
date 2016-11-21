@@ -499,10 +499,16 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
       }
       
       if (options.spotify.embed) {
-        plugins.push(new Plugin('audio', 'spotify', /spotify\.com\/track\/([a-zA-Z0-9_]+)/, function(match) {
+        plugins.push(new Plugin('audio', 'spotify', /open\.spotify\.com\/(?:track|artist|user\/\w+\/playlist)\/[a-zA-Z-0-9]{22}/, function(match) {
           // spotify
-          // TODO
-          return $sce.trustAsHtml('<iframe src="https://embed.spotify.com/?uri=spotify:track:' + match[1] + '" height="80"></iframe>');
+          var embedurl = '//embed.spotify.com/?uri=' + match[0];
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('width', '350')
+                   .attr('height', '80')
+                   .attr('frameborder', '0')
+                   .attr('allowtransparency', 'true');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
         }));
       }
       
