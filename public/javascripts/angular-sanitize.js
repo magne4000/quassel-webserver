@@ -702,7 +702,7 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
       }
       i = match.index;
       addText(raw.substr(0, i));
-      // Watch for IRC color codes, and but them before URL
+      // Watch for IRC color codes, and put them before URL
       if ((color_match = url.match(COLOR_CODE_REGEXP))) {
         for (j=0; j<color_match.length; j++) {
           addText(color_match[j]);

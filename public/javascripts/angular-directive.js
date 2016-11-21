@@ -70,8 +70,9 @@ angular.module('quassel')
                 break;
             case MT.Action:
             case MT.Plain:
-                content = $filter('color')($filter('linky')(message.content, '_blank'));
-                shouldCompile = false;
+                content = $filter('linky')(message.content, '_blank', {'class': 'check-embed'});
+                content = $filter('color')(content);
+                // shouldCompile = false;
                 break;
             case MT.Nick:
                 if (message.sender === message.content) {
@@ -724,4 +725,84 @@ angular.module('quassel')
       };
     }
   };
-});
+})
+.directive('checkEmbed', ['$embed', '$compile', function($embed, $compile) {
+  var template_label = '<span class="label label-default irc-embed-label" ng-click="action()"><i title="{{title}}" class="icon-qws" ng-class="icon"></i></span>';
+  var template_embed = '<li class="irc-embed">' +
+    '<div class="row">' +
+      '<small>{{pluginid}}</small>' +
+      '<button type="button" ng-click="hide()" class="close">×</button>' +
+    '</div>' +
+    '<div class="embed row" ng-class="category" ng-bind-html="html"></div>' +
+  '</li>';
+  
+  function insertEmbed(scope, el, html) {
+    var newscope = scope.$new();
+    newscope.html = html;
+    var compiled = $compile(template_embed)(newscope);
+    compiled.insertAfter(el.parents('.irc-message'));
+  }
+  
+  return {
+    restrict: 'C',
+    scope: true,
+    link: function(scope, element, attributes) {
+      var pluginAndMatch = $embed.getPluginAndMatch(attributes.href);
+      if (pluginAndMatch) {
+        var plugin = pluginAndMatch[0];
+        var match = pluginAndMatch[1];
+        
+        scope.category = plugin.category;
+        scope.pluginid = plugin.id;
+        
+        scope.load = function() {
+          $embed.exec(plugin.getHtml, match, function(html) {
+            scope.clearAndShow();
+            insertEmbed(scope, element, html);
+          });
+        };
+        
+        scope.clearAndShow = function() {
+          scope._hide_part1();
+          for (var i=0; i<scope.$parent.links.length; i++) {
+            scope.$parent.links[i]._hide_part2();
+          }
+          scope.show();
+        };
+        
+        scope.hide = function() {
+          scope._hide_part1();
+          scope._hide_part2();
+        };
+        
+        scope._hide_part1 = function() {
+          element.parents('.irc-message').next('.irc-embed').remove();
+        };
+        
+        scope._hide_part2 = function() {
+          scope.icon = 'icon-resize-full';
+          scope.title = 'show';
+          scope.action = scope.load;
+          element.css('text-decoration', '');
+        };
+        
+        scope.show = function() {
+          scope.icon = 'icon-resize-small';
+          scope.title = 'hide';
+          scope.action = scope.hide;
+          element.css('text-decoration', 'underline');
+        };
+        
+        scope._hide_part2();
+        
+        if (!scope.$parent.links) {
+          scope.$parent.links = [];
+        }
+        scope.$parent.links.push(scope);
+
+        var newel = $compile(template_label)(scope);
+        newel.insertAfter(element);
+      }
+    }
+  };
+}]);
