@@ -5,6 +5,7 @@ services:
 script:
 - docker run -v $(pwd):/cwd snapcore/snapcraft sh -c 'cd /cwd && snapcraft'
 after_success:
+- mkdir -p "${HOME}/.config/snapcraft"
 - openssl aes-256-cbc -K $encrypted_fd5960f2dcc4_key -iv $encrypted_fd5960f2dcc4_iv
   -in .travis_snapcraft.cfg -out "${HOME}/.config/snapcraft/snapcraft.cfg" -d
 deploy:
