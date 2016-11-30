@@ -144,7 +144,7 @@ script(type="text/ng-template", id="modalNetworks.html")
         button.btn.btn-danger.btn-sm.pull-right(title="Delete current network", ng-confirm-click="Are you sure you want to delete this network ?", ng-ok-click="deleteActiveNetwork()")
           i.icon-qws.icon-trash
         button.btn.btn-success.btn-sm.pull-right(title="Add a network", ng-click="createNetwork()")
-          i.icon-qws.icon-plus
+          i.icon-qws.icon-plus Add network
     .modal-footer
       button.btn.btn-default(type='button', ng-click='$dismiss("close")') Cancel
       button.btn.btn-primary(ng-click="saveNetworks()", ng-disabled="networksForm.$invalid") Save
