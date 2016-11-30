@@ -625,10 +625,6 @@ angular.module('quassel')
         $scope.activeServer = network.ServerList[index];
     };
     
-    $scope.selectNetwork = function(index) {
-        $scope.activeNetworkIndex = index;
-    };
-    
     $scope.addServer = function(network) {
         network.ServerList.push({
             Host: '',
@@ -670,6 +666,11 @@ angular.module('quassel')
             rejoinChannels: true
         });
         $scope.addServer($scope.networks[$scope.networks.length - 1]);
+        setTimeout(function() {
+            $scope.$apply(function() {
+                $scope.activeNetworkIndex = $scope.networks.length - 1;
+            });
+        }, 10);
         return true;
     };
     

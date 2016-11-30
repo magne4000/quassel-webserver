@@ -4,8 +4,8 @@ script(type="text/ng-template", id="modalNetworks.html")
       button.close(type='button', ng-click='$dismiss("close")') ×
       h4.modal-title Networks
     .modal-body.tab-margin
-      uib-tabset
-        uib-tab(heading="{{network.networkName}}", ng-repeat="network in networks", select="selectNetwork($index); selectServer(network, 0)", disable="networksForm.$invalid")
+      uib-tabset(active="activeNetworkIndex")
+        uib-tab(heading="{{network.networkName}}", ng-repeat="network in networks", select="selectServer(network, 0)", disable="networksForm.$invalid", index="$index")
           ng-form(name="networkForm")
             // Identity
             .form-group(ng-class="{'has-error': networkForm.networkName.$invalid}")
@@ -143,7 +143,7 @@ script(type="text/ng-template", id="modalNetworks.html")
                           input.form-control(type="text", id="codecForServer", ng-model="network.codecForServer", placeholder="Default")
         button.btn.btn-danger.btn-sm.pull-right(title="Delete current network", ng-confirm-click="Are you sure you want to delete this network ?", ng-ok-click="deleteActiveNetwork()")
           i.icon-qws.icon-trash
-        button.btn.btn-success.btn-sm.pull-right(title="Add a network", ng-click="createNetwork()")
+        button.btn.btn-success.btn-sm.pull-right(title="Add a network", ng-click="createNetwork()", ng-disabled="networksForm.$invalid")
           i.icon-qws.icon-plus Add network
     .modal-footer
       button.btn.btn-default(type='button', ng-click='$dismiss("close")') Cancel
