@@ -111,7 +111,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
               .loader(ng-if='bufferView === null && (networkscount === null || networkscount > 0)')
                 span.quassel-logo.mini
                 | Loading
-              .well(ng-if="networkscount === 0") You haven't configured a network yet
+              .well(ng-if="networkscount === 0")
+                div.alert.alert-info You haven't configured a network yet
                 button.btn.btn-block.btn-default(type="button", ng-click="configNetworks()") Add a network
               .network(
                     ng-show='bufferView !== null'
