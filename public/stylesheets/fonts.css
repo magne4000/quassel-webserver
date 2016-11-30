@@ -43,12 +43,12 @@
 }
 @font-face {
   font-family: 'quassel-webserver';
-  src: url('fonts/quassel-webserver.eot?68026525');
-  src: url('fonts/quassel-webserver.eot?68026525#iefix') format('embedded-opentype'),
-       url('fonts/quassel-webserver.woff2?68026525') format('woff2'),
-       url('fonts/quassel-webserver.woff?68026525') format('woff'),
-       url('fonts/quassel-webserver.ttf?68026525') format('truetype'),
-       url('fonts/quassel-webserver.svg?68026525#quassel-webserver') format('svg');
+  src: url('fonts/quassel-webserver.eot?99698831');
+  src: url('fonts/quassel-webserver.eot?99698831#iefix') format('embedded-opentype'),
+       url('fonts/quassel-webserver.woff2?99698831') format('woff2'),
+       url('fonts/quassel-webserver.woff?99698831') format('woff'),
+       url('fonts/quassel-webserver.ttf?99698831') format('truetype'),
+       url('fonts/quassel-webserver.svg?99698831#quassel-webserver') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -96,6 +96,8 @@
 .icon-filter:before { content: '\e812'; } /* '' */
 .icon-eraser:before { content: '\e813'; } /* '' */
 .icon-brush:before { content: '\e814'; } /* '' */
-.icon-arrow-up:before { content: '\e815'; }
-.icon-arrow-down:before { content: '\e816'; }
+.icon-arrow-up:before { content: '\e815'; } /* '' */
+.icon-arrow-down:before { content: '\e816'; } /* '' */
 .icon-lock:before { content: '\e817'; } /* '' */
+.icon-resize-full:before { content: '\e818'; } /* '' */
+.icon-resize-small:before { content: '\e819'; } /* '' */

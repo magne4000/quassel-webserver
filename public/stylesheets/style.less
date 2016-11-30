@@ -103,7 +103,7 @@ html, body, .container {
 }
 
 .buffer-container  {
-    .transition(opacity 0.5s linear;);
+    .transition(opacity 0.5s linear, box-shadow 0.2s ease-in-out;);
 }
 
 .buffer-container.highlight-on-bottom {
@@ -450,10 +450,6 @@ html, body, .container {
     background-color: @body-bg;
 }
 
-.backlog li {
-    display: table-row;
-}
-
 .backlog .timestamp > span {
     padding-right: 8px;
     padding-left: 4px;
@@ -476,8 +472,20 @@ html, body, .container {
     white-space: pre-wrap;
 }
 
-.backlog .irc-message > span, .backlog .irc-message > .message {
+.backlog .irc-message {
+    display: table-row;
+}
+
+.backlog .irc-message > * {
     display: table-cell;
+}
+
+.backlog .irc-embed-label {
+    margin-left: 4px;
+    
+    &:hover {
+        background-color: @label-primary-bg;
+    }
 }
 
 .backlog .markerline {
@@ -871,31 +879,97 @@ input[type="radio"]:disabled ~ span, input[type="checkbox"]:disabled ~ span {
 
 // Colorpicker
 colorpicker .colors li {
-    display: inline-block;
-    padding: 0;
-    margin: 2px;
-    box-shadow: 0 0 1px white;
-    border-radius: 50%;
+  display: inline-block;
+  padding: 0;
+  margin: 2px;
+  box-shadow: 0 0 1px white;
+  border-radius: 50%;
 }
+
 colorpicker .colors li:hover {
-    opacity: 0.5;
+  opacity: 0.5;
 }
+
 colorpicker .colors .btn {
-    display: inline-block;
-    width: 21px;
-    height: 21px;
-    border-radius: inherit !important;
+  display: inline-block;
+  width: 21px;
+  height: 21px;
+  border-radius: inherit !important;
 }
 
 // Loader
 .loader {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .loader .quassel-logo {
-    .animation(spin 1s linear infinite);
+  .animation(spin 1s linear infinite);
+}
+
+// Embed
+.irc-embed {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #e4e4e4;
+  border-radius: 2px;
+  margin: 5px 0;
+  box-shadow: 0px 1px 1px 0 rgba(0, 0, 0, 0.26);
+  border-bottom: 0;
+  padding-bottom: 1px;
+  
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .close {
+    margin: 2px 7px 10px 0;
+  }
+  
+  small:first-letter{
+    text-transform: capitalize;
+    opacity: 0.6;
+  }
+}
+
+.embed {
+  clear: left;
+}
+
+.embed.audio {
+  background-color: #1D1D1D;
+  padding-top: 6px;
+  
+  audio {
+    width: 100%;
+  }
+}
+
+.embed.video {
+  border-bottom: 0;
+  overflow: auto;
+  transition: all 0.5s linear;
+}
+
+.embed.video video,
+.embed.video object,
+.embed iframe {
+  width: 100%;
+  border: 0;
+}
+
+.embed.image {
+  max-height: 999px;
+  overflow: auto;
+  padding-bottom: 5px;
+  margin: 10px 0;
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
 }

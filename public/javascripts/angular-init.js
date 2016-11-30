@@ -179,11 +179,16 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     var reset = function() {
         favico.reset();
     };
+    
+    var counter = function() {
+        return num;
+    };
 
     return {
         more: more,
         less: less,
-        reset: reset
+        reset: reset,
+        counter: counter
     };
 }])
 .factory('$alert', ['notify', function(notify) {
@@ -350,7 +355,306 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
     };
 }])
-.run([function(){}]);
+.factory('$embed', ['$sce', '$http', '$timeout', function($sce, $http, $timeout) {
+  // Inspired by https://github.com/glowing-bear/glowing-bear/blob/master/js/plugins.js
+  // and https://github.com/ritz078/ng-embed
+  var options = {
+    image:       { embed: true },
+    audio:       { embed: true },
+    video:       { embed: true },
+    code:        { embed: true },
+    youtube:     { embed: true, theme: 'dark' },
+    twitter:     { embed: true },
+    twitch:      { embed: true },
+    dailymotion: { embed: true },
+    ted:         { embed: true },
+    soundcloud:  { embed: true, themeColor: 'f50000' },
+    spotify:     { embed: true },
+    codepen:     { embed: true },
+    jsfiddle:    { embed: true },
+    jsbin:       { embed: true },
+    plunker:     { embed: true },
+    gist:        { embed: true },
+    ideone:      { embed: true }
+  };
+  
+  function init() {
+    window.twttr = (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {};
+      if (d.getElementById(id)) return t;
+      js = d.createElement(s);
+      js.id = id;
+      js.src = "https://platform.twitter.com/widgets.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    
+      t._e = [];
+      t.ready = function(f) {
+        t._e.push(f);
+      };
+    
+      return t;
+    }(document, "script", "twitter-wjs"));
+    
+    window.twttr.ready(function (twttr) {
+      twttr.events.bind('rendered', function (event) {
+        setTimeout(function() {
+          // Height is sometime set to 0, but it shouldn't
+          event.target.style.height = "";
+        }, 1);
+      });
+    });
+  }
+  
+  function Plugin(category, id, regex, getHtml) {
+    this.category = category;
+    this.id = id;
+    this.regex = regex;
+    this.getHtml = getHtml;
+  }
+  
+  Plugin.prototype.exec = function(subject) {
+    var x = this.regex.exec(subject);
+    this.regex.lastIndex = 0;
+    return x;
+  };
+  
+  function plugins() {
+    var plugins = [];
+    if (options.video.embed) {
+      plugins.push(new Plugin('video', 'html5-video', /((?:https?):\/\/\S*\.(?:ogv|webm|mp4|gifv))\b/i, function(match) {
+        // html5
+        var el = angular.element('<video controls></video>')
+                  .attr('src', match[1]);
+        return $sce.trustAsHtml(el.prop('outerHTML'));
+      }));
+      
+      if (options.youtube.embed) {
+        plugins.push(new Plugin('video', 'youtube', /(?:youtube\.com|youtu\.be)\/(?:v\/|embed\/|watch(?:\?v=|\/))?([a-zA-Z0-9_-]+)/, function(match) {
+          // youtube
+          var embedurl = "https://www.youtube.com/embed/" + match[1] + "?html5=1&iv_load_policy=3&modestbranding=1&rel=0&showinfo=0&autoplay=0";
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('width', '560')
+                   .attr('height', '315')
+                   .attr('frameborder', '0')
+                   .attr('allowfullscreen', 'true');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      if (options.twitch.embed) {
+        plugins.push(new Plugin('video', 'twitch', /www\.twitch\.tv\/([a-zA_Z0-9_]+)/, function(match) {
+          // twitch
+          var embedurl = "http://player.twitch.tv/?channel=" + match[1];
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('width', '560')
+                   .attr('height', '315')
+                   .attr('frameborder', '0')
+                   .attr('allowfullscreen', 'true');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      if (options.dailymotion.embed) {
+        plugins.push(new Plugin('video', 'dailymotion', /(?:dailymotion\.com\/.*video|dai\.ly)\/([^_?# ]+)/, function(match) {
+          // dailymotion
+          var embedurl = 'https://www.dailymotion.com/embed/video/' + match[1] + '?html&controls=html&startscreen=html&info=0&logo=0&related=0';
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('width', '480')
+                   .attr('height', '270')
+                   .attr('frameborder', '0');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      if (options.ted.embed) {
+        plugins.push(new Plugin('video', 'ted', /ted\.com\/talks\/([a-zA-Z0-9_]+)/, function(match) {
+          // ted
+          var embedurl = 'https://embed.ted.com/talks/' + match[1] + '.html';
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('width', '480')
+                   .attr('height', '270')
+                   .attr('frameborder', '0');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+    }
+    
+    if (options.audio.embed) {
+      if (options.soundcloud.embed) {
+        plugins.push(new Plugin('audio', 'soundcloud', /soundcloud\.com\/[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_]+/, function(match) {
+          // soundcloud
+          var embedurl = 'https://w.soundcloud.com/player/?url=https://' + match[0] + '&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false&download=false&color=' + options.soundcloud.themeColor + '&theme_color=' + options.soundcloud.themeColor;
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('height', '160')
+                   .attr('scrolling', 'no')
+                   .attr('frameborder', '0');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      if (options.spotify.embed) {
+        plugins.push(new Plugin('audio', 'spotify', /open\.spotify\.com\/(?:track|artist|user\/\w+\/playlist)\/[a-zA-Z-0-9]{22}/, function(match) {
+          // spotify
+          var embedurl = '//embed.spotify.com/?uri=' + match[0];
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('width', '350')
+                   .attr('height', '80')
+                   .attr('frameborder', '0')
+                   .attr('allowtransparency', 'true');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      plugins.push(new Plugin('audio', 'html5-audio', /((?:https?):\/\/\S*\.(?:wav|mp3|ogg))\b/i, function(match) {
+        // html5
+        var el = angular.element('<audio controls></video>')
+                 .attr('src', match[1]);
+        return $sce.trustAsHtml(el.prop('outerHTML'));
+      }));
+    }
+    
+    if (options.image.embed) {
+      plugins.push(new Plugin('image', 'image', /((?:https?):\/\/\S*\.(?:gif|jpg|jpeg|tiff|png|svg|webp))\b/i, function(match) {
+        // html
+        var el = angular.element('<img/>')
+                 .attr('src', match[1]);
+        return $sce.trustAsHtml(el.prop('outerHTML'));
+      }));
+    }
+    
+    if (options.code.embed) {
+      if (options.codepen.embed) {
+        plugins.push(new Plugin('code', 'codepen', /http:\/\/codepen\.io\/([A-Za-z0-9_]+)\/pen\/([A-Za-z0-9_]+)/, function(match) {
+          // codepen
+          var embedurl = match[0].replace(/\/pen\//, '/embed/') + '/?height=300';
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('height', '300')
+                   .attr('allowtransparency', 'true')
+                   .attr('allowfullscreen', 'true')
+                   .attr('frameborder', '0');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      if (options.jsfiddle.embed) {
+        plugins.push(new Plugin('code', 'jsfiddle', /jsfiddle\.net\/[a-zA-Z0-9_]+\/[a-zA-Z0-9_]+/, function(match) {
+          // jsfiddle
+          var embedurl = 'http://' + match[0] + '/embedded';
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('height', '300')
+                   .attr('frameborder', '0');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      if (options.jsbin.embed) {
+        plugins.push(new Plugin('code', 'jsbin', /jsbin\.com\/[a-zA-Z0-9_]+\/[0-9_]+/, function(match) {
+          // jsbin
+          var embedurl = 'http://' + match[0] + '/embed?html,js,output';
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('height', '300')
+                   .attr('frameborder', '0');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      if (options.plunker.embed) {
+        plugins.push(new Plugin('code', 'plunker', /plnkr\.co\/edit\/([a-zA-Z0-9\?=]+)/, function(match) {
+          // plunker
+          var idMatch = match[1].indexOf('?') === -1 ? match[1] : match[1].split('?')[0];
+          var embedurl = 'http://embed.plnkr.co/' + idMatch;
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('height', '480')
+                   .attr('frameborder', '0');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+      
+      if (options.gist.embed) {
+        plugins.push(new Plugin('code', 'gist', /^(https:\/\/gist\.github\.com\/(?:.*?))[\/]?(?:\#.*)?$/i, function(match, next) {
+          // gist
+          var url = match[1] + '.json?callback=JSON_CALLBACK';
+          $http.jsonp(url).then(function(d) {
+            // Add the gist stylesheet only once
+            if (!document.getElementById('gistcss')) {
+              var el = angular.element('<link></link>')
+                   .attr('rel', 'stylesheet')
+                   .attr('href', d.data.stylesheet)
+                   .attr('id', 'gistcss');
+              angular.element('head').append(el);
+            }
+            next($sce.trustAsHtml(d.data.div));
+          });
+        }));
+      }
+      
+      if (options.ideone.embed) {
+        plugins.push(new Plugin('code', 'ideone', /ideone\.com\/(?:fork\/)?([a-zA-Z0-9]{6})/, function(match) {
+          // ideone
+          var embedurl = 'http://ideone.com/embed/' + match[1];
+          var el = angular.element('<iframe></iframe>')
+                   .attr('src', embedurl)
+                   .attr('height', '300')
+                   .attr('frameborder', '0');
+          return $sce.trustAsHtml(el.prop('outerHTML'));
+        }));
+      }
+    }
+    
+    if (options.twitter.embed) {
+      plugins.push(new Plugin('twitter', 'twitter', /^https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/, function(match, next) {
+        // twitter
+        var url = 'https://api.twitter.com/1.1/statuses/oembed.json?omit_script=true&id=' + match[2] + '&maxwidth=550&callback=JSON_CALLBACK';
+        $http.jsonp(url).then(function(d) {
+          next($sce.trustAsHtml(d.data.html));
+          $timeout(function() {
+            window.twttr.widgets.load();
+          }, 10);
+        });
+      }));
+    }
+    
+    return plugins;
+  }
+  var all_plugins = plugins();
+  
+  function exec(getHtml, match, next) {
+    var res = null;
+    res = getHtml(match, next);
+    if (res) {
+      next(res);
+    }
+  }
+  
+  function getPluginAndMatch(subject) {
+    var x = null;
+    for (var i=0; i<all_plugins.length; i++) {
+      x = all_plugins[i].exec(subject);
+      if (x) return [all_plugins[i], x];
+    }
+    return;
+  }
+  
+  return {
+    getPluginAndMatch: getPluginAndMatch,
+    exec: exec,
+    init: init
+  };
+}])
+.run(['$embed', function($embed){
+  $embed.init();
+}]);
 
 // Production steps of ECMA-262, Edition 6, 22.1.2.1
 // Reference: https://people.mozilla.org/~jorendorff/es6-draft.html#sec-array.from
