@@ -1094,7 +1094,6 @@ angular.module('quassel')
     });
     
     $quassel.once('setup', function(data) {
-        
         var modalParameters = {
             templateUrl: 'modalSetupWizard.html',
             controller: 'modalSetupWizardInstanceCtrl',
@@ -1124,14 +1123,30 @@ angular.module('quassel')
         $quassel.once('setupok', function(data) {
             $quassel.removeAllListeners('setupfailed');
             $alert.info('Core successfully configured');
-            
-            $quassel.once('init', function() {
-                $scope.configIdentities();
-            });
             $scope.login();
         });
 
         modalInstance.result.then(cb);
+    });
+    
+    $quassel.once('bufferview.ids', function(ids) {
+        if (!ids || ids.length === 0) {
+            $quassel.requestCreateBufferView({
+                sortAlphabetically: 1,
+                showSearch: 0,
+                networkId: 0,
+                minimumActivity: 0,
+                hideInactiveNetworks: 0,
+                hideInactiveBuffers: 0,
+                disableDecoration: 0,
+                bufferViewName: 'All Chats',
+                allowedBufferTypes: 15,
+                addNewBuffersAutomatically: 1,
+                TemporarilyRemovedBuffers: [],
+                RemovedBuffers: [],
+                BufferList: []
+            });
+        }
     });
     
     $scope.setBufferView = function(bv) {

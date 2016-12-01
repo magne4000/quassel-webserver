@@ -64,6 +64,7 @@
         requestHideBufferTemporarily: requestHideBufferTemporarily,
         requestRenameBuffer: requestRenameBuffer,
         requestUpdateAliasManager: requestUpdateAliasManager,
+        requestCreateBufferView: requestCreateBufferView,
         supports: supports,
         Feature: Quassel.Feature
       };
@@ -248,6 +249,10 @@
       
       function requestUpdateIdentity(identityId, identity) {
         self.quassel.requestUpdateIdentity(identityId, identity);
+      }
+      
+      function requestCreateBufferView(data) {
+        self.quassel.requestCreateBufferView(data);
       }
       
       function connect() {
