@@ -1,5 +1,7 @@
 sudo: required
 dist: trusty
+notifications:
+  irc: "chat.freenode.net#quassel-webserver"
 services:
 - docker
 script:
