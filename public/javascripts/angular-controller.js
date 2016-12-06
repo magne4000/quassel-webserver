@@ -663,7 +663,11 @@ angular.module('quassel')
             autoReconnectInterval: 60,
             autoReconnectRetries: 20,
             unlimitedReconnectRetries: false,
-            rejoinChannels: true
+            rejoinChannels: true,
+            useCustomMessageRate: false,
+            unlimitedMessageRate: false,
+            messageRateDelay: 2200,
+            messageRateBurstSize: 5
         });
         $scope.addServer($scope.networks[$scope.networks.length - 1]);
         setTimeout(function() {
@@ -684,6 +688,7 @@ angular.module('quassel')
     };
     
     $scope.supportSslVerify = $quassel.supports($quassel.Feature.VerifyServerSSL);
+    $scope.supportCustomRateLimits = $quassel.supports($quassel.Feature.CustomRateLimits);
     
     // At initialization, if we have no network, just add one so the user doesn't have an empty modal
     if ($scope.networks.length === 0) {

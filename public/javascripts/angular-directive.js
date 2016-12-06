@@ -696,6 +696,23 @@ angular.module('quassel')
     }
   };
 })
+.directive('divideBy', function() {
+  return {
+    require: 'ngModel',
+    scope: {
+      value: "=divideBy"
+    },
+    link: function(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function(value) {
+        return value * scope.value;
+      });
+      ngModel.$formatters.push(function(value) {
+        if (!scope.value) return 0;
+        return value / scope.value;
+      });
+    }
+  };
+})
 .directive('compareTo', function() {
   return {
     require: "ngModel",

@@ -569,6 +569,10 @@ html, body, .container {
     opacity: 0.7;
 }
 
+input[type="number"] {
+    max-width: 100px;
+}
+
 // MIRC colors
 .loop-mirc-color(@counter) when (@counter >= 0) {
   .loop-mirc-color((@counter - 1));

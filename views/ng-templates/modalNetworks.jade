@@ -85,7 +85,7 @@ script(type="text/ng-template", id="modalNetworks.html")
                         |  s between retries
                       .form-inline
                         .form-group(ng-class="{'has-error': tabsForm.autoReconnectRetries.$invalid}")
-                          label.control-label(for="autoReconnectRetries") Number of retries:
+                          label.control-label(for="autoReconnectRetries") Number of retries: 
                           input.input-sm.form-control(type="number", id="autoReconnectRetries", name="autoReconnectRetries", ng-model="network.autoReconnectRetries", required, min="1", max="999")
                         .form-group.checkbox(style="margin-left: 5px;")
                           label
@@ -95,6 +95,24 @@ script(type="text/ng-template", id="modalNetworks.html")
                         label
                           input(type="checkbox", ng-model="network.rejoinChannels", ng-true-value="1", ng-false-value="0")
                           | Rejoin all channels after reconnect
+                  .panel.panel-default(ng-class="{'panel-success': network.useCustomMessageRate}", ng-if="supportCustomRateLimits")
+                    .panel-heading.panel-heading-small.form-group
+                      button.btn.btn-transparent(type="button", ng-model="network.useCustomMessageRate", uib-btn-checkbox, btn-checkbox-true="1", btn-checkbox-false="0")
+                        i.icon-qws(ng-class="{'icon-check-empty': !network.useCustomMessageRate, 'icon-check': network.useCustomMessageRate}")
+                      | Use Custom Rate Limits
+                    .panel-body
+                      .form-group.form-inline
+                        .form-group(ng-class="{'has-error': tabsForm.msgRateBurstSize.$invalid}")
+                          label.control-label(for="msgRateBurstSize") Max. messages at once: 
+                          input.input-sm.form-control(type="number", name="msgRateBurstSize", ng-model="network.msgRateBurstSize", required, min="1", max="999")
+                        .form-group.checkbox(style="margin-left: 5px;")
+                          label
+                            input(type="checkbox", ng-model="network.unlimitedMessageRate", ng-true-value="1", ng-false-value="0")
+                            |  Unlimited
+                      .form-group.form-inline(ng-class="{'has-error': tabsForm.msgRateMessageDelay.$invalid}")
+                        | Wait 
+                        input.input-sm.form-control(type="number", name="msgRateMessageDelay", ng-model="network.msgRateMessageDelay", required, min="0.01", step="0.01", divide-by="1000")
+                        |  s between future messages
                 uib-tab(heading="Auto Identify", disable="tabsForm.$invalid")
                   // Auto Identify
                   .panel.panel-default(ng-class="{'panel-success': network.useAutoIdentify}")
