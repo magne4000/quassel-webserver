@@ -446,7 +446,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
       if (options.twitch.embed) {
         plugins.push(new Plugin('video', 'twitch', /www\.twitch\.tv\/([a-zA_Z0-9_]+)/, function(match) {
           // twitch
-          var embedurl = "http://player.twitch.tv/?channel=" + match[1];
+          var embedurl = "https://player.twitch.tv/?channel=" + match[1];
           var el = angular.element('<iframe></iframe>')
                    .attr('src', embedurl)
                    .attr('width', '560')
@@ -501,7 +501,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
       if (options.spotify.embed) {
         plugins.push(new Plugin('audio', 'spotify', /open\.spotify\.com\/(?:track|artist|user\/\w+\/playlist)\/[a-zA-Z-0-9]{22}/, function(match) {
           // spotify
-          var embedurl = '//embed.spotify.com/?uri=' + match[0];
+          var embedurl = 'https://embed.spotify.com/?uri=' + match[0];
           var el = angular.element('<iframe></iframe>')
                    .attr('src', embedurl)
                    .attr('width', '350')
@@ -531,9 +531,9 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     
     if (options.code.embed) {
       if (options.codepen.embed) {
-        plugins.push(new Plugin('code', 'codepen', /http:\/\/codepen\.io\/([A-Za-z0-9_]+)\/pen\/([A-Za-z0-9_]+)/, function(match) {
+        plugins.push(new Plugin('code', 'codepen', /https?:\/\/codepen\.io\/([A-Za-z0-9_]+)\/pen\/([A-Za-z0-9_]+)/, function(match) {
           // codepen
-          var embedurl = match[0].replace(/\/pen\//, '/embed/') + '/?height=300';
+          var embedurl = 'https://codepen.io/' + match[1] + '/embed/' + match[2] + '/?height=300';
           var el = angular.element('<iframe></iframe>')
                    .attr('src', embedurl)
                    .attr('height', '300')
@@ -547,7 +547,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
       if (options.jsfiddle.embed) {
         plugins.push(new Plugin('code', 'jsfiddle', /jsfiddle\.net\/[a-zA-Z0-9_]+\/[a-zA-Z0-9_]+/, function(match) {
           // jsfiddle
-          var embedurl = 'http://' + match[0] + '/embedded';
+          var embedurl = 'https://' + match[0] + '/embedded';
           var el = angular.element('<iframe></iframe>')
                    .attr('src', embedurl)
                    .attr('height', '300')
@@ -559,7 +559,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
       if (options.jsbin.embed) {
         plugins.push(new Plugin('code', 'jsbin', /jsbin\.com\/[a-zA-Z0-9_]+\/[0-9_]+/, function(match) {
           // jsbin
-          var embedurl = 'http://' + match[0] + '/embed?html,js,output';
+          var embedurl = 'https://' + match[0] + '/embed?html,js,output';
           var el = angular.element('<iframe></iframe>')
                    .attr('src', embedurl)
                    .attr('height', '300')
@@ -572,7 +572,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         plugins.push(new Plugin('code', 'plunker', /plnkr\.co\/edit\/([a-zA-Z0-9\?=]+)/, function(match) {
           // plunker
           var idMatch = match[1].indexOf('?') === -1 ? match[1] : match[1].split('?')[0];
-          var embedurl = 'http://embed.plnkr.co/' + idMatch;
+          var embedurl = 'https://embed.plnkr.co/' + idMatch;
           var el = angular.element('<iframe></iframe>')
                    .attr('src', embedurl)
                    .attr('height', '480')
@@ -602,7 +602,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
       if (options.ideone.embed) {
         plugins.push(new Plugin('code', 'ideone', /ideone\.com\/(?:fork\/)?([a-zA-Z0-9]{6})/, function(match) {
           // ideone
-          var embedurl = 'http://ideone.com/embed/' + match[1];
+          var embedurl = 'https://ideone.com/embed/' + match[1];
           var el = angular.element('<iframe></iframe>')
                    .attr('src', embedurl)
                    .attr('height', '300')
