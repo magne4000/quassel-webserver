@@ -422,10 +422,10 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
   function plugins() {
     var plugins = [];
     if (options.video.embed) {
-      plugins.push(new Plugin('video', 'html5-video', /((?:https?):\/\/\S*\.(?:ogv|webm|mp4|gifv))\b/i, function(match) {
+      plugins.push(new Plugin('video', 'html5-video', /https?:\/\/\S*\.(?:ogv|webm|mp4|gifv)\b/i, function(match) {
         // html5
         var el = angular.element('<video controls></video>')
-                  .attr('src', match[1]);
+                  .attr('src', match[0]);
         return $sce.trustAsHtml(el.prop('outerHTML'));
       }));
       
@@ -512,19 +512,19 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }));
       }
       
-      plugins.push(new Plugin('audio', 'html5-audio', /((?:https?):\/\/\S*\.(?:wav|mp3|ogg))\b/i, function(match) {
+      plugins.push(new Plugin('audio', 'html5-audio', /https?:\/\/\S*\.(?:wav|mp3|ogg)\b/i, function(match) {
         // html5
         var el = angular.element('<audio controls></video>')
-                 .attr('src', match[1]);
+                 .attr('src', match[0]);
         return $sce.trustAsHtml(el.prop('outerHTML'));
       }));
     }
     
     if (options.image.embed) {
-      plugins.push(new Plugin('image', 'image', /((?:https?):\/\/\S*\.(?:gif|jpg|jpeg|tiff|png|svg|webp))\b/i, function(match) {
+      plugins.push(new Plugin('image', 'image', /https:\/\/\S*\.(?:gif|jpg|jpeg|tiff|png|svg|webp)\b/i, function(match) {
         // html
         var el = angular.element('<img/>')
-                 .attr('src', match[1]);
+                 .attr('src', match[0]);
         return $sce.trustAsHtml(el.prop('outerHTML'));
       }));
     }

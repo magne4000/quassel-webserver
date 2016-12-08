@@ -120,6 +120,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     class="buffer-highlight-{{network.statusBuffer.highlight}}"
                     ng-class="{on: network.isConnected, off: !network.isConnected, active: buffer.id == network.statusBuffer.id}"
                     ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId"
+                    ng-if="!bufferView.hideInactiveNetworks || network.isConnected"
                     uib-dropdown
                 )
                 span.collapsable(ng-click="network.collapsed = !network.collapsed")
@@ -140,6 +141,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     ng-show='bufferView !== null'
                     id="{{network.networkName}}-channels"
                     uib-collapse="network.collapsed"
+                    ng-if="!bufferView.hideInactiveNetworks || network.isConnected"
                     ng-repeat-end
                 )
                 .channel(
@@ -149,7 +151,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       class="buffer-highlight-{{channel.highlight}}"
                       ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
                       ng-repeat="channel in network._buffers | channelsFilter | orderBy:'id':false:comparator track by channel.id"
-                      ng-if="showhidden || !bufferView.isHidden(channel.id)"
+                      ng-if="(showhidden || !bufferView.isHidden(channel.id)) && (!bufferView.hideInactiveBuffers || channel.active)"
                       uib-dropdown
                   )
                   span.channel-icon(ng-click="cycleHiddenState(channel)")
