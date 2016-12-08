@@ -136,7 +136,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   li(ng-if="!network.isConnected")
                     a(href="#", ng-click="connect(network)") Connect
                   li
-                    a(href="#", ng-click="showhidden = !showhidden") Show / Hide chats
+                    a(href="#", ng-click="toggleShowHide()") Show / Hide chats
               .network-channels.clearfix(
                     ng-show='bufferView !== null'
                     id="{{network.networkName}}-channels"

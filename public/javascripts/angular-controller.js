@@ -482,6 +482,10 @@ angular.module('quassel')
             $quassel.sendMessage($scope.buffer.id, '/whois ' + user.nick);
         }
     };
+    
+    $scope.toggleShowHide = function() {
+        $scope.showhidden = !$scope.showhidden;
+    };
 }])
 .controller('ModalJoinChannelInstanceCtrl', function ($scope, $uibModalInstance, network) {
     $scope.name = '';
