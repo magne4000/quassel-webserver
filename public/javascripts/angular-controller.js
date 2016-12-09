@@ -1052,6 +1052,12 @@ angular.module('quassel')
             updateBufferViews(bufferViewId);
         });
     });
+    
+    $quassel.on('bufferview.orderchanged', function(bufferViewId) {
+        $scope.$apply(function() {
+            updateBufferViews(bufferViewId);
+        });
+    });
 
     $quassel.on('ws.close', function() {
         console.log('DISCONNECTED');
@@ -1212,7 +1218,7 @@ angular.module('quassel')
         }
         this.value = value;
         this._original_value = value;
-    }
+    };
 
     var CircularBuffer = function(length) {
         this.first = null;

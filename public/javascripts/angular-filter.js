@@ -46,15 +46,13 @@ angular.module('quassel')
     };
 }])
 .filter('channelsFilter', function() {
-    return function(input) {
-        input = input || [];
-        var out = input.filter(function(elt){
-            return !elt._isStatusBuffer;
+    return function(channels, bufferView, showhidden) {
+        if (!bufferView) return [];
+        channels = channels || [];
+        var out = channels.filter(function(channel){
+            return !channel._isStatusBuffer && (showhidden || !bufferView.isHidden(channel.id)) && (!bufferView.hideInactiveBuffers || channel.active);
         });
-        out.sort(function(a, b){
-            return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-        });
-
+        
         return out;
     };
 })
