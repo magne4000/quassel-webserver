@@ -140,6 +140,9 @@ This is a [known issue](https://github.com/magne4000/quassel-webserver/issues/83
 #### In socket mode : Error: listen EADDRINUSE
 It means that quassel-webserver has been killed prematurely. You just have to manually delete `<path/to/qws.run>` file.
 
+## Support
+`#quassel-webserver` on Freenode
+
 ## License
 Copyright (c) 2014-2016 Joël Charles  
 Licensed under the MIT license.
