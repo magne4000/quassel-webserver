@@ -104,14 +104,14 @@ script(type="text/ng-template", id="modalNetworks.html")
                       .form-group.form-inline
                         .form-group(ng-class="{'has-error': tabsForm.msgRateBurstSize.$invalid}")
                           label.control-label(for="msgRateBurstSize") Max. messages at once: 
-                          input.input-sm.form-control(type="number", name="msgRateBurstSize", ng-model="network.msgRateBurstSize", required, min="1", max="999")
+                          input.input-sm.form-control(type="number", name="msgRateBurstSize", ng-model="network.msgRateBurstSize", ng-required="network.useCustomMessageRate && !network.unlimitedMessageRate", min="1", max="999")
                         .form-group.checkbox(style="margin-left: 5px;")
                           label
                             input(type="checkbox", ng-model="network.unlimitedMessageRate", ng-true-value="1", ng-false-value="0")
                             |  Unlimited
                       .form-group.form-inline(ng-class="{'has-error': tabsForm.msgRateMessageDelay.$invalid}")
                         | Wait 
-                        input.input-sm.form-control(type="number", name="msgRateMessageDelay", ng-model="network.msgRateMessageDelay", required, min="0.01", step="0.01", divide-by="1000")
+                        input.input-sm.form-control(type="number", name="msgRateMessageDelay", ng-model="network.msgRateMessageDelay", ng-required="network.useCustomMessageRate", min="0.01", step="0.01")
                         |  s between future messages
                 uib-tab(heading="Auto Identify", disable="tabsForm.$invalid")
                   // Auto Identify
