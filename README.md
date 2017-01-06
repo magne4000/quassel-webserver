@@ -17,7 +17,22 @@ n latest
 ![solarized theme](https://github.com/magne4000/magne4000.github.com/raw/master/images/quassel-solarized-1.png)
 
 ### Installation
-Install the server with: 
+
+With npm:
+
+```sh
+npm install quassel-webserver
+```
+
+With snap, in any of the [supported Linux distributions](http://snapcraft.io/docs/core/install#ubuntu):
+(Note that this is unstable and experimental at the moment)
+
+```sh
+snap install quassel-webserver --edge
+```
+
+### Development
+Get the code and install the server with: 
 ```sh
 git clone https://github.com/magne4000/quassel-webserver.git
 cd quassel-webserver
