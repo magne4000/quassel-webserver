@@ -670,8 +670,8 @@ angular.module('quassel')
             rejoinChannels: true,
             useCustomMessageRate: false,
             unlimitedMessageRate: false,
-            messageRateDelay: 2200,
-            messageRateBurstSize: 5
+            msgRateMessageDelay: 2200,
+            msgRateBurstSize: 5
         });
         $scope.addServer($scope.networks[$scope.networks.length - 1]);
         setTimeout(function() {
