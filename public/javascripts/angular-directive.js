@@ -41,7 +41,7 @@ angular.module('quassel')
         }
     };
 }])
-.directive('ircMessage', ['$filter', '$parse', '$compile', function($filter, $parse, $compile){
+.directive('ircMessage', ['$filter', '$parse', '$compile', '$sanitize', function($filter, $parse, $compile){
 
     var MT = require('message').Type;
     var dateFormat;
@@ -60,6 +60,10 @@ angular.module('quassel')
         sender = sender.replace('"', '\\"');
         return '<span data-nickhash="' + nickhash + '" ng-nick="' + sender + '"></span>';
     }
+    
+    function escapecurlybraces(subject) {
+      return subject.replace(/{{/g, '{<!---->{').replace(/}}/g, '}<!---->}');
+    }
 
     function getmessagetemplate(message, scope) {
         var content, arr, servers, shouldCompile = true;
@@ -72,7 +76,6 @@ angular.module('quassel')
             case MT.Plain:
                 content = $filter('linky')(message.content, '_blank', {'class': 'check-embed'});
                 content = $filter('color')(content);
-                // shouldCompile = false;
                 break;
             case MT.Nick:
                 if (message.sender === message.content) {
@@ -124,7 +127,7 @@ angular.module('quassel')
                 shouldCompile = false;
         }
         if (shouldCompile) {
-            return $compile('<span>' + content + '</span><br>')(scope);
+            return $compile('<span>' + escapecurlybraces(content) + '</span><br>')(scope);
         }
         return content + '<br>';
     }
