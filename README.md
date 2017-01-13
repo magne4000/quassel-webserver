@@ -25,10 +25,10 @@ npm install quassel-webserver
 ```
 
 With snap, in any of the [supported Linux distributions](http://snapcraft.io/docs/core/install#ubuntu):
-(Note that this is unstable and experimental at the moment)
+(Note that this is not yet stable)
 
 ```sh
-snap install quassel-webserver --edge
+snap install quassel-webserver --candidate
 ```
 
 ### Development
