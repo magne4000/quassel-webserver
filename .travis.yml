@@ -5,7 +5,7 @@ notifications:
 services:
 - docker
 script:
-- if [ ! -z "$TRAVIS_TAG" ]; then sed -i "s/version: master/version: '${TRAVIS_TAG}'/g" snapcraft.yaml; fi
+- if [ ! -z "$TRAVIS_TAG" ]; then sed -i s/version:\ master/version:\ \'${TRAVIS_TAG}\'/g snapcraft.yaml; fi
 - docker run -v $(pwd):/cwd snapcore/snapcraft sh -c 'cd /cwd && snapcraft'
 after_success:
 - mkdir -p "${HOME}/.config/snapcraft"
