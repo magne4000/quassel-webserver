@@ -4,7 +4,7 @@ summary: A web server/client for Quassel
 description: |
   A web client for Quassel (requires a running quasselcore)
 
-grade: devel
+grade: stable
 confinement: strict
 
 apps:
