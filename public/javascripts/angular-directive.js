@@ -476,22 +476,19 @@ angular.module('quassel')
 }])
 .directive('scrollme', [function () {
     var promise = null;
-    var subjects = [];
+    var bottomDistance = 0;
     return {
-        link: function (scope, element, attr) {
-            var parent = $(attr.scrollme)[0];
-            clearTimeout(promise);
-            if (parent.lastElementChild.isEqualNode(element[0])) {
-                subjects.push(element[0]);
+        link:  {
+            pre: function (scope, element, attr) {
+                var parent = $(attr.scrollme)[0];
+                bottomDistance = parent.scrollHeight - parent.scrollTop - parent.clientHeight;
+                console.log(bottomDistance)
+            },
+            post: function (scope, element, attr) {
+                var parent = $(attr.scrollme)[0];
+                clearTimeout(promise);
                 promise = setTimeout(function(){
-                    var cumulativeHeight = 0;
-                    for (var i=0; i<subjects.length; i++) {
-                        cumulativeHeight += subjects[i].offsetHeight + 1;
-                    }
-                    if (parent.scrollHeight - parent.scrollTop - parent.clientHeight <= cumulativeHeight) {
-                        parent.scrollTop = parent.scrollHeight;
-                    }
-                    subjects = [];
+                    parent.scrollTop = parent.scrollHeight;
                 }, 50);
             }
         }
