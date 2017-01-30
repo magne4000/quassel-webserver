@@ -200,9 +200,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     a.btn(ng-click="setAsDefault()", href="#") Set as default
                   li
                     a.btn(ng-click="useDefault()", href="#") Use default
-            ul.backlog(backlog="loadMore")
+            ul.backlog(backlog="loadMore", scroll-glue)
               li.irc-message(
-                    scrollme="ul.backlog"
                     ng-repeat-start="message in messages track by message.sid"
                     class="type-{{::message.type}}"
                     ng-class="{highlighted: message.isHighlighted()}"
@@ -263,6 +262,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src='#{settings.prefixpath}/javascripts/angular-aria.min.js')
       script(src='#{settings.prefixpath}/javascripts/ui-bootstrap-tpls.min.js')
       script(src='#{settings.prefixpath}/javascripts/bootstrap-tokenfield.min.js')
+      script(src='#{settings.prefixpath}/javascripts/scrollglue.js')
       script(src='#{settings.prefixpath}/javascripts/favico-0.3.10.min.js')
       script(src='#{settings.prefixpath}/javascripts/ng-quassel.js')
       script(src='#{settings.prefixpath}/javascripts/angular-sanitize.js')

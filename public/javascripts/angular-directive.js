@@ -474,26 +474,6 @@ angular.module('quassel')
         }
     };
 }])
-.directive('scrollme', [function () {
-    var promise = null;
-    var bottomDistance = 0;
-    return {
-        link:  {
-            pre: function (scope, element, attr) {
-                var parent = $(attr.scrollme)[0];
-                bottomDistance = parent.scrollHeight - parent.scrollTop - parent.clientHeight;
-                console.log(bottomDistance)
-            },
-            post: function (scope, element, attr) {
-                var parent = $(attr.scrollme)[0];
-                clearTimeout(promise);
-                promise = setTimeout(function(){
-                    parent.scrollTop = parent.scrollHeight;
-                }, 50);
-            }
-        }
-    };
-}])
 .directive('backlog', ['$timeout', '$compile', '$quassel', '$parse', function (timeout, $compile, $quassel, $parse) {
     return {
         link: function (scope, element, attr) {
