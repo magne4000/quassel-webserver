@@ -421,11 +421,11 @@ angular.module('quassel')
     
     $scope.cycleHiddenState = function(channel) {
         if ($scope.bufferView.isPermanentlyRemoved(channel.id)) {
-            $scope.channelHideTemporarily(channel);
-        } else if ($scope.bufferView.isTemporarilyRemoved(channel.id)) {
             $scope.channelUnhide(channel);
-        } else {
+        } else if ($scope.bufferView.isTemporarilyRemoved(channel.id)) {
             $scope.channelHidePermanently(channel);
+        } else {
+            $scope.channelHideTemporarily(channel);
         }
     };
     
