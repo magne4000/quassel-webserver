@@ -16,8 +16,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .ng-cloak.splash {
           display: block !important;
         }
-      link(rel='stylesheet', href=settings.prefixpath + '/stylesheets/fonts.css')
-      link(rel='stylesheet', href=settings.prefixpath + '/stylesheets/theme-' + (settings.default.theme || settings.theme) + '.css', theme)
+      link(rel='stylesheet', href=settings.prefix('/stylesheets/fonts.css'))
+      link(rel='stylesheet', href=settings.prefix('/stylesheets/theme-' + (settings.val.default.theme || settings.val.theme) + '.css', theme))
     body.login-page
       include ./ng-templates/modalJoinChannel
       include ./ng-templates/modalRenameBuffer
@@ -62,12 +62,16 @@ html(ng-app="quassel", ng-controller="ConfigController")
                 div(uib-alert, ng-if="alert != ''", ng-cloak, class="alert-warning") {{alert}}
                 form#logonform(role='form', ng-submit="login()")
                   h1 Connect to Quassel Core
-                  .form-group(ng-cloak, ng-hide=settings.forcedefault)
-                    label(for='host') Server address
-                    input#host.form-control(type='text', value=settings.default.host, ng-model="$parent.host")
-                  .form-group(ng-cloak, ng-hide=settings.forcedefault)
-                    label(for='port') Server port
-                    input#port.form-control(type='text', value=settings.default.port, ng-model="$parent.port")
+                  if settings.val.forcedefault
+                    input(type="hidden", value=settings.val.default.host, ng-model="$parent.host")
+                    input(type="hidden", value=settings.val.default.port, ng-model="$parent.port")
+                  else
+                    .form-group(ng-cloak)
+                      label(for='host') Server address
+                      input#host.form-control(type='text', value=settings.val.default.host, ng-model="$parent.host")
+                    .form-group(ng-cloak)
+                      label(for='port') Server port
+                      input#port.form-control(type='text', value=settings.val.default.port, ng-model="$parent.port")
                   .form-group
                     label(for='user') User name
                     input#user.form-control(type='text', ng-model="$parent.user")
@@ -257,22 +261,22 @@ html(ng-app="quassel", ng-controller="ConfigController")
               a.btn.showhide.left(href="javascript:void(0)", ng-click="shown2 = !shown2")
                 i.icon-qws(ng-class="shown2 ? 'icon-right-open' : 'icon-left-open'")
 
-      script(src=settings.prefixpath + '/javascripts/jquery.min.js')
-      script(src=settings.prefixpath + '/javascripts/angular.min.js')
-      script(src=settings.prefixpath + '/javascripts/angular-aria.min.js')
-      script(src=settings.prefixpath + '/javascripts/ui-bootstrap-tpls.min.js')
-      script(src=settings.prefixpath + '/javascripts/bootstrap-tokenfield.min.js')
-      script(src=settings.prefixpath + '/javascripts/scrollglue.js')
-      script(src=settings.prefixpath + '/javascripts/favico-0.3.10.min.js')
-      script(src=settings.prefixpath + '/javascripts/ng-quassel.js')
-      script(src=settings.prefixpath + '/javascripts/angular-sanitize.js')
-      script(src=settings.prefixpath + '/javascripts/angular-dnd.min.js')
-      script(src=settings.prefixpath + '/javascripts/angular-notify.min.js')
+      script(src=settings.prefix('/javascripts/jquery.min.js'))
+      script(src=settings.prefix('/javascripts/angular.min.js'))
+      script(src=settings.prefix('/javascripts/angular-aria.min.js'))
+      script(src=settings.prefix('/javascripts/ui-bootstrap-tpls.min.js'))
+      script(src=settings.prefix('/javascripts/bootstrap-tokenfield.min.js'))
+      script(src=settings.prefix('/javascripts/scrollglue.js'))
+      script(src=settings.prefix('/javascripts/favico-0.3.10.min.js'))
+      script(src=settings.prefix('/javascripts/ng-quassel.js'))
+      script(src=settings.prefix('/javascripts/angular-sanitize.js'))
+      script(src=settings.prefix('/javascripts/angular-dnd.min.js'))
+      script(src=settings.prefix('/javascripts/angular-notify.min.js'))
       if dev
-        script(src=settings.prefixpath + '/javascripts/libquassel.js')
+        script(src=settings.prefix('/javascripts/libquassel.js'))
       else
-        script(src=settings.prefixpath + '/javascripts/libquassel.min.js')
-      script(src=settings.prefixpath + '/javascripts/angular-init.js')
-      script(src=settings.prefixpath + '/javascripts/angular-directive.js')
-      script(src=settings.prefixpath + '/javascripts/angular-filter.js')
-      script(src=settings.prefixpath + '/javascripts/angular-controller.js')
+        script(src=settings.prefix('/javascripts/libquassel.min.js'))
+      script(src=settings.prefix('/javascripts/angular-init.js'))
+      script(src=settings.prefix('/javascripts/angular-directive.js'))
+      script(src=settings.prefix('/javascripts/angular-filter.js'))
+      script(src=settings.prefix('/javascripts/angular-controller.js'))

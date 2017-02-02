@@ -1,4 +1,3 @@
-var net = require('net');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -7,11 +6,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
 var fs = require('fs');
+var pjson = require('./package.json');
 var opts = require('commander');
 var netBrowserify = require('net-browserify-alt');
+var utils = require('./lib/utils');
 
 opts
-  .version('2.1.2')
+  .version(pjson.version)
   .option('-c, --config <value>', 'Path to configuration file', undefined)
   .option('-s, --socket <path>', 'listen on local socket. If this option is set, --listen, --port and --mode are ignored', undefined)
   .option('-l, --listen <value>', 'listening address [0.0.0.0]', undefined)
@@ -19,25 +20,26 @@ opts
   .option('-m, --mode <value>', 'http mode (http|https) [https]', undefined)
   .parse(process.argv);
 
-var settings = require('./lib/utils').settings(true, opts.config);
-var routes = require('./routes/index')(settings);
+var settings = new utils.settings(true, opts.config);
+var routes = require('./routes/index');
 
-if (settings.webserver) {
-    if (settings.webserver.socket && !opts.socket) {
-        opts.socket === settings.webserver.socket;
+if (settings.val.webserver) {
+    if (settings.val.webserver.socket && !opts.socket) {
+        opts.socket === settings.val.webserver.socket;
     }
-    if (settings.webserver.listen && !opts.listen) {
-        opts.listen === settings.webserver.listen;
+    if (settings.val.webserver.listen && !opts.listen) {
+        opts.listen === settings.val.webserver.listen;
     }
-    if (settings.webserver.port && !opts.port) {
-        opts.port = settings.webserver.port;
+    if (settings.val.webserver.port && !opts.port) {
+        opts.port = settings.val.webserver.port;
     }
-    if (settings.webserver.mode && !opts.mode) {
-        opts.mode = settings.webserver.mode;
+    if (settings.val.webserver.mode && !opts.mode) {
+        opts.mode = settings.val.webserver.mode;
     }
 }
 
 var app = express();
+app.locals.settings = settings;
 var server = null;
 if (opts.socket) {
     server = require('http').createServer(app);
@@ -86,12 +88,12 @@ if (opts.socket) {
 }
 
 // check that prefixpath do not contains ../, and it starts with / if not empty
-if (settings.prefixpath.length > 0) {
-    if (settings.prefixpath.indexOf('../') > -1) {
+if (settings.val.prefixpath.length > 0) {
+    if (settings.val.prefixpath.indexOf('../') > -1) {
         console.log(' ../ forbidden in prefixpath setting');
         process.exit(3);
     }
-    if (settings.prefixpath[0] !== '/') {
+    if (settings.val.prefixpath[0] !== '/') {
         console.log(' prefixpath setting must begin with trailing /');
         process.exit(4);
     }
@@ -99,10 +101,10 @@ if (settings.prefixpath.length > 0) {
 
 var nboptions = {
     server: server,
-    urlRoot: settings.prefixpath + '/p'
+    urlRoot: settings.prefix('/p')
 };
 if (settings.forcedefault) {
-    nboptions.to = [{host: settings.default.host, port: settings.default.port}];
+    nboptions.to = [{host: settings.val.default.host, port: settings.val.default.port}];
 }
 
 // view engine setup
@@ -118,25 +120,25 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 if (process.env.SNAP_DATA) {
-    app.use(settings.prefixpath, lessMiddleware(path.join(__dirname, 'public'), {
+    app.use(settings.val.prefixpath, lessMiddleware(path.join(__dirname, 'public'), {
         dest: path.join(process.env.SNAP_DATA)
     }));
 } else {
-    app.use(settings.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
+    app.use(settings.val.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
 }
-app.get(settings.prefixpath+'/javascripts/libquassel.js', function(req, res) {
+app.get(settings.prefix('/javascripts/libquassel.js'), function(req, res) {
     res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.js'));
 });
-app.get(settings.prefixpath+'/javascripts/libquassel.min.js', function(req, res) {
+app.get(settings.prefix('/javascripts/libquassel.min.js'), function(req, res) {
     res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.min.js'));
 });
-if (settings.prefixpath.length > 0) {
-    app.use(settings.prefixpath, express.static(path.join(__dirname, 'public')));
+if (settings.val.prefixpath.length > 0) {
+    app.use(settings.val.prefixpath, express.static(path.join(__dirname, 'public')));
 } else {
     app.use(express.static(path.join(__dirname, 'public')));
 }
 
-app.use(settings.prefixpath+'/', routes);
+app.use(settings.prefix('/'), routes);
 netBrowserify(app, nboptions);
 
 /// catch 404 and forward to error handler
