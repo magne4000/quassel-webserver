@@ -723,6 +723,75 @@ angular.module('quassel')
     }
   };
 })
+.directive('dropdownContextmenu', [function() {
+  
+  function getPosition(e, elm, dropdownMenu, rightalign) {
+    var css = {};
+    var x = e.pageX - elm[0].offsetLeft;
+    var y = e.pageY - elm[0].offsetTop;
+    var wd = dropdownMenu[0].offsetWidth;
+    var we = elm[0].offsetWidth;
+    var p = elm[0].offsetParent;
+    
+    while (p) {
+      x -= p.offsetLeft;
+      y -= p.offsetTop;
+      p = p.offsetParent;
+    }
+    
+    css.top = y + 'px';
+    if (rightalign) {
+      if (x - wd < 0) {
+        css.right = (we - wd) + 'px';
+      } else {
+        css.right = (we - x) + 'px';
+      }
+    } else {
+      if (x + wd > we) {
+        css.left = (we - wd) + 'px';
+      } else {
+        css.left = x + 'px';
+      }
+    }
+    
+    return css;
+  }
+  
+  return {
+    require: 'uibDropdown',
+    link: function(scope, elm, attrs, dropdownCtrl) {
+      var rightalign = dropdownCtrl.dropdownMenu.hasClass('dropdown-menu-right');
+      var restore = null;
+      
+      elm.on('contextmenu', function(e) {
+        e.preventDefault();
+        if (restore === null) {
+          var style = dropdownCtrl.dropdownMenu[0].style;
+          restore = {
+            top: style.top,
+            left: style.left,
+            right: style.right
+          };
+        }
+        
+        dropdownCtrl.toggle(true);
+        scope.$apply();
+        
+        var css = getPosition(e, elm, dropdownCtrl.dropdownMenu, rightalign);
+        dropdownCtrl.dropdownMenu.css(css);
+      });
+      
+      scope.$watch(function() {
+        if (restore !== null && !dropdownCtrl.isOpen()) {
+          dropdownCtrl.dropdownMenu[0].style.top = restore.top;
+          dropdownCtrl.dropdownMenu[0].style.left = restore.left;
+          dropdownCtrl.dropdownMenu[0].style.right = restore.right;
+          restore = null;
+        }
+      });
+    }
+  };
+}])
 .directive('checkEmbed', ['$embed', '$compile', function($embed, $compile) {
   var template_label = '<span class="label label-default irc-embed-label" ng-click="action()"><i title="{{title}}" class="icon-qws" ng-class="icon"></i></span>';
   var template_embed = '<li class="irc-embed">' +

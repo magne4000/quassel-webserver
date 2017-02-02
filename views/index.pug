@@ -126,6 +126,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     ng-repeat-start="network in networks | orderBy:'networkName' track by network.networkId"
                     ng-if="!bufferView.hideInactiveNetworks || network.isConnected"
                     uib-dropdown
+                    dropdown-contextmenu
                 )
                 span.collapsable(ng-click="network.collapsed = !network.collapsed")
                   i.icon-qws(ng-class="network.collapsed ? 'icon-up-open' : 'icon-down-open'")
@@ -156,6 +157,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
                       ng-repeat="channel in network._buffers | channelsFilter:bufferView:showhidden | orderBy:'id':false:comparator track by channel.id"
                       uib-dropdown
+                      dropdown-contextmenu
                   )
                   span.channel-icon(ng-click="showhidden && cycleHiddenState(channel)")
                     i.icon-qws(
@@ -246,7 +248,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                           colorpicker.list-group-item-text(colopicker-mode="backColor")
           #nick-pane.animation.pane(ng-class="{small: !shown2}")
             .buffer-container
-              .user(ng-repeat="user in buffer.users | ordernicks:buffer track by user.nick", uib-dropdown)
+              .user(ng-repeat="user in buffer.users | ordernicks:buffer track by user.nick", uib-dropdown, dropdown-contextmenu)
                 span.user-icon
                   i.icon-qws.icon-circle(ng-class="user.away ? 'user-away' : 'user-not-away'")
                 span.user-name(ng-class="userClass(buffer, user.nick)", title="{{user | usertitle:buffer}}") {{user.nick}}
