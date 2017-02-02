@@ -17,7 +17,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
           display: block !important;
         }
       link(rel='stylesheet', href=settings.prefix('/stylesheets/fonts.css'))
-      link(rel='stylesheet', href=settings.prefix('/stylesheets/theme-' + (settings.val.default.theme || settings.val.theme) + '.css', theme))
+      link(rel='stylesheet', href=settings.prefix('/stylesheets/theme-' + (settings.val.default.theme || settings.val.theme) + '.css'), theme)
     body.login-page
       include ./ng-templates/modalJoinChannel
       include ./ng-templates/modalRenameBuffer
