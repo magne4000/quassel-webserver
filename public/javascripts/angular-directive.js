@@ -727,17 +727,11 @@ angular.module('quassel')
   
   function getPosition(e, elm, dropdownMenu, rightalign) {
     var css = {};
-    var x = e.pageX - elm[0].offsetLeft;
-    var y = e.pageY - elm[0].offsetTop;
+    var elmrect = elm[0].getBoundingClientRect();
+    var x = e.pageX - elmrect.left;
+    var y = e.pageY - elmrect.top;
     var wd = dropdownMenu[0].offsetWidth;
     var we = elm[0].offsetWidth;
-    var p = elm[0].offsetParent;
-    
-    while (p) {
-      x -= p.offsetLeft;
-      y -= p.offsetTop;
-      p = p.offsetParent;
-    }
     
     css.top = y + 'px';
     if (rightalign) {
