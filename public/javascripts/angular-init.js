@@ -27,8 +27,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     };
 }])
 .factory('$ignore', ['$quassel', function($quassel){
-    var IgnoreList = require('ignore').IgnoreList;
-    var IgnoreItem = require('ignore').IgnoreItem;
+    var IgnoreList = require('libquassel/lib/ignore').IgnoreList;
+    var IgnoreItem = require('libquassel/lib/ignore').IgnoreItem;
     var ignoreList = new IgnoreList();
     var savedIgnoreList = null;
     var ignoreListRevision = 0;

@@ -266,6 +266,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
               a.btn.showhide.left(href="javascript:void(0)", ng-click="shown2 = !shown2")
                 i.icon-qws(ng-class="shown2 ? 'icon-right-open' : 'icon-left-open'")
 
+      <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
       script(src=settings.prefix('/javascripts/jquery.min.js'))
       script(src=settings.prefix('/javascripts/angular.min.js'))
       script(src=settings.prefix('/javascripts/angular-aria.min.js'))
@@ -277,10 +278,6 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src=settings.prefix('/javascripts/angular-sanitize.js'))
       script(src=settings.prefix('/javascripts/angular-dnd.min.js'))
       script(src=settings.prefix('/javascripts/angular-notify.min.js'))
-      if dev
-        script(src=settings.prefix('/javascripts/libquassel.js'))
-      else
-        script(src=settings.prefix('/javascripts/libquassel.min.js'))
       script(src=settings.prefix('/javascripts/angular-init.js'))
       script(src=settings.prefix('/javascripts/angular-directive.js'))
       script(src=settings.prefix('/javascripts/angular-filter.js'))

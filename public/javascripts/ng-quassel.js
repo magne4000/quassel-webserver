@@ -18,7 +18,7 @@
   angular.module('ngQuassel', []).provider('$quassel', socketProvider);
 
   function socketProvider() {
-    var Quassel = require('quassel');
+    var Quassel = require("libquassel");
     
     this.$get = ['$config', socketFactory];
 
@@ -88,9 +88,12 @@
         //Check if socket is undefined
         if (self.quassel === null) {
           var net = require('net');
-          net.setProxy({
-              path: window.location.pathname + 'p',
-          });
+          var has_ws_proxy = !!net.setProxy;
+          if (has_ws_proxy) {
+            net.setProxy({
+                path: window.location.pathname + 'p',
+            });
+          }
           self.quassel = new Quassel(self.server, self.port, {
               nobacklogs: $config.get('initialBacklogLimit', 0) === 0,
               initialbackloglimit: $config.get('initialBacklogLimit', 20),
@@ -101,10 +104,11 @@
               next(self.login, self.password);
               var istls = self.quassel.useSSL;
               if (istls) {
-                self.ws = self.quassel.qtsocket.socket._socket._ws;
+                self.ws = self.quassel.qtsocket.socket._socket;
               } else {
-                self.ws = self.quassel.qtsocket.socket._ws;
+                self.ws = self.quassel.qtsocket.socket;
               }
+              if (has_ws_proxy) self.ws = self.ws._ws;
               triggerWebsocketBindings();
           });
         }

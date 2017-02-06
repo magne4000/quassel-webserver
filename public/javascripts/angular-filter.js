@@ -1,7 +1,7 @@
 /* global angular */
 angular.module('quassel')
 .filter('decoratenick', ['stripnickFilter', function(stripnick) {
-    var MT = require('message').Type;
+    var MT = require('libquassel/lib/message').Type;
 
     return function(message) {
         var sender;
