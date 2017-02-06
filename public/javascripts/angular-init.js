@@ -106,7 +106,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
     }
     $http.get("settings")
-    .success(function(data, status) {
+    .then(function(response) {
+        var data = response.data;
         if (localStorage.length > 0 && data.version !== get('version')) {
             $alert.warn("Local settings replaced by default settings (new version)");
             localStorage.clear();
@@ -132,7 +133,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
         set('themes', data.themes || ['default', 'darksolarized']);
         $rootScope.$emit('defaultsettings', true);
-    }).error(function(data, status) {
+    }).catch(function(response) {
         $alert.warn("Could not load settings. Check nodejs logs.");
         if (missingKeys) {
             set('host', '');
@@ -584,8 +585,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
       if (options.gist.embed) {
         plugins.push(new Plugin('code', 'gist', /^(https:\/\/gist\.github\.com\/(?:.*?))[\/]?(?:\#.*)?$/i, function(match, next) {
           // gist
-          var url = match[1] + '.json?callback=JSON_CALLBACK';
-          $http.jsonp(url).then(function(d) {
+          var url = $sce.trustAsResourceUrl(match[1] + '.json');
+          $http.jsonp(url, {jsonpCallbackParam: 'callback'}).then(function(d) {
             // Add the gist stylesheet only once
             if (!document.getElementById('gistcss')) {
               var el = angular.element('<link></link>')
@@ -615,8 +616,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     if (options.twitter.embed) {
       plugins.push(new Plugin('twitter', 'twitter', /^https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/, function(match, next) {
         // twitter
-        var url = 'https://api.twitter.com/1.1/statuses/oembed.json?omit_script=true&id=' + match[2] + '&maxwidth=550&callback=JSON_CALLBACK';
-        $http.jsonp(url).then(function(d) {
+        var url = $sce.trustAsResourceUrl('https://api.twitter.com/1.1/statuses/oembed.json?omit_script=true&id=' + match[2] + '&maxwidth=550');
+        $http.jsonp(url, {jsonpCallbackParam: 'callback'}).then(function(d) {
           next($sce.trustAsHtml(d.data.html));
           $timeout(function() {
             window.twttr.widgets.load();

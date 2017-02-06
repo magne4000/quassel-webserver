@@ -683,6 +683,11 @@ angular.module('quassel')
       value: "=divideBy"
     },
     link: function(scope, element, attrs, ngModel) {
+      
+      if ((attrs.type === 'number') && ngModel) {
+        delete ngModel.$validators.step;
+      }
+      
       ngModel.$parsers.push(function(value) {
         return value * scope.value;
       });
