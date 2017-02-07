@@ -15,5 +15,6 @@ apps:
 
 parts:
   quassel-webserver:
+    build-packages: [python, build-essential]
     source: .
     plugin: nodejs
