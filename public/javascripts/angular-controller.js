@@ -112,7 +112,7 @@ angular.module('quassel')
     $quassel.on('network.init', function(networkId) {
         var networks = this.getNetworks();
         var network = networks.get(networkId);
-        $scope.$apply(function(){
+        $scope.$applyAsync(function(){
             network.collapsed = !network.isConnected;
             $scope.networks.push(network);
             $scope.networkscount = $scope.networks.length;
@@ -1036,25 +1036,25 @@ angular.module('quassel')
     });
     
     $quassel.on('bufferview.init', function(bufferViewId, bufferId) {
-        $scope.$apply(function() {
+        $scope.$applyAsync(function() {
             updateBufferViews(bufferViewId);
         });
     });
     
     $quassel.on('bufferview.bufferhidden', function(bufferViewId, bufferId) {
-        $scope.$apply(function() {
+        $scope.$applyAsync(function() {
             updateBufferViews(bufferViewId);
         });
     });
 
     $quassel.on('bufferview.bufferunhide', function(bufferViewId, bufferId) {
-        $scope.$apply(function() {
+        $scope.$applyAsync(function() {
             updateBufferViews(bufferViewId);
         });
     });
     
     $quassel.on('bufferview.orderchanged', function(bufferViewId) {
-        $scope.$apply(function() {
+        $scope.$applyAsync(function() {
             updateBufferViews(bufferViewId);
         });
     });
