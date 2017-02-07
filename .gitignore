@@ -4,3 +4,4 @@ node_modules
 npm-debug.log
 .c9
 settings-user.js
+public/bower_components

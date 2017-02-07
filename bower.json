@@ -1,0 +1,40 @@
+{
+  "name": "quassel-webserver",
+  "description": "Quassel web interface",
+  "main": "app.js",
+  "author": {
+    "name": "Joël Charles",
+    "email": "joel.charles91@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "quassel",
+    "webserver",
+    "quassel-webserver"
+  ],
+  "homepage": "https://github.com/magne4000/quassel-webserver",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.6.2",
+    "jquery": "^3.1.1",
+    "angular-aria": "^1.6.2",
+    "angular-sanitize": "^1.6.2",
+    "angular-bootstrap": "^2.5.0",
+    "angular-notify": "^2.5.1",
+    "bootstrap-tokenfield": "^0.12.1",
+    "angular-scroll-glue": "^2.1.0",
+    "favico.js": "^0.3.10",
+    "bootstrap": "^3.3.6"
+  },
+  "resolutions": {
+    "jquery": "^3.1.1",
+    "bootstrap": "^3.3.6"
+  }
+}
