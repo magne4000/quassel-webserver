@@ -223,6 +223,9 @@ html(ng-app="quassel", ng-controller="ConfigController")
                 span
             .input(ng-controller="InputController")
               form#messageform(ng-submit="sendMessage()")
+                .formatter
+                  .btn.btn-default.btn-xs.visible-xs-block.handle(title="Complete nick", ng-mousedown="sendTab($event, 'messagebox')")
+                    i.icon-qws.icon-people
                 #messagebox(contenteditable, mimic-input="true", focusonfocus, ng-attr-placeholder='{{nick || "Enter your message here"}}', ng-model="inputmessage", caret)
                 .formatter
                   button.btn.btn-default.btn-xs.handle(type="button", ng-click="formattervisible = !formattervisible", title="Format")

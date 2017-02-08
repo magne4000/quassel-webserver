@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg">
-<metadata>Copyright (C) 2016 by original authors @ fontello.com</metadata>
+<metadata>Copyright (C) 2017 by original authors @ fontello.com</metadata>
 <defs>
 <font id="quassel-webserver" horiz-adv-x="1000" >
 <font-face font-family="quassel-webserver" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
@@ -57,6 +57,8 @@
 <glyph glyph-name="resize-full" unicode="&#xe818;" d="M421 261q0-7-5-13l-185-185 80-81q10-10 10-25t-10-25-25-11h-250q-15 0-25 11t-11 25v250q0 15 11 25t25 11 25-11l80-80 186 185q5 6 12 6t13-6l64-63q5-6 5-13z m436 482v-250q0-15-10-25t-26-11-25 11l-80 80-185-185q-6-6-13-6t-13 6l-64 64q-5 5-5 12t5 13l186 185-81 81q-10 10-10 25t10 25 25 11h250q15 0 26-11t10-25z" horiz-adv-x="857.1" />
 
 <glyph glyph-name="resize-small" unicode="&#xe819;" d="M429 314v-250q0-14-11-25t-25-10-25 10l-81 81-185-186q-5-5-13-5t-12 5l-64 64q-6 6-6 13t6 13l185 185-80 80q-11 11-11 25t11 25 25 11h250q14 0 25-11t11-25z m421 375q0-7-6-12l-185-186 80-80q11-11 11-25t-11-25-25-11h-250q-14 0-25 11t-10 25v250q0 14 10 25t25 10 25-10l81-80 185 185q6 5 13 5t13-5l63-64q6-5 6-13z" horiz-adv-x="857.1" />
+
+<glyph glyph-name="people" unicode="&#xe81a;" d="M0-132l0 289q0 103 60 177t157 75l330 0q101-2 158-76t57-176l0-289q0-18-18-18l-105 0q-16 0-16 18l0 252q-6 27-27 24t-22-24l0-252q-2-18-19-18l-352 0q-17 0-17 18l0 252q-4 27-26 24t-23-24l0-252q0-18-18-18l-101 0q-18 0-18 18z m186 783q0 82 59 140t140 59q86-4 142-60t59-139q-2-84-61-143t-140-58q-84 2-142 60t-57 141z" horiz-adv-x="762" />
 </font>
 </defs>
 </svg>

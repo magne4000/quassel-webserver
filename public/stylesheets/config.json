@@ -161,6 +161,12 @@
       "css": "resize-small",
       "code": 59417,
       "src": "fontawesome"
+    },
+    {
+      "uid": "1e394b6cd5e0da3e10d8e4f3fe355960",
+      "css": "people",
+      "code": 59418,
+      "src": "elusive"
     }
   ]
 }

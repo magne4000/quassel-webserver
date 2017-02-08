@@ -1,3 +1,4 @@
+/* global KeyboardEvent */
 /* global angular */
 /* global $ */
 
@@ -1546,6 +1547,17 @@ angular.module('quassel')
             });
         }
     });
+    
+    $scope.sendTab = function($event, sId, key) {
+        $event.preventDefault();
+        if (KeyboardEvent) {
+            var el = document.getElementById(sId);
+            if (el) {
+                var ev = new KeyboardEvent('keydown', {"key": "Tab", "keyCode": 9});
+                el.dispatchEvent(ev);
+            }
+        }
+    };
 }])
 .controller('FilterController', ['$scope', '$config', function($scope, $config) {
     var filters = [

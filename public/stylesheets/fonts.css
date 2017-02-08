@@ -43,12 +43,12 @@
 }
 @font-face {
   font-family: 'quassel-webserver';
-  src: url('fonts/quassel-webserver.eot?99698831');
-  src: url('fonts/quassel-webserver.eot?99698831#iefix') format('embedded-opentype'),
-       url('fonts/quassel-webserver.woff2?99698831') format('woff2'),
-       url('fonts/quassel-webserver.woff?99698831') format('woff'),
-       url('fonts/quassel-webserver.ttf?99698831') format('truetype'),
-       url('fonts/quassel-webserver.svg?99698831#quassel-webserver') format('svg');
+  src: url('fonts/quassel-webserver.eot?69220943');
+  src: url('fonts/quassel-webserver.eot?69220943#iefix') format('embedded-opentype'),
+       url('fonts/quassel-webserver.woff2?69220943') format('woff2'),
+       url('fonts/quassel-webserver.woff?69220943') format('woff'),
+       url('fonts/quassel-webserver.ttf?69220943') format('truetype'),
+       url('fonts/quassel-webserver.svg?69220943#quassel-webserver') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -101,3 +101,4 @@
 .icon-lock:before { content: '\e817'; } /* '' */
 .icon-resize-full:before { content: '\e818'; } /* '' */
 .icon-resize-small:before { content: '\e819'; } /* '' */
+.icon-people:before { content: '\e81a'; } /* '' */
