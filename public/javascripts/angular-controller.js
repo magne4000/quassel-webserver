@@ -396,6 +396,7 @@ angular.module('quassel')
     };
 
     $scope.onDropComplete = function(dragged, dropped) {
+        if (dragged === dropped) return;
         if (dragged.isChannel() || dropped.isChannel()) {
             $alert.warn("Merging non-query buffers is not supported");
         } else if (dragged.network !== dropped.network) {
