@@ -342,7 +342,9 @@ angular.module('quassel')
         $scope.buffer = channel;
         if ($scope.buffer !== null) {
             updateMessages();
-            $('#messagebox').focus();
+            if ($responsive.getBreakpoint() !== 'xs') {
+                $('#messagebox').focus();
+            }
             $quassel.markBufferAsRead(channel.id, channel._lastMessageId);
         }
     };
