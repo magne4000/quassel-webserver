@@ -374,10 +374,9 @@ html, body, .container {
     .animation(spin 1s linear infinite);
 }
 
-.channel:hover .dropdown-channel, .user:hover .dropdown-user, .dropdown-network {
+.dropdown-channel, .dropdown-user, .dropdown-network {
     .icon;
     opacity: 0.5;
-    display: inline-block;
     cursor: pointer;
 
     &:hover {
@@ -387,6 +386,10 @@ html, body, .container {
 
 .dropdown-channel, .dropdown-user {
     display: none;
+}
+
+.channel:hover .dropdown-channel, .user:hover .dropdown-user, .dropdown-network {
+    display: inline-block;
 }
 
 .input {
@@ -777,6 +780,10 @@ input[type="number"] {
     // Hide timestamp
     .backlog .irc-message > span.timestamp {
         display: none;
+    }
+    
+    .dropdown-channel, .dropdown-user {
+        display: inline-block;
     }
 }
 
