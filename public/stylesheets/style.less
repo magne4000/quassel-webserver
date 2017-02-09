@@ -776,10 +776,22 @@ input[type="number"] {
         right: 0;
         box-shadow: -10px 0 10px -5px #000;
     }
-
-    // Hide timestamp
-    .backlog .irc-message > span.timestamp {
-        display: none;
+    
+    .backlog {
+        .irc-message > .timestamp {
+            display: table-cell;
+            
+            > span {
+                padding-right: 6px;
+                padding-left: 1px;
+                font-size: 0.8em;
+                font-family: "Roboto";
+            }
+        }
+        
+        .irc-message > .nick, .irc-message > .message {
+            display: inline;
+        }
     }
     
     .dropdown-channel, .dropdown-user {
