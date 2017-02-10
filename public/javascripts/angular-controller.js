@@ -120,15 +120,6 @@ angular.module('quassel')
         });
     });
     
-    $scope.$watch('buffer', function(newValue, oldValue) {
-        if (oldValue !== null && (newValue === null || newValue.id !== oldValue.id)) {
-            if ($config.get('emptybufferonswitch', false)) {
-                loadingMoreBacklogs.delete(oldValue.id);
-                oldValue.trimMessages($config.get('emptybufferonswitchvalue', 0));
-            }
-        }
-    });
-    
     $quassel.on('network.remove', function(networkId) {
         var index = null;
         for (var i=0; i<$scope.networks.length; i++) {
@@ -340,6 +331,8 @@ angular.module('quassel')
     });
     
     $scope.showBuffer = function(channel) {
+        if (channel && $scope.buffer === channel) return;
+        var olfbuf = $scope.buffer;
         $scope.buffer = channel;
         if ($scope.buffer !== null) {
             updateMessages();
@@ -347,6 +340,18 @@ angular.module('quassel')
                 $('#messagebox').focus();
             }
             $quassel.markBufferAsRead(channel.id, channel._lastMessageId);
+            
+            // Empty backlogs if configured so
+            if ($config.get('emptybufferonswitch', false)) {
+                loadingMoreBacklogs.delete(olfbuf.id);
+                olfbuf.trimMessages($config.get('emptybufferonswitchvalue', 0));
+            }
+            
+            // Update title
+            var network = $quassel.get().getNetworks().get(channel.network);
+            document.title = channel.name + ' (' + network.networkName + ') – Quassel Web App';
+        } else {
+            document.title = 'Quassel Web App';
         }
     };
 
