@@ -159,7 +159,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       uib-dropdown
                       dropdown-contextmenu
                   )
-                  span.channel-icon(ng-click="showhidden && cycleHiddenState(channel)")
+                  span.channel-icon(ng-click="showhidden ? cycleHiddenState(channel) : showBuffer(channel)")
                     i.icon-qws(
                         class="hidden-status"
                         ng-show="showhidden"
