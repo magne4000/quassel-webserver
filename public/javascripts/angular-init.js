@@ -522,7 +522,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     }
     
     if (options.image.embed) {
-      plugins.push(new Plugin('image', 'image', /https:\/\/\S*\.(?:gif|jpg|jpeg|tiff|png|svg|webp)\b/i, function(match) {
+      plugins.push(new Plugin('image', 'image', /https?:\/\/\S*\.(?:gif|jpg|jpeg|tiff|png|svg|webp)\b/i, function(match) {
         // html
         var el = angular.element('<img/>')
                  .attr('src', match[0]);
