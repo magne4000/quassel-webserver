@@ -2,7 +2,7 @@ const {app, BrowserWindow} = require('electron');
 var utils = require('./lib/utils');
 
 var settings = new utils.settings(true);
-settings.val.prefixpath = '../public'
+settings.val.prefixpath = '../dist'
 const locals = {dev: true, settings};
 var j = require('electron-pug')({pretty: true}, locals);
 

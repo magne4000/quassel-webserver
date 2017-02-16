@@ -16,8 +16,10 @@ html(ng-app="quassel", ng-controller="ConfigController")
         .ng-cloak.splash {
           display: block !important;
         }
-      link(rel='stylesheet', href=settings.prefix('/stylesheets/fonts.css'))
-      link(rel='stylesheet', href=settings.prefix('/stylesheets/theme-' + (settings.val.default.theme || settings.val.theme) + '.css'), theme)
+      script(src=settings.prefix('/manifest.js'))
+      script(src=settings.prefix('/vendor.js'))
+      link(rel='stylesheet', href=settings.prefix('/main.css'))
+      link(rel='stylesheet', href=settings.prefix('/theme-' + (settings.val.default.theme || settings.val.theme) + '.css'), theme)
     body.login-page
       include ./ng-templates/modalJoinChannel
       include ./ng-templates/modalRenameBuffer
@@ -266,20 +268,4 @@ html(ng-app="quassel", ng-controller="ConfigController")
               a.btn.showhide.left(href="javascript:void(0)", ng-click="shown2 = !shown2")
                 i.icon-qws(ng-class="shown2 ? 'icon-right-open' : 'icon-left-open'")
 
-      <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-      script(src=settings.prefix('/bower_components/jquery/dist/jquery.min.js'))
-      script(src=settings.prefix('/bower_components/angular/angular.min.js'))
-      script(src=settings.prefix('/bower_components/angular-aria/angular-aria.min.js'))
-      script(src=settings.prefix('/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js'))
-      script(src=settings.prefix('/bower_components/bootstrap-tokenfield/dist/bootstrap-tokenfield.min.js'))
-      script(src=settings.prefix('/bower_components/angular-scroll-glue/src/scrollglue.js'))
-      script(src=settings.prefix('/bower_components/favico.js/favico-0.3.10.min.js'))
-      script(src=settings.prefix('/javascripts/ng-quassel.js'))
-      script(src=settings.prefix('/bower_components/angular-sanitize/angular-sanitize.js'))
-      script(src=settings.prefix('/javascripts/angular-dnd.min.js'))
-      script(src=settings.prefix('/javascripts/angular-notify.min.js'))
-      script(src=settings.prefix('/bower_components/angular-notify/dist/angular-notify.min.js'))
-      script(src=settings.prefix('/javascripts/angular-init.js'))
-      script(src=settings.prefix('/javascripts/angular-directive.js'))
-      script(src=settings.prefix('/javascripts/angular-filter.js'))
-      script(src=settings.prefix('/javascripts/angular-controller.js'))
+      script(src=settings.prefix('/main.js'))
