@@ -1,6 +1,7 @@
 /* jshint esversion:6, asi: true */
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const webpack = require('webpack')
+const merge = require('webpack-merge')
 
 const config = {
 	entry: {
@@ -33,14 +34,10 @@ const config = {
 			loader: 'file-loader?name=font/[name].[ext]'
 		}
 	]},
-	target: 'electron-renderer',
 	plugins: [
 		new ExtractTextPlugin('[name].css'),
 		new webpack.ProvidePlugin({
-		  jQuery: 'jquery',
-		  $: 'jquery',
-		  jquery: 'jquery',
-		  "window.jQuery": 'jquery'
+		  "window.jQuery": 'jquery',
 		}),
 		new webpack.optimize.CommonsChunkPlugin({
 			names: ['vendor', 'manifest']
@@ -48,4 +45,32 @@ const config = {
 	],
 	devtool: "cheap-source-map"
 }
-module.exports = config
+const platform_specific = {
+	'electron-renderer': {
+		target: 'electron-renderer',
+	},
+	web: {
+		target: 'web',
+		plugins: [
+			new webpack.ProvidePlugin({
+				Buffer: __dirname + "/src/buffershim.js"
+			})
+		],
+		node: {
+			zlib: true,
+			tty: true,
+			stream: true,
+			buffer: false,
+			Buffer: false
+		},
+		resolve: {
+			alias: {
+				tls$: __dirname + "/node_modules/tls-browserify",
+				net$: __dirname + "/node_modules/net-browserify-alt",
+				buffer$: __dirname + "/node_modules/buffer"
+			}
+		},
+	}
+}
+module.exports = (env) =>
+	merge(config, platform_specific[(env ? env.platform : null) || 'web'])

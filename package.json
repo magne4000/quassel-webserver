@@ -61,6 +61,7 @@
     "angularjs-scroll-glue": "^2.2.0",
     "bootstrap": "^3.3.7",
     "bootstrap-tokenfield": "^0.12.0",
+    "buffer": "^5.0.5",
     "css-loader": "^0.26.1",
     "extract-text-webpack-plugin": "^2.0.0-rc.3",
     "favico.js": "^0.3.10",
@@ -68,7 +69,10 @@
     "jquery": "^3.1.1",
     "less": "^2.7.2",
     "less-loader": "^2.2.3",
+    "node-forge": "^0.7.0",
     "style-loader": "^0.13.1",
-    "webpack": "^2.2.1"
+    "tls-browserify": "^0.2.1",
+    "webpack": "^2.2.1",
+    "webpack-merge": "^2.6.1"
   }
 }
