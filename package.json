@@ -73,6 +73,7 @@
     "style-loader": "^0.13.1",
     "tls-browserify": "^0.2.1",
     "webpack": "^2.2.1",
+    "webpack-dev-middleware": "^1.10.0",
     "webpack-merge": "^2.6.1"
   }
 }
