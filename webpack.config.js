@@ -1,5 +1,6 @@
 /* jshint esversion:6, asi: true */
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 
@@ -41,7 +42,10 @@ const config = {
 		}),
 		new webpack.optimize.CommonsChunkPlugin({
 			names: ['vendor', 'manifest']
-		})
+		}),
+		new CopyWebpackPlugin([
+			{from: 'public/favicon.ico'}
+		])
 	],
 	devtool: "cheap-source-map"
 }

@@ -36,7 +36,7 @@ Get the code and install the server with:
 ```sh
 git clone https://github.com/magne4000/quassel-webserver.git
 cd quassel-webserver
-npm install --production
+npm install
 ```
 #### Update
 Update the server with: 

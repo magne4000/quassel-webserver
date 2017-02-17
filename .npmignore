@@ -1,0 +1,7 @@
+node_modules
+.c9revisions
+.settings
+npm-debug.log
+.c9
+settings-user.js
+public/
