@@ -27,8 +27,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     };
 }])
 .factory('$ignore', ['$quassel', function($quassel){
-    var IgnoreList = require('ignore').IgnoreList;
-    var IgnoreItem = require('ignore').IgnoreItem;
+    var IgnoreList = require('libquassel/lib/ignore').IgnoreList;
+    var IgnoreItem = require('libquassel/lib/ignore').IgnoreItem;
     var ignoreList = new IgnoreList();
     var savedIgnoreList = null;
     var ignoreListRevision = 0;
@@ -63,7 +63,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         }
     };
 }])
-.factory('$config', ['$rootScope', '$http', '$alert', function($rootScope, $http, $alert){
+.factory('$config', ['$rootScope', '$http', '$alert', '$q', function($rootScope, $http, $alert, $q){
 
     function set(key, val, raw) {
         localStorage.setItem(key, raw ? val : JSON.stringify(val));
@@ -105,7 +105,15 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             break;
         }
     }
-    $http.get("settings")
+    $q(function(resolve, reject) {
+        try {
+            resolve({data: require('electron').remote.getGlobal("app_settings")});
+        } catch(e) {
+            reject(e);
+        }
+    }).catch(function() {
+        return $http.get("settings");
+    })
     .then(function(response) {
         var data = response.data;
         if (localStorage.length > 0 && data.version !== get('version')) {

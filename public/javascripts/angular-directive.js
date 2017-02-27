@@ -43,7 +43,7 @@ angular.module('quassel')
 }])
 .directive('ircMessage', ['$filter', '$parse', '$compile', '$sanitize', function($filter, $parse, $compile){
 
-    var MT = require('message').Type;
+    var MT = require('libquassel/lib/message').Type;
     var dateFormat;
     if (typeof Intl != "undefined" && Intl.DateTimeFormat) {
         dateFormat = new Intl.DateTimeFormat(undefined, {weekday: "long", year: "numeric", month: "long", day: "numeric"});
@@ -247,7 +247,7 @@ angular.module('quassel')
     };
 })
 .directive('caret', [function() {
-    var MT = require('message').Type;
+    var MT = require('libquassel/lib/message').Type;
 
     function uniq(a) {
         var seen = {};

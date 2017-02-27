@@ -14,9 +14,9 @@ angular.module('quassel')
     $scope.shown = true;
     $scope.shown2 = $responsive.getBreakpoint() !== 'xs';
 
-    var MT = require('message').Type;
-    var MF = require('message').Flag;
-    var IRCMessage = require('message').IRCMessage;
+    var MT = require('libquassel/lib/message').Type;
+    var MF = require('libquassel/lib/message').Flag;
+    var IRCMessage = require('libquassel/lib/message').IRCMessage;
     var loadingMoreBacklogs = new Map;
     var initialLastSeenList = [];
     
@@ -520,7 +520,7 @@ angular.module('quassel')
     };
 })
 .controller('ModalAliasesInstanceCtrl', function ($scope, $uibModalInstance, aliases) {
-    var alias = require('alias');
+    var alias = require('libquassel/lib/alias');
     $scope.aliases = aliases;
 
     $scope.ok = function () {
@@ -740,7 +740,7 @@ angular.module('quassel')
     $scope.displayIgnoreListConfigItem = false;
     $scope.displayIdentitiesConfigItem = false;
     $scope.activeIndice = 0;
-    var modal, dbg = require("debug"), alias = require('alias');
+    var modal, dbg = require("debug"), alias = require('libquassel/lib/alias');
 
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
@@ -1241,7 +1241,7 @@ angular.module('quassel')
     var MAX_CIRCULARBUFFER_SIZE = 50;
     var messagesHistory = new Map;
     var messagesHistoryGlobal = new CircularBuffer(MAX_CIRCULARBUFFER_SIZE * 10);
-    var MT = require('message').Type;
+    var MT = require('libquassel/lib/message').Type;
 
     $scope.inputmessage = '';
     $scope.nick = null;

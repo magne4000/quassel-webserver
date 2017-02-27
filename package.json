@@ -22,7 +22,9 @@
     }
   ],
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "prepublish": "webpack",
+    "build": "webpack"
   },
   "engines": {
     "node": ">= 4"
@@ -36,10 +38,8 @@
     "body-parser": "^1.16.0",
     "commander": "^2.9.0",
     "cookie-parser": "~1.4.3",
+    "electron-pug": "^1.5.1",
     "express": "^4.14.1",
-    "less": "^2.7.2",
-    "less-middleware": "^2.2.0",
-    "libquassel": "~2.1.7",
     "morgan": "^1.8.0",
     "net-browserify-alt": "^1.1.0",
     "pug": "^2.0.0-beta11",
@@ -47,5 +47,34 @@
   },
   "optionalDependencies": {
     "httpolyglot": "~0.1.2"
+  },
+  "devDependencies": {
+    "@cgross/angular-notify": "^2.5.1",
+    "@iamadamjowett/angular-click-outside": "^2.10.1",
+    "angular": "^1.6.2",
+    "angular-aria": "^1.6.2",
+    "angular-bootstrap": "^0.12.2",
+    "angular-sanitize": "^1.6.2",
+    "angular-ui-bootstrap": "^2.5.0",
+    "angularjs-scroll-glue": "^2.2.0",
+    "bootstrap": "^3.3.7",
+    "bootstrap-tokenfield": "^0.12.0",
+    "buffer": "^5.0.5",
+    "copy-webpack-plugin": "^4.0.1",
+    "css-loader": "^0.26.1",
+    "extract-text-webpack-plugin": "^2.0.0-rc.3",
+    "favico.js": "^0.3.10",
+    "file-loader": "^0.10.0",
+    "jquery": "^3.1.1",
+    "less": "^2.7.2",
+    "less-loader": "^2.2.3",
+    "libquassel": "^2.1.7",
+    "node-forge": "^0.7.0",
+    "qtdatastream": "^0.7.1",
+    "style-loader": "^0.13.1",
+    "tls-browserify": "^0.2.1",
+    "webpack": "^2.2.1",
+    "webpack-dev-middleware": "^1.10.0",
+    "webpack-merge": "^2.6.1"
   }
 }

@@ -2,9 +2,6 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var lessMiddleware = require('less-middleware');
 var fs = require('fs');
 var pjson = require('./package.json');
 var opts = require('commander');
@@ -114,29 +111,33 @@ app.set('view options', {
     layout: false
 });
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
-if (process.env.SNAP_DATA) {
-    app.use(settings.val.prefixpath, lessMiddleware(path.join(__dirname, 'public'), {
-        dest: path.join(process.env.SNAP_DATA)
+// use webpack-dev-middleware when in dev mode and it exists
+var is_dev = (app.get('env') === 'development');
+
+if (is_dev) {
+    try {
+        var webpackMiddleware = require('webpack-dev-middleware');
+        var webpack = require('webpack');
+    }
+    catch(e) {
+        console.log("unable to load webpack middleware", e);
+    }
+}
+if (is_dev && webpack) {
+    var webpackCfg = require('./webpack.config.js');
+    var compiler = webpack(webpackCfg({platform: 'web'}));
+    app.use(webpackMiddleware(compiler, {
+        publicPath: settings.val.prefixpath || ''
     }));
 } else {
-    app.use(settings.val.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
+    if (settings.val.prefixpath.length > 0) {
+        app.use(settings.val.prefixpath, express.static(path.join(__dirname, 'dist')));
+    } else {
+        app.use(express.static(path.join(__dirname, 'dist')));
+    }
 }
-app.get(settings.prefix('/javascripts/libquassel.js'), function(req, res) {
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.js'));
-});
-app.get(settings.prefix('/javascripts/libquassel.min.js'), function(req, res) {
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.min.js'));
-});
-if (settings.val.prefixpath.length > 0) {
-    app.use(settings.val.prefixpath, express.static(path.join(__dirname, 'public')));
-} else {
-    app.use(express.static(path.join(__dirname, 'public')));
-}
+app.use(favicon(path.join(__dirname, webpack ? 'public' : 'dist', 'favicon.ico')));
+app.use(logger('dev'));
 
 app.use(settings.prefix('/'), routes);
 netBrowserify(app, nboptions);
@@ -152,7 +153,7 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
+if (is_dev) {
     app.locals.dev = true;
     app.use(function(err, req, res) {
         res.status(err.status || 500);
