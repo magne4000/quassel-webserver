@@ -2,11 +2,7 @@
 A web client for Quassel (requires a running quasselcore)
 
 :exclamation: Your node version should be at least v6.x (v6 and v7 are supported).
-To install node last version, you can run :
-```
-npm -g install n
-n latest
-```
+To install node last version, you can install [nvm](https://github.com/creationix/nvm).
 
 ### Screenshots
 
@@ -18,10 +14,12 @@ n latest
 
 ### Installation
 
-With npm:
+With git:
 
 ```sh
-npm install quassel-webserver
+git clone https://github.com/magne4000/quassel-webserver.git
+cd quassel-webserver
+npm install --production
 ```
 
 With snap, in any of the [supported Linux distributions](http://snapcraft.io/docs/core/install#ubuntu):
@@ -36,7 +34,7 @@ Get the code and install the server with:
 ```sh
 git clone https://github.com/magne4000/quassel-webserver.git
 cd quassel-webserver
-npm install --production
+npm install
 ```
 #### Update
 Update the server with: 
