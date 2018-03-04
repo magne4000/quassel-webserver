@@ -1,3 +1,4 @@
+/* global libquassel */
 /* global angular */
 /* global Favico */
 /* global localStorage */
@@ -27,8 +28,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     };
 }])
 .factory('$ignore', ['$quassel', function($quassel){
-    var IgnoreList = require('ignore').IgnoreList;
-    var IgnoreItem = require('ignore').IgnoreItem;
+    var IgnoreList = libquassel.ignore.IgnoreList;
+    var IgnoreItem = libquassel.ignore.IgnoreItem;
     var ignoreList = new IgnoreList();
     var savedIgnoreList = null;
     var ignoreListRevision = 0;

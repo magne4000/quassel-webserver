@@ -1,3 +1,4 @@
+/* global libquassel*/
 /* global angular */
 /* global Intl */
 /* global $ */
@@ -43,7 +44,7 @@ angular.module('quassel')
 }])
 .directive('ircMessage', ['$filter', '$parse', '$compile', '$sanitize', function($filter, $parse, $compile){
 
-    var MT = require('message').Type;
+    var MT = libquassel.message.Types;
     var dateFormat;
     if (typeof Intl != "undefined" && Intl.DateTimeFormat) {
         dateFormat = new Intl.DateTimeFormat(undefined, {weekday: "long", year: "numeric", month: "long", day: "numeric"});
@@ -68,57 +69,57 @@ angular.module('quassel')
     function getmessagetemplate(message, scope) {
         var content, arr, servers, shouldCompile = true;
         switch(message.type) {
-            case MT.Topic:
+            case MT.TOPIC:
                 content = $filter('linky')(message.content, '_blank');
                 shouldCompile = false;
                 break;
-            case MT.Action:
-            case MT.Plain:
+            case MT.ACTION:
+            case MT.PLAIN:
                 content = $filter('linky')(message.content, '_blank', {'class': 'check-embed'});
                 content = $filter('color')(content);
                 break;
-            case MT.Nick:
+            case MT.NICK:
                 if (message.sender === message.content) {
                     content = "You are now known as " +  nickplaceholder(message.content);
                 } else {
                     content = nickplaceholder(message.sender) + " is now known as " + nickplaceholder(message.content);
                 }
                 break;
-            case MT.Mode:
+            case MT.MODE:
                 content = "Mode " + message.content + " by " + nickplaceholder(message.sender);
                 break;
-            case MT.Join:
+            case MT.JOIN:
                 content = nickplaceholder(message.sender) + " has joined";
                 break;
-            case MT.Part:
+            case MT.PART:
                 if (message.content) {
                     content = nickplaceholder(message.sender) + " has left (" + $filter('linky')(message.content, '_blank') + ")";
                 } else {
                     content = nickplaceholder(message.sender) + " has left";
                 }
                 break;
-            case MT.Quit:
+            case MT.QUIT:
                 if (message.content) {
                     content = nickplaceholder(message.sender) + " has quit (" + $filter('linky')(message.content, '_blank') + ")";
                 } else {
                     content = nickplaceholder(message.sender) + " has quit";
                 }
                 break;
-            case MT.Kick:
+            case MT.KICK:
                 var ind = message.content.indexOf(" ");
                 content = nickplaceholder(message.sender) + " has kicked " + message.content.slice(0, ind) + " (" + message.content.slice(ind+1) + ")";
                 break;
-            case MT.NetsplitJoin:
+            case MT.NETSPLITJOIN:
                 arr = message.content.split("#:#");
                 servers = arr.pop().split(" ");
                 content = "Netsplit between " + servers[0] + " and " + servers[1] + " ended. Users joined: " + arr.map(nickplaceholder).join(', ');
                 break;
-            case MT.NetsplitQuit:
+            case MT.NETSPLITQUIT:
                 arr = message.content.split("#:#");
                 servers = arr.pop().split(" ");
                 content = "Netsplit between " + servers[0] + " and " + servers[1] + ". Users quit: " + arr.map(nickplaceholder).join(', ');
                 break;
-            case MT.DayChange:
+            case MT.DAYCHANGE:
                 content = "{Day changed to " + dateFormat.format(message.datetime) + "}";
                 shouldCompile = false;
                 break;
@@ -247,7 +248,7 @@ angular.module('quassel')
     };
 })
 .directive('caret', [function() {
-    var MT = require('message').Type;
+    var MT = libquassel.message.Types;
 
     function uniq(a) {
         var seen = {};
@@ -339,7 +340,7 @@ angular.module('quassel')
             var message = scope.buffer.messages.get(messageId);
 
             // Only check Plain and Action messages for nicks.
-            if (!(message.type == MT.Plain || message.type == MT.Action))
+            if (!(message.type == MT.PLAIN || message.type == MT.ACTION))
                 continue;
 
             var nick = message.getNick();

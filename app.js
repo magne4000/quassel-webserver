@@ -8,7 +8,6 @@ var lessMiddleware = require('less-middleware');
 var fs = require('fs');
 var pjson = require('./package.json');
 var opts = require('commander');
-var netBrowserify = require('net-browserify-alt');
 var utils = require('./lib/utils');
 
 opts
@@ -99,14 +98,6 @@ if (settings.val.prefixpath.length > 0) {
     }
 }
 
-var nboptions = {
-    server: server,
-    urlRoot: settings.prefix('/p')
-};
-if (settings.forcedefault) {
-    nboptions.to = [{host: settings.val.default.host, port: settings.val.default.port}];
-}
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -127,10 +118,16 @@ if (process.env.SNAP_DATA) {
     app.use(settings.val.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
 }
 app.get(settings.prefix('/javascripts/libquassel.js'), function(req, res) {
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.js'));
+    // FIXME
+    res.sendFile(path.join(__dirname, 'node_modules/libquassel/dist/libquassel.js'));
+});
+app.get(settings.prefix('/javascripts/libquassel.js.map'), function(req, res) {
+    // FIXME
+    res.sendFile(path.join(__dirname, 'node_modules/libquassel/dist/libquassel.js.map'));
 });
 app.get(settings.prefix('/javascripts/libquassel.min.js'), function(req, res) {
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.min.js'));
+    // FIXME
+    res.sendFile(path.join(__dirname, 'node_modules/libquassel/dist/libquassel.min.js'));
 });
 if (settings.val.prefixpath.length > 0) {
     app.use(settings.val.prefixpath, express.static(path.join(__dirname, 'public')));
@@ -139,7 +136,6 @@ if (settings.val.prefixpath.length > 0) {
 }
 
 app.use(settings.prefix('/'), routes);
-netBrowserify(app, nboptions);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
