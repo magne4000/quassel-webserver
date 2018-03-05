@@ -40,7 +40,7 @@
     "express": "^4.14.1",
     "less": "^2.7.2",
     "less-middleware": "^2.2.0",
-    "libquassel": "~3.0.0",
+    "libquassel": "~3.0.1",
     "morgan": "^1.8.0",
     "pug": "^2.0.0-beta11",
     "serve-favicon": "~2.3.2",
