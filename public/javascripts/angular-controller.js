@@ -26,7 +26,9 @@ angular.module('quassel')
         var networkItem = it.next();
         network._buffers = [];
         while(!networkItem.done) {
-            network._buffers.push(networkItem.value);
+            if (!networkItem.value.isStatusBuffer) {
+                network._buffers.push(networkItem.value);
+            }
             networkItem = it.next();
         }
     }
@@ -194,7 +196,7 @@ angular.module('quassel')
     $quassel.on('buffer.lastseen', function(bufferId, messageId) {
         messageId = parseInt(messageId, 10);
         var buffer = this.networks.getBuffer(bufferId);
-        if (buffer !== null) {
+        if (buffer) {
             // Fix networkStatusBuffer sync from server
             if (buffer.isStatusBuffer) {
                 var network = this.networks.get(buffer.network);
@@ -229,7 +231,7 @@ angular.module('quassel')
 
     $quassel.on('buffer.markerline', function(bufferId, messageId) {
         var buffer = this.networks.getBuffer(bufferId);
-        if (buffer !== null) {
+        if (buffer) {
             $scope.$apply(function(){
                 buffer.markerline = parseInt(messageId, 10);
             });
@@ -242,7 +244,7 @@ angular.module('quassel')
             setHighlight(buffer, 'low');
             highlightmode = 'low';
         } else if (!buffer.isChannel) {
-            if (!message.isSelf()) {
+            if (!message.isSelf) {
                 if (setHighlight(buffer, 'high')) {
                     incFavico(buffer);
                 }
@@ -267,7 +269,7 @@ angular.module('quassel')
 
     $quassel.on('buffer.message', function(bufferId, messageId) {
         var buffer = this.networks.getBuffer(bufferId);
-        if (buffer !== null) {
+        if (buffer) {
             var message = buffer.messages.get(parseInt(messageId, 10));
             if ($scope.buffer !== null && buffer.id === $scope.buffer.id && $wfocus.isFocus()) {
                 $quassel.core().markBufferAsRead(bufferId, messageId);
@@ -291,7 +293,7 @@ angular.module('quassel')
 
     $quassel.on('buffer.read', function(bufferId) {
         var buffer = this.networks.getBuffer(bufferId);
-        if (buffer !== null) {
+        if (buffer) {
             while(buffer.favico > 0) {
                 $favico.less();
                 buffer.favico--;
@@ -387,16 +389,16 @@ angular.module('quassel')
         });
 
         modalInstance.result.then(function (name) {
-            $quassel.core().sendMessage(network.statusBuffer.id, '/join ' + name);
+            $quassel.core().sendMessage(network.statusBuffer.getBufferInfo(), '/join ' + name);
         });
     };
 
     $scope.channelPart = function(channel) {
-        $quassel.core().sendMessage(channel.id, '/part');
+        $quassel.core().sendMessage(channel.getBufferInfo(), '/part');
     };
 
     $scope.channelJoin = function(channel) {
-        $quassel.core().sendMessage(channel.id, '/join ' + channel.name);
+        $quassel.core().sendMessage(channel.getBufferInfo(), '/join ' + channel.name);
     };
 
     $scope.channelDelete = function(channel) {
@@ -459,36 +461,39 @@ angular.module('quassel')
         var buffer;
         if (network !== null) {
             buffer = network.getBuffer(user.nick);
-            if (buffer !== null) {
+            if (buffer) {
                 $scope.showBuffer(buffer);
             } else {
                 $quassel.once('network.addbuffer', function(networkId, bufferId) {
-                    network = $quassel.get().getNetworks().get(networkId);
+                    network = $quassel.get().networks.get(networkId);
                     buffer = network.getBuffer(bufferId);
-                    if (buffer !== null) {
+                    if (buffer) {
                         $scope.$apply(function(){
                             $scope.showBuffer(buffer);
                         });
                     }
                 });
-                $quassel.core().sendMessage($scope.buffer.id, '/query ' + user.nick);
+                $quassel.core().sendMessage($scope.buffer.getBufferInfo(), '/query ' + user.nick);
             }
         }
     };
     
     $scope.userClass = function(buffer, nick) {
         var uclass = '';
-        if (buffer.isOwner(nick)) uclass = 'user-owner';
-        else if (buffer.isAdmin(nick)) uclass = 'user-admin';
-        else if (buffer.isOp(nick)) uclass = 'user-op';
-        else if (buffer.isHalfOp(nick)) uclass = 'user-half-op';
-        else if (buffer.isVoiced(nick)) uclass = 'user-voiced';
+        if (buffer.hasUser(nick)) {
+            var bufferUser = buffer.users.get(nick);
+            if (bufferUser.isOwner) uclass = 'user-owner';
+            else if (bufferUser.isAdmin) uclass = 'user-admin';
+            else if (bufferUser.isOp) uclass = 'user-op';
+            else if (bufferUser.isHalfOp) uclass = 'user-half-op';
+            else if (bufferUser.isVoiced) uclass = 'user-voiced';
+        }
         return uclass;
     };
     
     $scope.whois = function(user) {
         if ($scope.buffer !== null) {
-            $quassel.core().sendMessage($scope.buffer.id, '/whois ' + user.nick);
+            $quassel.core().sendMessage($scope.buffer.getBufferInfo(), '/whois ' + user.nick);
         }
     };
     
@@ -1408,7 +1413,7 @@ angular.module('quassel')
                 if (lines && lines.length > 0) {
                     $scope.cleanMessageHistory($scope.buffer.id);
                     for (var idx in lines) {
-                        $quassel.core().sendMessage($scope.buffer.id, lines[idx]);
+                        $quassel.core().sendMessage($scope.buffer.getBufferInfo(), lines[idx]);
                     }
                     $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
                     $scope.inputmessage = '';

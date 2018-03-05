@@ -19,6 +19,7 @@
   angular.module('ngQuassel', []).provider('$quassel', socketProvider);
 
   function socketProvider() {
+    const WebSocketStream = libquassel.WebSocketStream;
     var Quassel = libquassel.Client;
     
     this.$get = ['$config', socketFactory];
@@ -60,10 +61,19 @@
         self.port = _port;
         self.login = _login;
         self.password = _password;
+        
+        self.ws.socket.send(JSON.stringify({
+          server: _server,
+          port: _port,
+        }));
       }
       
       function getWebsocketURL() {
-        return 'ws' + (window.location.protocol === 'https:' ? 's' : '') +  '://' + self.server + ':' + self.port;
+        const protocol = 'ws' + (window.location.protocol === 'https:' ? 's' : '');
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        const pathname = window.location.pathname;
+        return protocol +  '://' + hostname + ':' + port + pathname;
       }
       
       function getQuassel() {
@@ -82,8 +92,8 @@
             securecore: $config.get('securecore', true)
           });
         }
-        if (self.server !== null) {
-          self.ws = new libquassel.WebSocketStream(getWebsocketURL(), ['binary', 'base64']);
+        if (self.ws === null) {
+          self.ws = new WebSocketStream(getWebsocketURL(), ['binary', 'base64']);
         }
       }
 

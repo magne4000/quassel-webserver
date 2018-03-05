@@ -9,6 +9,7 @@ var fs = require('fs');
 var pjson = require('./package.json');
 var opts = require('commander');
 var utils = require('./lib/utils');
+var ws = require('./ws');
 
 opts
   .version(pjson.version)
@@ -39,6 +40,7 @@ if (settings.val.webserver) {
 
 var app = express();
 app.locals.settings = settings;
+
 var server = null;
 if (opts.socket) {
     server = require('http').createServer(app);
@@ -169,6 +171,8 @@ if (app.get('env') === 'development') {
         });
     });
 }
+
+ws(server);
 
 if (app.get('socket')) {
     var socket = app.get('socket');

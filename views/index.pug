@@ -67,10 +67,10 @@ html(ng-app="quassel", ng-controller="ConfigController")
                     input(type="hidden", value=settings.val.default.port, ng-model="$parent.port")
                   else
                     .form-group(ng-cloak)
-                      label(for='host') Websocket host
+                      label(for='host') Server address
                       input#host.form-control(type='text', value=settings.val.default.host, ng-model="$parent.host")
                     .form-group(ng-cloak)
-                      label(for='port') Websocket port
+                      label(for='port') Server port
                       input#port.form-control(type='text', value=settings.val.default.port, ng-model="$parent.port")
                   .form-group
                     label(for='user') User name

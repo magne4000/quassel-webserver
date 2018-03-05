@@ -282,13 +282,16 @@ angular.module('quassel')
 
         users.forEach(function(value) {
             var user = value.user;
-            
-            if (buffer.isOwner(user.nick)) owner.push(user);
-            else if (buffer.isAdmin(user.nick)) admin.push(user);
-            else if (buffer.isOp(user.nick)) op.push(user);
-            else if (buffer.isHalfOp(user.nick)) halfop.push(user);
-            else if (buffer.isVoiced(user.nick)) voiced.push(user);
-            else other.push(user);
+            if (buffer.hasUser(user.nick)) {
+                var bufferUser = buffer.users.get(user.nick);
+                
+                if (bufferUser.isOwner) owner.push(user);
+                else if (bufferUser.isAdmin) admin.push(user);
+                else if (bufferUser.isOp) op.push(user);
+                else if (bufferUser.isHalfOp) halfop.push(user);
+                else if (bufferUser.isVoiced) voiced.push(user);
+                else other.push(user);
+            }
         });
 
         function sortNicks(a, b){

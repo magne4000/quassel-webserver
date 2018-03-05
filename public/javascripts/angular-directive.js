@@ -343,7 +343,7 @@ angular.module('quassel')
             if (!(message.type == MT.PLAIN || message.type == MT.ACTION))
                 continue;
 
-            var nick = message.getNick();
+            var nick = message.nick;
             if (nick.length < token.length)
                 continue;
 
