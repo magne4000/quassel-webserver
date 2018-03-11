@@ -60,7 +60,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         },
         save: function() {
             savedIgnoreList = angular.copy(ignoreList);
-            $quassel.core.updateIgnoreListManager(ignoreList.export());
+            $quassel.core().updateIgnoreListManager(ignoreList.export());
         }
     };
 }])
@@ -97,7 +97,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         },
         save: function() {
             savedHighlightRuleManager = angular.copy(highlightRuleManager);
-            $quassel.core.updateHighlightRuleManager(highlightRuleManager.export());
+            $quassel.core().updateHighlightRuleManager(highlightRuleManager.export());
         }
     };
 }])
