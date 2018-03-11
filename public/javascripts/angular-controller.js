@@ -5,8 +5,8 @@
 
 angular.module('quassel')
 .controller('NetworkController',
-        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config', '$responsive',
-            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config, $responsive) {
+        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config', '$responsive', '$highlight',
+            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config, $responsive, $highlight) {
     $scope.networks = [];
     $scope.buffer = null;
     $scope.messages = [];
@@ -335,6 +335,11 @@ angular.module('quassel')
         $scope.$apply(function(){
             updateMessages();
         });
+    });
+    
+    $quassel.on('highlightrules', function(manager) {
+        $highlight.setManager(manager);
+        $highlight.incRevision();
     });
     
     $quassel.on('buffer.rename', function() {
@@ -747,12 +752,13 @@ angular.module('quassel')
         $uibModalInstance.close([$scope.selectedBackend.DisplayName, properties, $scope.username, $scope.password]);
     };
 })
-.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', '$alert', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $alert) {
+.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', '$alert', '$highlight', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $alert, $highlight) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
     $scope.displayIgnoreListConfigItem = false;
     $scope.displayIdentitiesConfigItem = false;
+    $scope.displayHighlightConfigItem = false;
     $scope.activeIndice = 0;
     var modal, dbg = libquassel.debug, alias = libquassel.alias;
 
@@ -893,6 +899,15 @@ angular.module('quassel')
             scope: $scope,
         });
     };
+    
+    $scope.configHighlightRules = function() {
+        $scope.highlightManager = $highlight.getManager();
+        $scope.activeIndice = 0;
+        modal = $uibModal.open({
+            templateUrl: 'modalHighlightRuleManager.html',
+            scope: $scope,
+        });
+    };
 
     $scope.gsdisplayfullhostmask = function(newValue) {
         if (arguments.length > 0) {
@@ -972,10 +987,37 @@ angular.module('quassel')
         $ignore.deleteItem($scope.activeIndice);
         $scope.ignoreList = $ignore.getList();
     };
+    
+    $scope.createHighlightRule = function() {
+        $highlight.createRule();
+        $scope.highlightManager = $highlight.getManager();
+    };
+    
+    $scope.deleteSelectedHighlightRule = function() {
+        $highlight.deleteRule($scope.activeIndice);
+        $scope.highlightManager = $highlight.getManager();
+    };
+    
+    $scope.cancelHighlightManager = function() {
+        $highlight.restoreSavedManager();
+        modal.dismiss('close');
+    };
+
+    $scope.saveHighlightManager = function() {
+        $highlight.setManager($scope.highlightManager);
+        $highlight.save();
+        modal.dismiss('close');
+    };
 
     $quassel.once('ignorelist', function(list) {
         $scope.$apply(function(){
             $scope.displayIgnoreListConfigItem = true;
+        });
+    });
+    
+    $quassel.once('highlightrules', function(list) {
+        $scope.$apply(function(){
+            $scope.displayHighlightConfigItem = true;
         });
     });
     

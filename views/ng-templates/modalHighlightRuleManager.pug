@@ -1,0 +1,38 @@
+script(type="text/ng-template", id="modalHighlightRuleManager.html")
+    .modal-header
+      button.close(type='button', ng-click='$dismiss("close")') ×
+      h4.modal-title Highlight rules
+    .modal-body
+      uib-tabset
+        uib-tab(heading="{{highlightRule.name}}", select="setActiveIndice($index)", ng-repeat="highlightRule in highlightManager.list")
+          button.btn.btn-primary.pull-right(type="button", ng-model="highlightRule.isEnabled", uib-btn-checkbox)
+            i.icon-qws(ng-class="{'icon-check-empty': !highlightRule.isEnabled, 'icon-check': highlightRule.isEnabled}")
+            span  {{highlightRule.isEnabled ? 'Rule enabled':'Rule disabled'}}
+          h4 Highlight rule
+          form
+            .form-group
+              label.control-label(for="name") Rule
+              input.form-control(type="text", id="name", ng-model="highlightRule.name", required)
+            .form-group
+              label.control-label(for="sender") Sender
+              input.form-control(type="text", id="sender", ng-model="highlightRule.sender")
+            .form-group
+              label.control-label(for="channel") Channel
+              input.form-control(type="text", id="channel", ng-model="highlightRule.channel")
+            .btn-group
+              button.btn.btn-primary(type="button", ng-model="highlightRule.isRegEx", uib-btn-checkbox)
+                i.icon-qws(ng-class="{'icon-check-empty': !highlightRule.isRegEx, 'icon-check': highlightRule.isRegEx}")
+                span  Regex ?
+              button.btn.btn-primary(type="button", ng-model="highlightRule.isCaseSensitive", uib-btn-checkbox)
+                i.icon-qws(ng-class="{'icon-check-empty': !highlightRule.isCaseSensitive, 'icon-check': highlightRule.isCaseSensitive}")
+                span  Case sensitive ?
+              button.btn.btn-primary(type="button", ng-model="highlightRule.isInverse", uib-btn-checkbox)
+                i.icon-qws(ng-class="{'icon-check-empty': !highlightRule.isInverse, 'icon-check': highlightRule.isInverse}")
+                span  Inverse ?
+        button.btn.btn-danger.btn-sm.pull-right(title="Delete current rule", ng-confirm-click="Are you sure you want to delete this rule ?", ng-ok-click="deleteSelectedHighlightRule()")
+          i.icon-qws.icon-trash
+        button.btn.btn-success.btn-sm.pull-right(title="Add a rule", ng-click="createHighlightRule()")
+          i.icon-qws.icon-plus
+    .modal-footer
+      button.btn.btn-default(type='button', ng-click="cancelHighlightManager()") Cancel
+      button.btn.btn-primary(ng-click="saveHighlightManager()") Save

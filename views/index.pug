@@ -26,6 +26,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       include ./ng-templates/modalNetworks
       include ./ng-templates/modalIdentities
       include ./ng-templates/modalIgnoreList
+      include ./ng-templates/modalHighlightRuleManager
       include ./ng-templates/modalSetupWizard
       #container(ng-controller="QuasselController", ng-class="{connecting: connecting, disconnected: disconnected}")
         #header.dropdown(uib-dropdown)
@@ -47,6 +48,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
               a(href="#", ng-click="configAliases()", ng-show="logged") Aliases
             li
               a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreListConfigItem") Ignore List
+            li
+              a(href="#", ng-click="configHighlightRules()", ng-show="displayHighlightConfigItem") Highlight Rules
             li(class="dropdown-header", ng-show="bufferViews.length") Chat lists
             li(ng-repeat="bv in bufferViews", ng-class="{active: bv.id == bufferView.id}")
               a(href="#", ng-click="setBufferView(bv)") {{bv.bufferViewName}}
