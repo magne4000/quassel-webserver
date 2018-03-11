@@ -238,6 +238,15 @@ angular.module('quassel')
         }
     });
     
+    $quassel.on('buffer.activity', function(bufferId, activity) {
+        var buffer = this.networks.getBuffer(bufferId);
+        if (buffer) {
+            if ((activity & MT.PLAIN) || (activity & MT.NOTICE) || (activity & MT.ACTION)) {
+                setHighlight(buffer, 'low');
+            }
+        }
+    });
+    
     function updateBufferHighlightOnMessage(buffer, message) {
         var highlightmode = null;
         if (buffer.isStatusBuffer) {
