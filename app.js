@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var lessMiddleware = require('less-middleware');
 var fs = require('fs');
+var untildify = require('untildify');
 var pjson = require('./package.json');
 var opts = require('commander');
 var netBrowserify = require('net-browserify-alt');
@@ -25,10 +26,10 @@ var routes = require('./routes/index');
 
 if (settings.val.webserver) {
     if (settings.val.webserver.socket && !opts.socket) {
-        opts.socket === settings.val.webserver.socket;
+        opts.socket = untildify(settings.val.webserver.socket);
     }
     if (settings.val.webserver.listen && !opts.listen) {
-        opts.listen === settings.val.webserver.listen;
+        opts.listen = settings.val.webserver.listen;
     }
     if (settings.val.webserver.port && !opts.port) {
         opts.port = settings.val.webserver.port;
