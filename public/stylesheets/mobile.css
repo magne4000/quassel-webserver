@@ -1,0 +1,11 @@
+body, html {
+   overflow: hidden;
+   width: 100%;
+   overflow-x: hidden;
+   overflow-y: hidden;
+   position: fixed;
+}
+
+div {
+   -webkit-overflow-scrolling: touch; /* Lets it scroll lazy */
+}

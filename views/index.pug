@@ -4,10 +4,11 @@ html(ng-app="quassel", ng-controller="ConfigController")
       meta(charset='utf-8')
       title Quassel Web App
       meta(http-equiv='X-UA-Compatible', content='IE=edge')
+      meta(name='apple-mobile-web-app-capable', content='YES')
       meta(name='description', content='Quassel Web App')
       meta(name='author', content='Joël Charles')
       meta(name='author', content='Johannes Siipola')
-      meta(name="viewport", content="width=device-width, initial-scale=1")
+      meta(name="viewport", content="width=device-width, initial-scale=1, user-scalable=no, height=device-height")
       link(rel='icon', href='favicon.ico')
       style.
         [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak, .splash {
@@ -17,6 +18,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
           display: block !important;
         }
       link(rel='stylesheet', href=settings.prefix('/stylesheets/fonts.css'))
+      link(rel='stylesheet', href=settings.prefix('/stylesheets/mobile.css'))
       link(rel='stylesheet', href=settings.prefix('/stylesheets/theme-' + (settings.val.default.theme || settings.val.theme) + '.css'), theme)
     body.login-page
       include ./ng-templates/modalJoinChannel
