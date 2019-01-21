@@ -1,7 +1,7 @@
 # quassel-webserver
 A web client for Quassel (requires a running quasselcore)
 
-:exclamation: Your node version should be at least v6.x (v6 and v7 are supported).
+:exclamation: Your node version should be at least v6.x (v6 through v10 are supported).
 To install node last version, you can install [nvm](https://github.com/creationix/nvm).
 
 ### Screenshots
