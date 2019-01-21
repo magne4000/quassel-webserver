@@ -1,28 +1,18 @@
-sudo: required
-dist: trusty
+dist: xenial
 notifications:
-  irc: "chat.freenode.net#quassel-webserver"
-services:
-- docker
+  irc: chat.freenode.net#quassel-webserver
 script:
 - if [ ! -z "$TRAVIS_TAG" ]; then sed -i s/version:\ master/version:\ \'${TRAVIS_TAG}\'/g snapcraft.yaml; fi
-- docker run -v $(pwd):/cwd snapcore/snapcraft sh -c 'apt update -qq && apt install snapcraft -y && cd /cwd && snapcraft'
-after_success:
-- mkdir -p "${HOME}/.config/snapcraft"
-- openssl aes-256-cbc -K $encrypted_fd5960f2dcc4_key -iv $encrypted_fd5960f2dcc4_iv
-  -in .travis_snapcraft.cfg -out "${HOME}/.config/snapcraft/snapcraft.cfg" -d
 deploy:
-  - provider: script
-    on:
-      branch: master
-    script: docker run -v "${HOME}":/root -v $(pwd):$(pwd) -t ubuntu:xenial sh -c "apt update -qq && apt
-      install snapcraft -y && cd $(pwd) && snapcraft push *.snap --release
-      edge"
-    skip_cleanup: true
-  - provider: script
-    on:
-      tags: true
-    script: docker run -v "${HOME}":/root -v $(pwd):$(pwd) -t ubuntu:xenial sh -c "apt update -qq && apt
-      install snapcraft -y && cd $(pwd) && snapcraft push *.snap --release
-      edge"
-    skip_cleanup: true
+- provider: snap
+  on:
+    branch: master
+  snap: quassel-webserver_master_amd64.snap
+  channel: edge
+  skip_cleanup: true
+- provider: snap
+  on:
+    tags: true
+  snap: quassel-webserver_master_amd64.snap
+  channel: edge
+  skip_cleanup: true
