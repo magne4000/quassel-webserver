@@ -26,7 +26,7 @@
     "dev": "nodemon ./bin/www -m http -p 64111"
   },
   "engines": {
-    "node": ">= 4"
+    "node": ">= 6"
   },
   "keywords": [
     "quassel",
