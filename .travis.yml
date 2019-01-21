@@ -1,37 +1,18 @@
-sudo: required
-dist: trusty
+dist: xenial
 notifications:
   irc: chat.freenode.net#quassel-webserver
-services:
-- docker
-cache:
-  directories:
-  - ".encrypted"
 script:
-- if [ ! -z "$TRAVIS_TAG" ]; then sed -i s/version:\ master/version:\ \'${TRAVIS_TAG}\'/g
-  snapcraft.yaml; fi
-- docker run -v $(pwd):/cwd snapcore/snapcraft sh -c 'apt update -qq && apt install
-  snapcraft -y && cd /cwd && snapcraft'
-- "./ci/travis.sh"
+- if [ ! -z "$TRAVIS_TAG" ]; then sed -i s/version:\ master/version:\ \'${TRAVIS_TAG}\'/g snapcraft.yaml; fi
 deploy:
-- provider: script
+- provider: snap
   on:
     branch: master
-  script: docker run -v "${HOME}":/root -v $(pwd):$(pwd) -t ubuntu:xenial sh -c "apt
-    update -qq && apt install snapcraft -y && cd $(pwd) && snapcraft push *.snap --release
-    edge"
+  snap: quassel-webserver_master_amd64.snap
+  channel: edge
   skip_cleanup: true
-- provider: script
+- provider: snap
   on:
     tags: true
-  script: docker run -v "${HOME}":/root -v $(pwd):$(pwd) -t ubuntu:xenial sh -c "apt
-    update -qq && apt install snapcraft -y && cd $(pwd) && snapcraft push *.snap --release
-    edge"
+  snap: quassel-webserver_master_amd64.snap
+  channel: edge
   skip_cleanup: true
-after_success:
-- openssl enc -aes-256-cbc -base64 -pass env:SNAPCRAFT_SECRET -out ".encrypted/snapcraft.cfg.enc"
-  < "$HOME/.config/snapcraft/snapcraft.cfg"
-- rm -f "$HOME/.config/snapcraft/snapcraft.cfg"
-env:
-  global:
-    secure: AumzMkqTqquJssR7HB4I/O02LKD0IKevQQMSkPDY/JBV1+CsHXnE+g7n4nR905YxdFwlNHsfaMLCpgWi8WjDT8ydQDTIWTTCO/HAl+jqFJWaSJ4Pphg40LRAeqeDeR8HO1M7c71/8b5CGeMZRBznroMb1RuWcM25VJ+fxZ/6RA90E5ELkztMilEtl9xEUu0VBVqmh2YMihbBod9xao78EK4MGS74/+8Px7T+YZSu6Vh1uqYN2rilE6pu3Qoi6254PkAPAkKfzKHZcTguD+PWZUc3DbS32YgI5nHgYSa/UVHoNtkjNi1PfxizaWShNvzsT1SAETrZaw5wLatHSWMrri+2MvNWvGRnKZPP53n4k777CLllWl/1fXFfeH/kIeRv2eX4VcZYcVz2Cqo0rMAD2awEQ6OlNVTPbvp0F9obsbJr+bChFjhWo3/WRg1/AT85U+6YnFF4vmaQI2132uNG5gv1sefGvAphWi5XIRgfa9gR9WscfBjIKK5oHWKlbrqZE47ijdnEuzUw1Ad+FDi/8yxMFubqfCgAoQ5BIV7sVQ3/l4Qvrw3WAJQZJBF1VjHLb5jFzrmfa/qk0ykOtVCmvlIreBMoKkpwlEHXN+K40u5A1Yhm/a/CeWdCete/a3YcsHzMwwukK0f0+GpCwHBTuK0kh7zBYQ0ievf7qEV0gDk=
