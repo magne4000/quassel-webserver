@@ -120,16 +120,10 @@ if (process.env.SNAP_DATA) {
     app.use(settings.val.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
 }
 app.get(settings.prefix('/javascripts/libquassel.js'), function(req, res) {
-    // FIXME
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/dist/libquassel.js'));
+    res.sendFile(require.resolve('libquassel/dist/libquassel.js'));
 });
 app.get(settings.prefix('/javascripts/libquassel.js.map'), function(req, res) {
-    // FIXME
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/dist/libquassel.js.map'));
-});
-app.get(settings.prefix('/javascripts/libquassel.min.js'), function(req, res) {
-    // FIXME
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/dist/libquassel.min.js'));
+    res.sendFile(require.resolve('libquassel/dist/libquassel.js.map'));
 });
 if (settings.val.prefixpath.length > 0) {
     app.use(settings.val.prefixpath, express.static(path.join(__dirname, 'public')));

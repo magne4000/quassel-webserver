@@ -280,10 +280,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src=settings.prefix('/javascripts/angular-sanitize.js'))
       script(src=settings.prefix('/javascripts/angular-dnd.min.js'))
       script(src=settings.prefix('/javascripts/angular-notify.min.js'))
-      if dev
-        script(src=settings.prefix('/javascripts/libquassel.js'))
-      else
-        script(src=settings.prefix('/javascripts/libquassel.min.js'))
+      script(src=settings.prefix('/javascripts/libquassel.js'))
       script(src=settings.prefix('/javascripts/angular-init.js'))
       script(src=settings.prefix('/javascripts/angular-directive.js'))
       script(src=settings.prefix('/javascripts/angular-filter.js'))
