@@ -9,8 +9,8 @@ var fs = require('fs');
 var untildify = require('untildify');
 var pjson = require('./package.json');
 var opts = require('commander');
-var netBrowserify = require('net-browserify-alt');
 var utils = require('./lib/utils');
+var ws = require('./ws');
 
 opts
   .version(pjson.version)
@@ -41,6 +41,7 @@ if (settings.val.webserver) {
 
 var app = express();
 app.locals.settings = settings;
+
 var server = null;
 if (opts.socket) {
     server = require('http').createServer(app);
@@ -100,14 +101,6 @@ if (settings.val.prefixpath.length > 0) {
     }
 }
 
-var nboptions = {
-    server: server,
-    urlRoot: settings.prefix('/p')
-};
-if (settings.forcedefault) {
-    nboptions.to = [{host: settings.val.default.host, port: settings.val.default.port}];
-}
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -128,10 +121,10 @@ if (process.env.SNAP_DATA) {
     app.use(settings.val.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
 }
 app.get(settings.prefix('/javascripts/libquassel.js'), function(req, res) {
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.js'));
+    res.sendFile(require.resolve('libquassel/dist/libquassel.js'));
 });
-app.get(settings.prefix('/javascripts/libquassel.min.js'), function(req, res) {
-    res.sendFile(path.join(__dirname, 'node_modules/libquassel/client/libquassel.min.js'));
+app.get(settings.prefix('/javascripts/libquassel.js.map'), function(req, res) {
+    res.sendFile(require.resolve('libquassel/dist/libquassel.js.map'));
 });
 if (settings.val.prefixpath.length > 0) {
     app.use(settings.val.prefixpath, express.static(path.join(__dirname, 'public')));
@@ -140,7 +133,6 @@ if (settings.val.prefixpath.length > 0) {
 }
 
 app.use(settings.prefix('/'), routes);
-netBrowserify(app, nboptions);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -174,6 +166,8 @@ if (app.get('env') === 'development') {
         });
     });
 }
+
+ws(server);
 
 if (app.get('socket')) {
     var socket = app.get('socket');

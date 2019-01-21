@@ -1,42 +1,44 @@
+/* global libquassel */
 /* global angular */
+
 angular.module('quassel')
 .filter('decoratenick', ['stripnickFilter', function(stripnick) {
-    var MT = require('message').Type;
+    var MT = libquassel.message.Types;
 
     return function(message) {
         var sender;
         switch(message.type) {
-            case MT.Nick:
+            case MT.NICK:
                 sender = '<->';
                 break;
-            case MT.Mode:
+            case MT.MODE:
                 sender = '***';
                 break;
-            case MT.Join:
+            case MT.JOIN:
                 sender = '-->';
                 break;
-            case MT.Part:
+            case MT.PART:
                 sender = '<--';
                 break;
-            case MT.Quit:
+            case MT.QUIT:
                 sender = '<--';
                 break;
-            case MT.Kick:
+            case MT.KICK:
                 sender = '<-*';
                 break;
-            case MT.Server:
+            case MT.SERVER:
                 sender = stripnick(message.sender) || "*";
                 break;
-            case MT.Topic:
+            case MT.TOPIC:
                 sender = '*';
                 break;
-            case MT.NetsplitJoin:
+            case MT.NETSPLITJOIN:
                 sender = '=>';
                 break;
-            case MT.NetsplitQuit:
+            case MT.NETSPLITQUIT:
                 sender = '<=';
                 break;
-            case MT.DayChange:
+            case MT.DAYCHANGE:
                 sender = '-';
                 break;
             default:
@@ -280,13 +282,16 @@ angular.module('quassel')
 
         users.forEach(function(value) {
             var user = value.user;
-            
-            if (buffer.isOwner(user.nick)) owner.push(user);
-            else if (buffer.isAdmin(user.nick)) admin.push(user);
-            else if (buffer.isOp(user.nick)) op.push(user);
-            else if (buffer.isHalfOp(user.nick)) halfop.push(user);
-            else if (buffer.isVoiced(user.nick)) voiced.push(user);
-            else other.push(user);
+            if (buffer.hasUser(user.nick)) {
+                var bufferUser = buffer.users.get(user.nick);
+                
+                if (bufferUser.isOwner) owner.push(user);
+                else if (bufferUser.isAdmin) admin.push(user);
+                else if (bufferUser.isOp) op.push(user);
+                else if (bufferUser.isHalfOp) halfop.push(user);
+                else if (bufferUser.isVoiced) voiced.push(user);
+                else other.push(user);
+            }
         });
 
         function sortNicks(a, b){

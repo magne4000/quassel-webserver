@@ -11,6 +11,7 @@
 // Module for provide Socket.io support
 
 /* global angular */
+/* global libquassel */
 
 (function () {
   'use strict';
@@ -18,14 +19,15 @@
   angular.module('ngQuassel', []).provider('$quassel', socketProvider);
 
   function socketProvider() {
-    var Quassel = require('quassel');
+    const WebSocketStream = libquassel.WebSocketStream;
+    var Quassel = libquassel.Client;
     
     this.$get = ['$config', socketFactory];
 
     function socketFactory($config) {
       this.quassel = null;
-      this.server = '';
-      this.port = '';
+      this.server = null;
+      this.port = null;
       this.login = '';
       this.password = '';
       this.ws = null;
@@ -44,29 +46,12 @@
         'get': getQuassel,
         markBufferAsRead: markBufferAsRead,
         moreBacklogs: moreBacklogs,
-        sendMessage: sendMessage,
-        requestDisconnectNetwork: requestDisconnectNetwork,
-        requestConnectNetwork: requestConnectNetwork,
-        requestRemoveBuffer: requestRemoveBuffer,
-        requestMergeBuffersPermanently: requestMergeBuffersPermanently,
-        requestUpdateIdentity: requestUpdateIdentity,
-        requestUpdateIgnoreListManager: requestUpdateIgnoreListManager,
-        requestSetNetworkInfo: requestSetNetworkInfo,
-        createNetwork: createNetwork,
-        removeNetwork: removeNetwork,
-        createIdentity: createIdentity,
-        removeIdentity: removeIdentity,
         connect: connect,
         disconnect: disconnect,
         login: login,
-        requestUnhideBuffer: requestUnhideBuffer,
-        requestHideBufferPermanently: requestHideBufferPermanently,
-        requestHideBufferTemporarily: requestHideBufferTemporarily,
-        requestRenameBuffer: requestRenameBuffer,
-        requestUpdateAliasManager: requestUpdateAliasManager,
-        requestCreateBufferView: requestCreateBufferView,
         supports: supports,
-        Feature: Quassel.Feature
+        Features: libquassel.Features,
+        core: core
       };
 
       return service;
@@ -76,8 +61,19 @@
         self.port = _port;
         self.login = _login;
         self.password = _password;
-        self.quassel.server = self.server;
-        self.quassel.port = self.port;
+        
+        self.ws.socket.send(JSON.stringify({
+          server: _server,
+          port: _port,
+        }));
+      }
+      
+      function getWebsocketURL() {
+        const protocol = 'ws' + (window.location.protocol === 'https:' ? 's' : '');
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        const pathname = window.location.pathname;
+        return protocol +  '://' + hostname + ':' + port + pathname;
       }
       
       function getQuassel() {
@@ -85,28 +81,19 @@
       }
 
       function initializeSocket() {
-        //Check if socket is undefined
         if (self.quassel === null) {
-          var net = require('net');
-          net.setProxy({
-              path: window.location.pathname + 'p',
+          self.quassel = new Quassel(function(next) {
+            next(self.login, self.password);
+            triggerWebsocketBindings();
+          }, {
+            initialbackloglimit: $config.get('initialBacklogLimit', 20),
+            backloglimit: $config.get('backlogLimit', 50),
+            highlightmode: $config.get('highlightmode', 2),
+            securecore: $config.get('securecore', true)
           });
-          self.quassel = new Quassel(self.server, self.port, {
-              nobacklogs: $config.get('initialBacklogLimit', 0) === 0,
-              initialbackloglimit: $config.get('initialBacklogLimit', 20),
-              backloglimit: $config.get('backlogLimit', 50),
-              highlightmode: $config.get('highlightmode', 2),
-              securecore: $config.get('securecore', true)  // tls-browserify module doesn't respect tls API of nodejs
-          }, function(next) {
-              next(self.login, self.password);
-              var istls = self.quassel.useSSL;
-              if (istls) {
-                self.ws = self.quassel.qtsocket.socket._socket._ws;
-              } else {
-                self.ws = self.quassel.qtsocket.socket._ws;
-              }
-              triggerWebsocketBindings();
-          });
+        }
+        if (self.ws === null) {
+          self.ws = new WebSocketStream(getWebsocketURL(), ['binary', 'base64']);
         }
       }
 
@@ -163,9 +150,9 @@
       function emit(name, data, callback) {
         initializeSocket();
         if (typeof callback === 'function') {
-            self.quassel.emit(name, data, angularCallback(callback));
+          self.quassel.emit(name, data, angularCallback(callback));
         } else {
-            self.quassel.emit.apply(self.quassel, Array.prototype.slice.call(arguments));
+          self.quassel.emit.apply(self.quassel, Array.prototype.slice.call(arguments));
         }
       }
       
@@ -180,83 +167,16 @@
       }
       
       function moreBacklogs(bufferId, firstMessageId) {
-        self.quassel.requestBacklog(bufferId, -1, firstMessageId, 50);
+        self.quassel.core.backlog(bufferId, -1, firstMessageId, 50);
       }
       
-      function sendMessage(bufferId, message) {
-        self.quassel.sendMessage(bufferId, message);
-      }
-      
-      function requestDisconnectNetwork(networkId) {
-        self.quassel.requestDisconnectNetwork(networkId);
-      }
-      
-      function requestConnectNetwork(networkId) {
-        self.quassel.requestConnectNetwork(networkId);
-      }
-      
-      function requestRemoveBuffer(bufferId) {
-        self.quassel.requestRemoveBuffer(bufferId);
-      }
-      
-      function requestMergeBuffersPermanently(bufferId1, bufferId2) {
-        self.quassel.requestMergeBuffersPermanently(bufferId1, bufferId2);
-      }
-      
-      function requestUnhideBuffer(bufferViewId, bufferId) {
-        self.quassel.requestUnhideBuffer(bufferViewId, bufferId);
-      }
-      
-      function requestHideBufferTemporarily(bufferViewId, bufferId) {
-        self.quassel.requestHideBufferTemporarily(bufferViewId, bufferId);
-      }
-      
-      function requestHideBufferPermanently(bufferViewId, bufferId) {
-        self.quassel.requestHideBufferPermanently(bufferViewId, bufferId);
-      }
-      
-      function requestRenameBuffer(bufferId, name) {
-        self.quassel.requestRenameBuffer(bufferId, name);
-      }
-      
-      function requestUpdateAliasManager(aliases) {
-        self.quassel.requestUpdateAliasManager(aliases);
-      }
-      
-      function requestUpdateIgnoreListManager(ignoreList) {
-        self.quassel.requestUpdateIgnoreListManager(ignoreList);
-      }
-      
-      function requestSetNetworkInfo(networkId, network) {
-        self.quassel.requestSetNetworkInfo(networkId, network);
-      }
-      
-      function createNetwork(networkName, identityId, initialServer, optionsopt) {
-        self.quassel.createNetwork(networkName, identityId, initialServer, optionsopt);
-      }
-      
-      function removeNetwork(networkId) {
-        self.quassel.removeNetwork(networkId);
-      }
-      
-      function createIdentity(identityName, options) {
-        self.quassel.createIdentity(identityName, options);
-      }
-      
-      function removeIdentity(identityId) {
-        self.quassel.removeIdentity(identityId);
-      }
-      
-      function requestUpdateIdentity(identityId, identity) {
-        self.quassel.requestUpdateIdentity(identityId, identity);
-      }
-      
-      function requestCreateBufferView(data) {
-        self.quassel.requestCreateBufferView(data);
+      function core() {
+        return self.quassel.core;
       }
       
       function connect() {
-        self.quassel.connect();
+        initializeSocket();
+        self.quassel.connect(self.ws);
       }
       
       function disconnect() {

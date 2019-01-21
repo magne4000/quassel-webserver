@@ -1,3 +1,4 @@
+/* global libquassel */
 /* global angular */
 /* global Favico */
 /* global localStorage */
@@ -27,8 +28,8 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     };
 }])
 .factory('$ignore', ['$quassel', function($quassel){
-    var IgnoreList = require('ignore').IgnoreList;
-    var IgnoreItem = require('ignore').IgnoreItem;
+    var IgnoreList = libquassel.ignore.IgnoreList;
+    var IgnoreItem = libquassel.ignore.IgnoreItem;
     var ignoreList = new IgnoreList();
     var savedIgnoreList = null;
     var ignoreListRevision = 0;
@@ -59,7 +60,44 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
         },
         save: function() {
             savedIgnoreList = angular.copy(ignoreList);
-            $quassel.requestUpdateIgnoreListManager(ignoreList.export());
+            $quassel.core().updateIgnoreListManager(ignoreList.export());
+        }
+    };
+}])
+.factory('$highlight', ['$quassel', function($quassel){
+    var HighlightRuleManager = libquassel.highlight.HighlightRuleManager;
+    var HighlightRule = libquassel.highlight.HighlightRule;
+    var highlightRuleManager = new HighlightRuleManager();
+    var savedHighlightRuleManager = null;
+    var highlightRuleManagerRevision = 0;
+    return {
+        createRule: function() {
+            highlightRuleManager.list.push(new HighlightRule('', false, false, true, false, '', ''));
+        },
+        deleteRule: function(indice) {
+            if (highlightRuleManager.list[indice]) {
+                highlightRuleManager.list.splice(indice, 1);
+            }
+        },
+        getManager: function() {
+            return highlightRuleManager;
+        },
+        restoreSavedManager: function() {
+            highlightRuleManager = angular.copy(savedHighlightRuleManager);
+        },
+        setManager: function(obj) {
+            highlightRuleManager = obj;
+            savedHighlightRuleManager = angular.copy(highlightRuleManager);
+        },
+        getRevision: function() {
+            return highlightRuleManagerRevision;
+        },
+        incRevision: function() {
+            highlightRuleManagerRevision++;
+        },
+        save: function() {
+            savedHighlightRuleManager = angular.copy(highlightRuleManager);
+            $quassel.core().updateHighlightRuleManager(highlightRuleManager.export());
         }
     };
 }])
@@ -522,7 +560,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
     }
     
     if (options.image.embed) {
-      plugins.push(new Plugin('image', 'image', /https:\/\/\S*\.(?:gif|jpg|jpeg|tiff|png|svg|webp)\b/i, function(match) {
+      plugins.push(new Plugin('image', 'image', /https?:\/\/\S*\.(?:gif|jpg|jpeg|tiff|png|svg|webp)\b/i, function(match) {
         // html
         var el = angular.element('<img/>')
                  .attr('src', match[0]);

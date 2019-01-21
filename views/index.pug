@@ -4,10 +4,11 @@ html(ng-app="quassel", ng-controller="ConfigController")
       meta(charset='utf-8')
       title Quassel Web App
       meta(http-equiv='X-UA-Compatible', content='IE=edge')
+      meta(name='apple-mobile-web-app-capable', content='YES')
       meta(name='description', content='Quassel Web App')
       meta(name='author', content='Joël Charles')
       meta(name='author', content='Johannes Siipola')
-      meta(name="viewport", content="width=device-width, initial-scale=1")
+      meta(name="viewport", content="width=device-width, initial-scale=1, user-scalable=no, height=device-height")
       link(rel='icon', href='favicon.ico')
       style.
         [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak, .splash {
@@ -17,6 +18,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
           display: block !important;
         }
       link(rel='stylesheet', href=settings.prefix('/stylesheets/fonts.css'))
+      link(rel='stylesheet', href=settings.prefix('/stylesheets/mobile.css'))
       link(rel='stylesheet', href=settings.prefix('/stylesheets/theme-' + (settings.val.default.theme || settings.val.theme) + '.css'), theme)
     body.login-page
       include ./ng-templates/modalJoinChannel
@@ -26,6 +28,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       include ./ng-templates/modalNetworks
       include ./ng-templates/modalIdentities
       include ./ng-templates/modalIgnoreList
+      include ./ng-templates/modalHighlightRuleManager
       include ./ng-templates/modalSetupWizard
       #container(ng-controller="QuasselController", ng-class="{connecting: connecting, disconnected: disconnected}")
         #header.dropdown(uib-dropdown)
@@ -47,6 +50,8 @@ html(ng-app="quassel", ng-controller="ConfigController")
               a(href="#", ng-click="configAliases()", ng-show="logged") Aliases
             li
               a(href="#", ng-click="configIgnoreList()", ng-show="displayIgnoreListConfigItem") Ignore List
+            li
+              a(href="#", ng-click="configHighlightRules()", ng-show="displayHighlightConfigItem") Highlight Rules
             li(class="dropdown-header", ng-show="bufferViews.length") Chat lists
             li(ng-repeat="bv in bufferViews", ng-class="{active: bv.id == bufferView.id}")
               a(href="#", ng-click="setBufferView(bv)") {{bv.bufferViewName}}
@@ -130,7 +135,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                 )
                 span.collapsable(ng-click="network.collapsed = !network.collapsed")
                   i.icon-qws(ng-class="network.collapsed ? 'icon-up-open' : 'icon-down-open'")
-                span.network-name(ng-click="showBuffer(network.getStatusBuffer())") {{network.networkName}}
+                span.network-name(ng-click="showBuffer(network.statusBuffer)") {{network.networkName}}
                 a.dropdown-network.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
                   i.icon-qws.icon-menu
                 ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
@@ -154,7 +159,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       drag
                       drop="onDropComplete"
                       class="buffer-highlight-{{channel.highlight}}"
-                      ng-class="{on: channel.active, off: !channel.active, active: buffer.id == channel.id}"
+                      ng-class="{on: channel.isActive, off: !channel.isActive, active: buffer.id == channel.id}"
                       ng-repeat="channel in network._buffers | channelsFilter:bufferView:showhidden | orderBy:'id':false:comparator track by channel.id"
                       uib-dropdown
                       dropdown-contextmenu
@@ -170,11 +175,11 @@ html(ng-app="quassel", ng-controller="ConfigController")
                   a.dropdown-channel.dropdown-toggle(data-toggle="dropdown", uib-dropdown-toggle)
                     i.icon-qws.icon-menu
                   ul.dropdown-menu.dropdown-menu-right(role="menu", uib-dropdown-menu)
-                    li(ng-if="channel.active && channel.isChannel()")
+                    li(ng-if="channel.active && channel.isChannel")
                       a(href="#", ng-click="channelPart(channel)") Part
-                    li(ng-if="!channel.active && channel.isChannel()")
+                    li(ng-if="!channel.active && channel.isChannel")
                       a(href="#", ng-click="channelJoin(channel)") Join
-                    li(ng-if="!channel.active || !channel.isChannel()")
+                    li(ng-if="!channel.active || !channel.isChannel")
                       a(href="#", ng-confirm-click="Are you sure you want to delete this buffer permanently ?", ng-ok-click="channelDelete(channel)") Delete
                     li(class="dropdown-header") Show / Hide
                     li(ng-if="!bufferView.isPermanentlyRemoved(channel.id)")
@@ -183,7 +188,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
                       a(href="#", ng-click="channelHideTemporarily(channel)") Hide temporarily
                     li(ng-if="bufferView.isHidden(channel.id)")
                       a(href="#", ng-click="channelUnhide(channel)") Unhide
-                    li(ng-if="!channel.isChannel()")
+                    li(ng-if="!channel.isChannel")
                       a(href="#", ng-click="openModalRenameBuffer(channel)") Rename
             .buffer-bottom-bar
               a.btn.showhide.right(href="javascript:void(0)", ng-click="shown = !shown")
@@ -210,7 +215,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
               li.irc-message(
                     ng-repeat-start="message in messages track by message.sid"
                     class="type-{{::message.type}}"
-                    ng-class="{highlighted: message.isHighlighted()}"
+                    ng-class="{highlighted: message.isHighlighted}"
                     ng-if="!currentFilter2[message.type]"
                 )
                 span.timestamp
@@ -277,10 +282,7 @@ html(ng-app="quassel", ng-controller="ConfigController")
       script(src=settings.prefix('/javascripts/angular-sanitize.js'))
       script(src=settings.prefix('/javascripts/angular-dnd.min.js'))
       script(src=settings.prefix('/javascripts/angular-notify.min.js'))
-      if dev
-        script(src=settings.prefix('/javascripts/libquassel.js'))
-      else
-        script(src=settings.prefix('/javascripts/libquassel.min.js'))
+      script(src=settings.prefix('/javascripts/libquassel.js'))
       script(src=settings.prefix('/javascripts/angular-init.js'))
       script(src=settings.prefix('/javascripts/angular-directive.js'))
       script(src=settings.prefix('/javascripts/angular-filter.js'))

@@ -1,5 +1,7 @@
 [Service]
 ExecStart=/usr/bin/node /home/quassel-webserver/quassel-webserver/app.js -l 127.0.0.1 -m http
+# If it is launched in Socket mode, edit and uncomment the following line
+# ExecStopPost=-/bin/rm /var/run/quassel-web/quassel-web.sock
 Restart=always
 StandardOutput=syslog
 StandardError=syslog

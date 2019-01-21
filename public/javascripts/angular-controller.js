@@ -1,11 +1,12 @@
+/* global libquassel */
 /* global KeyboardEvent */
 /* global angular */
 /* global $ */
 
 angular.module('quassel')
 .controller('NetworkController',
-        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config', '$responsive',
-            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config, $responsive) {
+        ['$scope', '$quassel', '$uibModal', '$favico', '$alert', '$desktop', '$wfocus', '$ignore', '$config', '$responsive', '$highlight',
+            function($scope, $quassel, $uibModal, $favico, $alert, $desktop, $wfocus, $ignore, $config, $responsive, $highlight) {
     $scope.networks = [];
     $scope.buffer = null;
     $scope.messages = [];
@@ -14,18 +15,20 @@ angular.module('quassel')
     $scope.shown = true;
     $scope.shown2 = $responsive.getBreakpoint() !== 'xs';
 
-    var MT = require('message').Type;
-    var MF = require('message').Flag;
-    var IRCMessage = require('message').IRCMessage;
+    var MT = libquassel.message.Types;
+    var MF = libquassel.message.Flags;
+    var IRCMessage = libquassel.message.IRCMessage;
     var loadingMoreBacklogs = new Map;
     var initialLastSeenList = [];
     
     function _updateBuffers(network) {
-        var it = network.getBufferMap().values();
+        var it = network.buffers.values();
         var networkItem = it.next();
         network._buffers = [];
         while(!networkItem.done) {
-            network._buffers.push(networkItem.value);
+            if (!networkItem.value.isStatusBuffer) {
+                network._buffers.push(networkItem.value);
+            }
             networkItem = it.next();
         }
     }
@@ -34,8 +37,8 @@ angular.module('quassel')
         var message = new IRCMessage({
             id: msg.id,
             timestamp: timestamp/1000,
-            type: MT.DayChange,
-            flags: MF.ServerMsg,
+            type: MT.DAYCHANGE,
+            flags: MF.SERVERMSG,
             bufferInfo: {
                 network: msg.networkId,
                 id: msg.bufferId
@@ -62,7 +65,7 @@ angular.module('quassel')
         var shouldDelete = false;
         if (buffer.ignoreListRevision === $ignore.getRevision() && typeof message.isIgnored === "boolean") {
             shouldDelete = message.isIgnored;
-        } else if ($ignore.getList().matches(message, $quassel.get().getNetworks())) {
+        } else if ($ignore.getList().matches(message, $quassel.get().networks)) {
             message.isIgnored = true;
             shouldDelete = true;
         } else {
@@ -111,8 +114,7 @@ angular.module('quassel')
     });
 
     $quassel.on('network.init', function(networkId) {
-        var networks = this.getNetworks();
-        var network = networks.get(networkId);
+        var network = this.networks.get(networkId);
         $scope.$applyAsync(function(){
             network.collapsed = !network.isConnected;
             $scope.networks.push(network);
@@ -136,19 +138,19 @@ angular.module('quassel')
     });
 
     $quassel.on('network.addbuffer', function(networkId, bufferId) {
-        var network = this.getNetworks().get(networkId);
+        var network = this.networks.get(networkId);
         _updateBuffers(network);
     });
     
     $quassel.on('network.disconnected', function(networkId) {
-        var network = this.getNetworks().get(networkId);
+        var network = this.networks.get(networkId);
         $scope.$apply(function(){
             network.collapsed = true;
         });
     });
     
     $quassel.on('network.connected', function(networkId) {
-        var network = this.getNetworks().get(networkId);
+        var network = this.networks.get(networkId);
         $scope.$apply(function(){
             network.collapsed = false;
         });
@@ -193,15 +195,15 @@ angular.module('quassel')
 
     $quassel.on('buffer.lastseen', function(bufferId, messageId) {
         messageId = parseInt(messageId, 10);
-        var buffer = this.getNetworks().findBuffer(bufferId);
-        if (buffer !== null) {
+        var buffer = this.networks.getBuffer(bufferId);
+        if (buffer) {
             // Fix networkStatusBuffer sync from server
-            if (buffer.isStatusBuffer()) {
-                var network = this.getNetworks().get(buffer.network);
-                network.setStatusBuffer(buffer);
+            if (buffer.isStatusBuffer) {
+                var network = this.networks.get(buffer.network);
+                network.statusBuffer = buffer;
             }
 
-            var bufferLastMessage = buffer.getLastMessage();
+            var bufferLastMessage = buffer.lastMessage;
             if (typeof bufferLastMessage === 'undefined' && $config.get('initialBacklogLimit', 20) !== 0) {
                 initialLastSeenList[bufferId] = messageId;
             }
@@ -228,33 +230,42 @@ angular.module('quassel')
     });
 
     $quassel.on('buffer.markerline', function(bufferId, messageId) {
-        var buffer = this.getNetworks().findBuffer(bufferId);
-        if (buffer !== null) {
+        var buffer = this.networks.getBuffer(bufferId);
+        if (buffer) {
             $scope.$apply(function(){
                 buffer.markerline = parseInt(messageId, 10);
             });
         }
     });
     
+    $quassel.on('buffer.activity', function(bufferId, activity) {
+        var buffer = this.networks.getBuffer(bufferId);
+        if (buffer) {
+            if ((activity & MT.PLAIN) || (activity & MT.NOTICE) || (activity & MT.ACTION)) {
+                setHighlight(buffer, 'low');
+            }
+        }
+    });
+    
     function updateBufferHighlightOnMessage(buffer, message) {
         var highlightmode = null;
-        if (buffer.isStatusBuffer()) {
+        if (buffer.isStatusBuffer) {
             setHighlight(buffer, 'low');
             highlightmode = 'low';
-        } else if (!buffer.isChannel()) {
-            if (!message.isSelf()) {
+        } else if (!buffer.isChannel) {
+            if (!message.isSelf) {
                 if (setHighlight(buffer, 'high')) {
                     incFavico(buffer);
                 }
                 highlightmode = 'high';
             }
-        } else if (!message.isSelf()) {
-            if (message.isHighlighted()) {
+        } else if (!message.isSelf) {
+            if (message.isHighlighted) {
                 if (setHighlight(buffer, 'high')) {
                     incFavico(buffer);
                 }
                 highlightmode = 'high';
-            } else if (message.type == MT.Plain || message.type == MT.Action) {
+            } else if (message.type == MT.PLAIN || message.type == MT.ACTION) {
                 setHighlight(buffer, 'medium');
                 highlightmode = 'medium';
             } else {
@@ -266,15 +277,15 @@ angular.module('quassel')
     }
 
     $quassel.on('buffer.message', function(bufferId, messageId) {
-        var buffer = this.getNetworks().findBuffer(bufferId);
-        if (buffer !== null) {
+        var buffer = this.networks.getBuffer(bufferId);
+        if (buffer) {
             var message = buffer.messages.get(parseInt(messageId, 10));
             if ($scope.buffer !== null && buffer.id === $scope.buffer.id && $wfocus.isFocus()) {
-                $quassel.markBufferAsRead(bufferId, messageId);
+                $quassel.core().markBufferAsRead(bufferId, messageId);
             } else {
                 if (!$wfocus.isFocus() && $scope.buffer !== null && buffer.id === $scope.buffer.id) {
                     $wfocus.onNextFocus(function(){
-                        $quassel.markBufferAsRead(bufferId, messageId);
+                        $quassel.core().markBufferAsRead(bufferId, messageId);
                     });
                 }
                 if (updateBufferHighlightOnMessage(buffer, message) === 'high') {
@@ -290,8 +301,8 @@ angular.module('quassel')
     });
 
     $quassel.on('buffer.read', function(bufferId) {
-        var buffer = this.getNetworks().findBuffer(bufferId);
-        if (buffer !== null) {
+        var buffer = this.networks.getBuffer(bufferId);
+        if (buffer) {
             while(buffer.favico > 0) {
                 $favico.less();
                 buffer.favico--;
@@ -301,7 +312,7 @@ angular.module('quassel')
     });
 
     $quassel.on('buffer.remove', function(bufferId) {
-        var networks = this.getNetworksMap();
+        var networks = this.networks;
         $scope.$apply(function(){
             networks.forEach(function(network){
                 _updateBuffers(network);
@@ -310,10 +321,10 @@ angular.module('quassel')
     });
 
     $quassel.on('buffer.merge', function(bufferId1, bufferId2) {
-        var buffer1 = this.getNetworks().findBuffer(bufferId1);
-        var network = this.getNetworks().get(buffer1.network);
+        var buffer1 = this.networks.getBuffer(bufferId1);
+        var network = this.networks.get(buffer1.network);
         $scope.$apply(function(){
-            network._buffers = network.getBufferMap().values();
+            network._buffers = network.networks.values();
             _updateBuffers(network);
         });
     });
@@ -324,6 +335,11 @@ angular.module('quassel')
         $scope.$apply(function(){
             updateMessages();
         });
+    });
+    
+    $quassel.on('highlightrules', function(manager) {
+        $highlight.setManager(manager);
+        $highlight.incRevision();
     });
     
     $quassel.on('buffer.rename', function() {
@@ -339,7 +355,7 @@ angular.module('quassel')
             if ($responsive.getBreakpoint() !== 'xs') {
                 $('#messagebox').focus();
             }
-            $quassel.markBufferAsRead(channel.id, channel._lastMessageId);
+            $quassel.core().markBufferAsRead(channel.id, channel._lastMessageId);
             
             // Empty backlogs if configured so
             if ($config.get('emptybufferonswitch', false)) {
@@ -348,7 +364,7 @@ angular.module('quassel')
             }
             
             // Update title
-            var network = $quassel.get().getNetworks().get(channel.network);
+            var network = $quassel.get().networks.get(channel.network);
             document.title = channel.name + ' (' + network.networkName + ') – Quassel Web App';
         } else {
             document.title = 'Quassel Web App';
@@ -360,7 +376,7 @@ angular.module('quassel')
             && (!loadingMoreBacklogs.has($scope.buffer.id)
                 ||  loadingMoreBacklogs.get($scope.buffer.id) === false)
             && loadingMoreBacklogs.get($scope.buffer.id) !== 'stop') {
-            var firstMessageId = $scope.buffer._firstMessageId;
+            var firstMessageId = $scope.buffer.firstMessageId;
             loadingMoreBacklogs.set($scope.buffer.id, true);
             if (!firstMessageId) firstMessageId = -1;
             $quassel.moreBacklogs($scope.buffer.id, firstMessageId);
@@ -370,11 +386,11 @@ angular.module('quassel')
     };
 
     $scope.connect = function(network) {
-        $quassel.requestConnectNetwork(network.networkId);
+        $quassel.core().connectNetwork(network.networkId);
     };
 
     $scope.disconnect = function(network) {
-       $quassel.requestDisconnectNetwork(network.networkId);
+       $quassel.core().disconnectNetwork(network.networkId);
     };
 
     $scope.openModalJoinChannel = function(network) {
@@ -387,20 +403,20 @@ angular.module('quassel')
         });
 
         modalInstance.result.then(function (name) {
-            $quassel.sendMessage(network.getStatusBuffer().id, '/join ' + name);
+            $quassel.core().sendMessage(network.statusBuffer.getBufferInfo(), '/join ' + name);
         });
     };
 
     $scope.channelPart = function(channel) {
-        $quassel.sendMessage(channel.id, '/part');
+        $quassel.core().sendMessage(channel.getBufferInfo(), '/part');
     };
 
     $scope.channelJoin = function(channel) {
-        $quassel.sendMessage(channel.id, '/join ' + channel.name);
+        $quassel.core().sendMessage(channel.getBufferInfo(), '/join ' + channel.name);
     };
 
     $scope.channelDelete = function(channel) {
-        $quassel.requestRemoveBuffer(channel.id);
+        $quassel.core().removeBuffer(channel.id);
     };
 
     $scope.onDropComplete = function(dragged, dropped) {
@@ -411,21 +427,21 @@ angular.module('quassel')
             $alert.warn("Merging buffers from different networks is not supported");
         } else if (dragged.id !== dropped.id) {
             if (window.confirm("Do you want to merge buffer '" + dragged.name + "' into buffer '" + dropped.name + "' ?")) {
-                $quassel.requestMergeBuffersPermanently(dropped.id, dragged.id);
+                $quassel.core().mergeBuffersPermanently(dropped.id, dragged.id);
             }
         }
     };
 
     $scope.channelHidePermanently = function(channel) {
-        $quassel.requestHideBufferPermanently($scope.bufferView.id, channel.id);
+        $quassel.core().hideBufferPermanently($scope.bufferView.id, channel.id);
     };
 
     $scope.channelHideTemporarily = function(channel) {
-        $quassel.requestHideBufferTemporarily($scope.bufferView.id, channel.id);
+        $quassel.core().hideBufferTemporarily($scope.bufferView.id, channel.id);
     };
 
     $scope.channelUnhide = function(channel) {
-        $quassel.requestUnhideBuffer($scope.bufferView.id, channel.id);
+        $quassel.core().unhideBuffer($scope.bufferView.id, channel.id);
     };
     
     $scope.cycleHiddenState = function(channel) {
@@ -449,46 +465,49 @@ angular.module('quassel')
 
         modalInstance.result.then(function (name) {
             if (name) {
-                $quassel.requestRenameBuffer(buffer.id, name);
+                $quassel.core().renameBuffer(buffer.id, name);
             }
         });
     };
 
     $scope.userQuery = function(user) {
-        var network = $quassel.get().getNetworks().get($scope.buffer.network);
+        var network = $quassel.get().networks.get($scope.buffer.network);
         var buffer;
         if (network !== null) {
             buffer = network.getBuffer(user.nick);
-            if (buffer !== null) {
+            if (buffer) {
                 $scope.showBuffer(buffer);
             } else {
                 $quassel.once('network.addbuffer', function(networkId, bufferId) {
-                    network = $quassel.get().getNetworks().get(networkId);
+                    network = $quassel.get().networks.get(networkId);
                     buffer = network.getBuffer(bufferId);
-                    if (buffer !== null) {
+                    if (buffer) {
                         $scope.$apply(function(){
                             $scope.showBuffer(buffer);
                         });
                     }
                 });
-                $quassel.sendMessage($scope.buffer.id, '/query ' + user.nick);
+                $quassel.core().sendMessage($scope.buffer.getBufferInfo(), '/query ' + user.nick);
             }
         }
     };
     
     $scope.userClass = function(buffer, nick) {
         var uclass = '';
-        if (buffer.isOwner(nick)) uclass = 'user-owner';
-        else if (buffer.isAdmin(nick)) uclass = 'user-admin';
-        else if (buffer.isOp(nick)) uclass = 'user-op';
-        else if (buffer.isHalfOp(nick)) uclass = 'user-half-op';
-        else if (buffer.isVoiced(nick)) uclass = 'user-voiced';
+        if (buffer.hasUser(nick)) {
+            var bufferUser = buffer.users.get(nick);
+            if (bufferUser.isOwner) uclass = 'user-owner';
+            else if (bufferUser.isAdmin) uclass = 'user-admin';
+            else if (bufferUser.isOp) uclass = 'user-op';
+            else if (bufferUser.isHalfOp) uclass = 'user-half-op';
+            else if (bufferUser.isVoiced) uclass = 'user-voiced';
+        }
         return uclass;
     };
     
     $scope.whois = function(user) {
         if ($scope.buffer !== null) {
-            $quassel.sendMessage($scope.buffer.id, '/whois ' + user.nick);
+            $quassel.core().sendMessage($scope.buffer.getBufferInfo(), '/whois ' + user.nick);
         }
     };
     
@@ -520,7 +539,7 @@ angular.module('quassel')
     };
 })
 .controller('ModalAliasesInstanceCtrl', function ($scope, $uibModalInstance, aliases) {
-    var alias = require('alias');
+    var alias = libquassel.alias;
     $scope.aliases = aliases;
 
     $scope.ok = function () {
@@ -700,8 +719,8 @@ angular.module('quassel')
         $scope.selectServer(network, 0);
     };
     
-    $scope.supportSslVerify = $quassel.supports($quassel.Feature.VerifyServerSSL);
-    $scope.supportCustomRateLimits = $quassel.supports($quassel.Feature.CustomRateLimits);
+    $scope.supportSslVerify = $quassel.supports($quassel.Features.VERIFYSERVERSSL);
+    $scope.supportCustomRateLimits = $quassel.supports($quassel.Features.CUSTOMRATELIMITS);
     
     // At initialization, if we have no network, just add one so the user doesn't have an empty modal
     if ($scope.networks.length === 0) {
@@ -733,14 +752,15 @@ angular.module('quassel')
         $uibModalInstance.close([$scope.selectedBackend.DisplayName, properties, $scope.username, $scope.password]);
     };
 })
-.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', '$alert', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $alert) {
+.controller('ConfigController', ['$scope', '$uibModal', '$theme', '$ignore', '$quassel', '$config', '$alert', '$highlight', function($scope, $uibModal, $theme, $ignore, $quassel, $config, $alert, $highlight) {
     // $scope.activeTheme is assigned in the theme directive
     $scope.getAllThemes = $theme.getAllThemes;
     $scope.ignoreList = $ignore.getList();
     $scope.displayIgnoreListConfigItem = false;
     $scope.displayIdentitiesConfigItem = false;
+    $scope.displayHighlightConfigItem = false;
     $scope.activeIndice = 0;
-    var modal, dbg = require("debug"), alias = require('alias');
+    var modal, dbg = libquassel.debug, alias = libquassel.alias;
 
     $scope.setTheme = function(theme) {
         $scope.activeTheme = theme;
@@ -773,17 +793,17 @@ angular.module('quassel')
                     areEquals = angular.equals(identity, identities[i]);
                     if (!areEquals) {
                         // Update identity information
-                        $quassel.requestUpdateIdentity(identity.identityId, identities[i]);
+                        $quassel.core().updateIdentity(identity.identityId, identities[i]);
                         acount[1] = acount[1] + 1;
                     }
                 } else {
                     // Create the new identity
-                    $quassel.createIdentity(identities[i].identityName, identities[i]);
+                    $quassel.core().createIdentity(identities[i].identityName, identities[i]);
                     acount[0] = acount[0] + 1;
                 }
             }
             im.forEach(function(identity) {
-                $quassel.removeIdentity(identity.identityId);
+                $quassel.core().removeIdentity(identity.identityId);
                 acount[2] = acount[2] + 1;
             });
         });
@@ -812,7 +832,7 @@ angular.module('quassel')
                     return $quassel;
                 },
                 networks: function(){
-                    var networks = $quassel.get().getNetworksMap();
+                    var networks = $quassel.get().networks;
                     if (networks.__mapValuesData__) {
                         return angular.copy(networks.__mapValuesData__);
                     }
@@ -829,7 +849,7 @@ angular.module('quassel')
         });
 
         modalInstance.result.then(function (networks) {
-            var nm = new Map($quassel.get().getNetworksMap()), i=0, network, areEquals = false;
+            var nm = new Map($quassel.get().networks), i=0, network, areEquals = false;
             for (;i<networks.length; i++) {
                 if (typeof networks[i].networkId === 'number' && networks[i].networkId > -1) {
                     network = nm.get(networks[i].networkId);
@@ -837,16 +857,16 @@ angular.module('quassel')
                     areEquals = angular.equals(network, networks[i]);
                     if (!areEquals) {
                         // Update network information
-                        $quassel.requestSetNetworkInfo(network.networkId, networks[i]);
+                        $quassel.core().setNetworkInfo(network.networkId, networks[i]);
                     }
                 } else {
                     // Create the new network
-                    $quassel.createNetwork(networks[i].networkName, networks[i].identityId, undefined, networks[i]);
+                    $quassel.core().createNetwork(networks[i].networkName, networks[i].identityId, undefined, networks[i]);
                     // TODO Check networkName duplicates
                 }
             }
             nm.forEach(function(network) {
-                $quassel.removeNetwork(network.networkId);
+                $quassel.core().removeNetwork(network.networkId);
             });
         });
     };
@@ -867,7 +887,7 @@ angular.module('quassel')
             }, function() {
                 $alert.error('Fail to save aliases');
             });
-            $quassel.requestUpdateAliasManager(alias.toCoreObject(aliases));
+            $quassel.core().updateAliasManager(alias.toCoreObject(aliases));
         });
     };
 
@@ -876,6 +896,15 @@ angular.module('quassel')
         $scope.activeIndice = 0;
         modal = $uibModal.open({
             templateUrl: 'modalIgnoreList.html',
+            scope: $scope,
+        });
+    };
+    
+    $scope.configHighlightRules = function() {
+        $scope.highlightManager = $highlight.getManager();
+        $scope.activeIndice = 0;
+        modal = $uibModal.open({
+            templateUrl: 'modalHighlightRuleManager.html',
             scope: $scope,
         });
     };
@@ -958,10 +987,37 @@ angular.module('quassel')
         $ignore.deleteItem($scope.activeIndice);
         $scope.ignoreList = $ignore.getList();
     };
+    
+    $scope.createHighlightRule = function() {
+        $highlight.createRule();
+        $scope.highlightManager = $highlight.getManager();
+    };
+    
+    $scope.deleteSelectedHighlightRule = function() {
+        $highlight.deleteRule($scope.activeIndice);
+        $scope.highlightManager = $highlight.getManager();
+    };
+    
+    $scope.cancelHighlightManager = function() {
+        $highlight.restoreSavedManager();
+        modal.dismiss('close');
+    };
+
+    $scope.saveHighlightManager = function() {
+        $highlight.setManager($scope.highlightManager);
+        $highlight.save();
+        modal.dismiss('close');
+    };
 
     $quassel.once('ignorelist', function(list) {
         $scope.$apply(function(){
             $scope.displayIgnoreListConfigItem = true;
+        });
+    });
+    
+    $quassel.once('highlightrules', function(list) {
+        $scope.$apply(function(){
+            $scope.displayHighlightConfigItem = true;
         });
     });
     
@@ -1155,7 +1211,7 @@ angular.module('quassel')
     
     $quassel.once('bufferview.ids', function(ids) {
         if (!ids || ids.length === 0) {
-            $quassel.requestCreateBufferView({
+            $quassel.core().createBufferView({
                 sortAlphabetically: 1,
                 showSearch: 0,
                 networkId: 0,
@@ -1241,7 +1297,7 @@ angular.module('quassel')
     var MAX_CIRCULARBUFFER_SIZE = 50;
     var messagesHistory = new Map;
     var messagesHistoryGlobal = new CircularBuffer(MAX_CIRCULARBUFFER_SIZE * 10);
-    var MT = require('message').Type;
+    var MT = libquassel.message.Types;
 
     $scope.inputmessage = '';
     $scope.nick = null;
@@ -1408,7 +1464,7 @@ angular.module('quassel')
                 if (lines && lines.length > 0) {
                     $scope.cleanMessageHistory($scope.buffer.id);
                     for (var idx in lines) {
-                        $quassel.sendMessage($scope.buffer.id, lines[idx]);
+                        $quassel.core().sendMessage($scope.buffer.getBufferInfo(), lines[idx]);
                     }
                     $scope.addMessageHistory($scope.inputmessage, $scope.buffer.id);
                     $scope.inputmessage = '';
@@ -1525,7 +1581,7 @@ angular.module('quassel')
         var valid = false;
         if (newValue !== null) {
             if (typeof newValue.network === "number") {
-                var network = $quassel.get().getNetworks().get(newValue.network);
+                var network = $quassel.get().networks.get(newValue.network);
                 if (network) {
                     $scope.nick = network.nick;
                     valid = true;
