@@ -1,8 +1,12 @@
+sudo: true
 dist: xenial
+service:
+- docker
 notifications:
   irc: chat.freenode.net#quassel-webserver
 script:
 - if [ ! -z "$TRAVIS_TAG" ]; then sed -i s/version:\ master/version:\ \'${TRAVIS_TAG}\'/g snapcraft.yaml; fi
+- docker run -v $(pwd):/cwd snapcore/snapcraft sh -c 'apt update -qq && apt install snapcraft -y && cd /cwd && snapcraft'
 deploy:
 - provider: snap
   on:
