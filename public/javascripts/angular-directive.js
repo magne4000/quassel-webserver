@@ -74,6 +74,7 @@ angular.module('quassel')
                 shouldCompile = false;
                 break;
             case MT.ACTION:
+            case MT.NOTICE:
             case MT.PLAIN:
                 content = $filter('linky')(message.content, '_blank', {'class': 'check-embed'});
                 content = $filter('color')(content);
