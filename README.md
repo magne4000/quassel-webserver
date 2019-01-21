@@ -157,5 +157,5 @@ It means that quassel-webserver has been killed prematurely. You just have to ma
 `#quassel-webserver` on Freenode
 
 ## License
-Copyright (c) 2014-2016 Joël Charles  
+Copyright (c) 2019 Joël Charles  
 Licensed under the MIT license.
