@@ -31,7 +31,6 @@
       this.login = '';
       this.password = '';
       this.ws = null;
-      this._ws_cb = [];
       var self = this;
       
       var service = {
@@ -62,7 +61,7 @@
         self.login = _login;
         self.password = _password;
         
-        self.ws.socket.send(JSON.stringify({
+        self.ws.write(JSON.stringify({
           server: _server,
           port: _port,
         }));
@@ -84,7 +83,6 @@
         if (self.quassel === null) {
           self.quassel = new Quassel(function(next) {
             next(self.login, self.password);
-            triggerWebsocketBindings();
           }, {
             initialbackloglimit: $config.get('initialBacklogLimit', 20),
             backloglimit: $config.get('backlogLimit', 50),
@@ -115,8 +113,7 @@
         }
         
         if (name.substr(0, 3) == "ws.") {
-          self._ws_cb.push({name: name.substr(3), callback: callback, active: false});
-          triggerWebsocketBindings();
+          self.ws.on(name.substr(3), callback);
         } else {
           self.quassel.on(name, angularCallback(callback));
         }
@@ -136,7 +133,7 @@
       function removeListener(name, cb) {
         initializeSocket();
         if (name.substr(0, 3) == "ws.") {
-          self.ws.removeEventListener(name.substr(3), cb);
+          self.ws.removeListener(name.substr(3), cb);
         } else {
           self.quassel.removeListener(name, cb);
         }
@@ -185,18 +182,6 @@
       
       function login() {
         self.quassel.login();
-      }
-      
-      function triggerWebsocketBindings() {
-        if (self.ws !== null) {
-          var i = 0;
-          for (; i<self._ws_cb.length; i++) {
-            if (self._ws_cb[i].active === false) {
-              self.ws['on'+self._ws_cb[i].name] = self._ws_cb[i].callback;
-              self._ws_cb[i].active = true;
-            }
-          }
-        }
       }
       
       function onceWithTimeout(name, timeout, callbackSuccess, callbackError) {

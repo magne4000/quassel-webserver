@@ -1124,13 +1124,17 @@ angular.module('quassel')
         });
     });
 
-    $quassel.on('ws.close', function() {
+    $quassel.on('ws.end', function() {
         console.log('DISCONNECTED');
-        $quassel.disconnect();
         $scope.$apply(function(){
             $scope.connecting = false;
             $scope.disconnected = true;
         });
+        try {
+            $quassel.disconnect();
+        } catch (e) {
+            console.warn(e);
+        }
     });
 
     $quassel.on('loginfailed', function() {
