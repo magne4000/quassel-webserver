@@ -355,7 +355,7 @@ angular.module('quassel')
             if ($responsive.getBreakpoint() !== 'xs') {
                 $('#messagebox').focus();
             }
-            $quassel.markBufferAsRead(channel.id, channel._lastMessageId);
+            $quassel.markBufferAsRead(channel.id, channel.lastMessageId);
             
             // Empty backlogs if configured so
             if ($config.get('emptybufferonswitch', false)) {

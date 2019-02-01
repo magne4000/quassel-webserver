@@ -1,7 +1,7 @@
 {
   "name": "quassel-webserver",
   "description": "Quassel web interface",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "homepage": "https://github.com/magne4000/quassel-webserver",
   "license": "MIT",
   "author": {
