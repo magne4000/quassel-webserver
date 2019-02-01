@@ -158,9 +158,9 @@
       }
       
       function markBufferAsRead(bufferId, lastMessageId) {
-        self.quassel.requestSetLastMsgRead(bufferId, lastMessageId);
-        self.quassel.requestMarkBufferAsRead(bufferId);
-        self.quassel.requestSetMarkerLine(bufferId, lastMessageId);
+        self.quassel.core.setLastMsgRead(bufferId, lastMessageId);
+        self.quassel.core.markBufferAsRead(bufferId);
+        self.quassel.core.setMarkerLine(bufferId, lastMessageId);
       }
       
       function moreBacklogs(bufferId, firstMessageId) {

@@ -281,11 +281,11 @@ angular.module('quassel')
         if (buffer) {
             var message = buffer.messages.get(parseInt(messageId, 10));
             if ($scope.buffer !== null && buffer.id === $scope.buffer.id && $wfocus.isFocus()) {
-                $quassel.core().markBufferAsRead(bufferId, messageId);
+                $quassel.markBufferAsRead(bufferId, messageId);
             } else {
                 if (!$wfocus.isFocus() && $scope.buffer !== null && buffer.id === $scope.buffer.id) {
                     $wfocus.onNextFocus(function(){
-                        $quassel.core().markBufferAsRead(bufferId, messageId);
+                        $quassel.markBufferAsRead(bufferId, messageId);
                     });
                 }
                 if (updateBufferHighlightOnMessage(buffer, message) === 'high') {
@@ -355,7 +355,7 @@ angular.module('quassel')
             if ($responsive.getBreakpoint() !== 'xs') {
                 $('#messagebox').focus();
             }
-            $quassel.core().markBufferAsRead(channel.id, channel._lastMessageId);
+            $quassel.markBufferAsRead(channel.id, channel._lastMessageId);
             
             // Empty backlogs if configured so
             if ($config.get('emptybufferonswitch', false)) {
