@@ -134,6 +134,9 @@ location /quassel {
 
 #### Apache
 You will need mod_proxy_wstunnel and mod_rewrite.
+
+To proxy to a server over TCP:
+
 ```apache
 <VirtualHost ...>
 ...
@@ -145,7 +148,23 @@ ProxyPass /quassel http://127.0.0.1:64080/quassel
 ...
 </VirtualHost>
 ```
-Apache doesn't support yet reverse proxying unix socket with http+websocket backend.
+
+or to proxy to a unix domain socket:
+
+```apache
+<VirtualHost ...>
+  RewriteEngine On
+  <Location /quassel>
+    RewriteCond %{HTTP:UPGRADE} ^WebSocket$ [NC]
+    RewriteCond %{HTTP:CONNECTION} Upgrade$ [NC]
+    RewriteRule .* unix:///var/run/quasselweb.socket|ws://localhost/quassel/$1 [P,L,NE]
+
+    ProxyPass unix:///var/run/quasselweb.socket|http://localhost/quassel
+  </Location>
+</VirtualHost>
+```
+
+(Note that you need the [NE] flag to prevent the "|" from being escaped)
 
 ### Troubleshooting
 #### Slow buffer display after some time
