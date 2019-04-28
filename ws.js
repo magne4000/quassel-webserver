@@ -27,13 +27,13 @@ module.exports = function(server, settings) {
             // First message is the information about the target server
             var { server, port } = JSON.parse(targetInfo);
             
-            if (settings.forcedefault) {
-                server = settings.default.host;
-                port = settings.default.port;
+            if (settings.val.forcedefault) {
+                server = settings.val.default.host;
+                port = settings.val.default.port;
             }
             
             const socket = createSocket(server, port, (err) => {
-                if (err) return ws.send(err);
+                if (err) return ws.send(err.toString());
             });
             
             ws.on('message', function (data) {
