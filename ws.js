@@ -17,7 +17,7 @@ function createSocket(host, port, callback) {
     return socket;
 }
 
-module.exports = function(server) {
+module.exports = function(server, settings) {
     const wss = new WebSocket.Server({
         server: server
     });
@@ -25,10 +25,15 @@ module.exports = function(server) {
     wss.on('connection', function connection(ws, req) {
         ws.once('message', function incoming(targetInfo) {
             // First message is the information about the target server
-            const { server, port } = JSON.parse(targetInfo);
+            var { server, port } = JSON.parse(targetInfo);
+            
+            if (settings.val.forcedefault) {
+                server = settings.val.default.host;
+                port = settings.val.default.port;
+            }
             
             const socket = createSocket(server, port, (err) => {
-                if (err) return ws.send(err);
+                if (err) return ws.send(err.toString());
             });
             
             ws.on('message', function (data) {

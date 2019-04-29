@@ -167,7 +167,7 @@ if (app.get('env') === 'development') {
     });
 }
 
-ws(server);
+ws(server, settings);
 
 if (app.get('socket')) {
     var socket = app.get('socket');
