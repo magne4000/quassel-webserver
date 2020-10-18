@@ -108,6 +108,27 @@ angular.module('quassel')
         return messages;
     }
 
+    function checkURLOptions() {
+        let fragments = window.location.hash.substr(1).split("&");
+        let wantedChannelName = "";
+        let wantedNetworkName = "";
+        fragments.forEach(function(fragment){
+            let option = fragment.split("=");
+            if(typeof option[1] !== 'undefined'){
+                if(option[0] === "channel") wantedChannelName = option[1];
+                if(option[0] === "network") wantedNetworkName = option[1];
+            }
+        });
+
+        $scope.networks.forEach(function(network){
+            if(network.networkName === wantedNetworkName){
+                network._buffers.forEach(function(channel){
+                    if(channel.name === wantedChannelName) $scope.showBuffer(channel);
+                });
+            }
+        });
+    }
+
     $quassel.on('init', function(obj) {
         $scope.networkscount = obj.SessionState.NetworkIds.length;
         $scope.networks = [];
@@ -119,6 +140,7 @@ angular.module('quassel')
             network.collapsed = !network.isConnected;
             $scope.networks.push(network);
             $scope.networkscount = $scope.networks.length;
+            checkURLOptions();
         });
     });
     
