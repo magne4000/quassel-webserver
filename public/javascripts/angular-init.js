@@ -157,7 +157,7 @@ angular.module('quassel', ['ngQuassel', 'ngAria', 'ngSanitize', 'ui.bootstrap', 
             set('port', data.settings.port);
             set('initialBacklogLimit', data.settings.initialBacklogLimit);
             set('backlogLimit', data.settings.backlogLimit);
-            set('securecore', data.settings.securecore || true);
+            set('securecore', (typeof data.settings.securecore === 'boolean' ? data.settings.securecore : true));
             set('theme', data.settings.theme);
             set('perchathistory', data.settings.perchathistory);
             set('displayfullhostmask', data.settings.displayfullhostmask);
