@@ -45,7 +45,7 @@
     "pug": "^2.0.0-beta11",
     "serve-favicon": "~2.5.0",
     "untildify": "^3.0.2",
-    "ws": "^6.1.2"
+    "ws": "^7.4.6"
   },
   "optionalDependencies": {
     "httpolyglot": "~0.1.2"
