@@ -1,3 +1,5 @@
+⚠️ This project is not actively maintained
+
 # quassel-webserver
 A web client for Quassel (requires a running quasselcore)
 
