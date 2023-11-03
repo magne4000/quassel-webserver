@@ -1,3 +1,5 @@
+⚠️ This project is not actively maintained
+
 # quassel-webserver
 A web client for Quassel (requires a running quasselcore)
 
@@ -14,7 +16,7 @@ To install node last version, you can install [nvm](https://github.com/creationi
 
 ### Installation
 
-With git:
+**With git:**
 
 ```sh
 git clone https://github.com/magne4000/quassel-webserver.git
@@ -22,12 +24,24 @@ cd quassel-webserver
 npm install --production
 ```
 
-With snap, in any of the [supported Linux distributions](http://snapcraft.io/docs/core/install#ubuntu):
+**With snap:**  
+in any of the [supported Linux distributions](http://snapcraft.io/docs/core/install#ubuntu):
 (Note that this is not yet stable)
 
 ```sh
 snap install quassel-webserver --candidate
 ```
+
+**On NixOS:**  
+There is a NixOS module available in NixOS 17.03 and above. Just add these lines to your /etc/nixos/configuration.nix
+
+```nix
+  services.quassel-webserver = {
+    enable = true;
+  };
+```
+
+For more configuration options in NixOS check out `man configuration.nix`.
 
 ### Development
 Get the code and install the server with: 
