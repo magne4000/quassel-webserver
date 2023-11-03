@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import express from 'express';
 import path from "path";
 import { fileURLToPath } from 'url';
@@ -211,9 +213,4 @@ export class QuasselWebserverApp {
     }
 }
 
-if (!module.parent) {
-    // I'm parent
-    new QuasselWebserverApp();
-} else {
-    // I'm child
-}
+new QuasselWebserverApp();
