@@ -4,3 +4,5 @@ node_modules
 npm-debug.log
 .c9
 settings-user.js
+settings-user.cjs
+.idea

@@ -21,12 +21,13 @@
       "url": "https://github.com/magne4000/quassel-webserver/blob/master/LICENSE-MIT"
     }
   ],
+  "type": "module",
   "scripts": {
-    "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www -m http -p 64111"
+    "start": "node bin/www.js",
+    "dev": "nodemon bin/www.js -m http -p 64111"
   },
   "engines": {
-    "node": ">= 6"
+    "node": ">= 16"
   },
   "keywords": [
     "quassel",
@@ -34,23 +35,24 @@
     "quassel-webserver"
   ],
   "dependencies": {
-    "body-parser": "^1.16.0",
-    "commander": "^2.9.0",
-    "cookie-parser": "~1.4.3",
-    "express": "^4.14.1",
-    "less": "^3.9.0",
+    "body-parser": "^1.20.2",
+    "commander": "^11.1.0",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.2",
+    "less": "^4.2.0",
     "less-middleware": "^3.1.0",
     "libquassel": "~3.1.5",
-    "morgan": "^1.8.0",
-    "pug": "^2.0.0-beta11",
+    "morgan": "^1.10.0",
+    "pug": "^3.0.2",
+    "resolve-esm": "^2.0.3",
     "serve-favicon": "~2.5.0",
-    "untildify": "^3.0.2",
-    "ws": "^6.1.2"
+    "untildify": "^5.0.0",
+    "ws": "^8.14.2"
   },
   "optionalDependencies": {
-    "httpolyglot": "~0.1.2"
+    "@httptoolkit/httpolyglot": "^2.1.1"
   },
   "devDependencies": {
-    "nodemon": "^1.17.1"
+    "nodemon": "^3.0.1"
   }
 }
