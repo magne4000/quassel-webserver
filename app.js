@@ -139,10 +139,10 @@ export class QuasselWebserverApp {
             this.app.use(this.settings.val.prefixpath, lessMiddleware(path.join(__dirname, 'public')));
         }
         this.app.get(this.settings.prefix('/javascripts/libquassel.js'), function (req, res) {
-            res.sendFile(importMetaResolve('libquassel/dist/libquassel.js').replace('file://', '/'));
+            res.sendFile(importMetaResolve('@binsky/libquassel/dist/libquassel.js').replace('file://', '/'));
         });
         this.app.get(this.settings.prefix('/javascripts/libquassel.js.map'), function (req, res) {
-            res.sendFile(importMetaResolve('libquassel/dist/libquassel.js.map').replace('file://', '/'));
+            res.sendFile(importMetaResolve('@binsky/libquassel/dist/libquassel.js.map').replace('file://', '/'));
         });
         if (this.settings.val.prefixpath.length > 0) {
             this.app.use(this.settings.val.prefixpath, express.static(path.join(__dirname, 'public')));
