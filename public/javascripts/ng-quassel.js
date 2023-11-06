@@ -20,8 +20,8 @@
 
   function socketProvider() {
     const WebSocketStream = libquassel.WebSocketStream;
-    var Quassel = libquassel.Client;
-    
+    const Quassel = libquassel.Client;
+
     this.$get = ['$config', socketFactory];
 
     function socketFactory($config) {
@@ -31,9 +31,9 @@
       this.login = '';
       this.password = '';
       this.ws = null;
-      var self = this;
-      
-      var service = {
+      const self = this;
+
+      return {
         addListener: addListener,
         on: addListener,
         once: addListenerOnce,
@@ -53,20 +53,18 @@
         core: core
       };
 
-      return service;
-      
       function setServer(_server, _port, _login, _password) {
         self.server = _server;
         self.port = _port;
         self.login = _login;
         self.password = _password;
-        
+
         self.ws.write(JSON.stringify({
           server: _server,
           port: _port,
         }));
       }
-      
+
       function getWebsocketURL() {
         const protocol = 'ws' + (window.location.protocol === 'https:' ? 's' : '');
         const hostname = window.location.hostname;
@@ -74,7 +72,7 @@
         const pathname = window.location.pathname;
         return protocol +  '://' + hostname + ':' + port + pathname;
       }
-      
+
       function getQuassel() {
         return self.quassel;
       }
@@ -98,8 +96,7 @@
       function angularCallback(callback) {
         return function () {
           if (callback) {
-            var args = arguments;
-            callback.apply(self.quassel, args);
+            callback.apply(self.quassel, arguments);
           }
         };
       }
@@ -111,9 +108,9 @@
           scope = null;
           callback = arguments[1];
         }
-        
-        if (name.substr(0, 3) == "ws.") {
-          self.ws.on(name.substr(3), callback);
+
+        if (name.substring(0, 3) === "ws.") {
+          self.ws.on(name.substring(3), callback);
         } else {
           self.quassel.on(name, angularCallback(callback));
         }
@@ -132,8 +129,8 @@
 
       function removeListener(name, cb) {
         initializeSocket();
-        if (name.substr(0, 3) == "ws.") {
-          self.ws.removeListener(name.substr(3), cb);
+        if (name.substring(0, 3) === "ws.") {
+          self.ws.removeListener(name.substring(3), cb);
         } else {
           self.quassel.removeListener(name, cb);
         }
@@ -152,41 +149,41 @@
           self.quassel.emit.apply(self.quassel, Array.prototype.slice.call(arguments));
         }
       }
-      
+
       function supports(feature) {
         return self.quassel.supports(feature);
       }
-      
+
       function markBufferAsRead(bufferId, lastMessageId) {
         self.quassel.core.setLastMsgRead(bufferId, lastMessageId);
         self.quassel.core.markBufferAsRead(bufferId);
         self.quassel.core.setMarkerLine(bufferId, lastMessageId);
       }
-      
+
       function moreBacklogs(bufferId, firstMessageId) {
         self.quassel.core.backlog(bufferId, -1, firstMessageId, 50);
       }
-      
+
       function core() {
         return self.quassel.core;
       }
-      
+
       function connect() {
         initializeSocket();
         self.quassel.connect(self.ws);
       }
-      
+
       function disconnect() {
         self.quassel.disconnect();
       }
-      
+
       function login() {
         self.quassel.login();
       }
-      
+
       function onceWithTimeout(name, timeout, callbackSuccess, callbackError) {
-        var timeoutId = null;
-        var callbackSuccessIntern = function() {
+        let timeoutId = null;
+        const callbackSuccessIntern = function() {
           clearTimeout(timeoutId);
           callbackSuccess();
         };
