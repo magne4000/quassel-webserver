@@ -3,7 +3,7 @@
 # quassel-webserver
 A web client for Quassel (requires a running quasselcore)
 
-:exclamation: Your node version should be at least v6.x (v6 through v10 are supported).
+:exclamation: Your node version should be at least v16 (v20 recommended).
 To install node last version, you can install [nvm](https://github.com/creationix/nvm).
 
 ### Screenshots
@@ -61,12 +61,12 @@ and run the following command: `node app.js`
 The server is now running.
 
 #### Settings
-It is recommended to copy settings.js file to a new settings-user.js file
+It is recommended to copy settings.cjs file to a new settings-user.cjs file
 ```
-cp settings.js settings-user.js
+cp settings.cjs settings-user.cjs
 ```
-File `settings-user.js` can then be modified to specify default quasselcore `host` and `port`.  
-All available settings are described in `settings.js` file.
+File `settings-user.cjs` can then be modified to specify default quasselcore `host` and `port`.  
+All available settings are described in `settings.cjs` file.
 
 #### Certificate
 You must use your own certificate for https mode. The key file is located at ssl/key.pem, and the certificate ssl/cert.pem.
@@ -117,7 +117,7 @@ This tells the webserver to run in `http` mode, and to listen on port `64080`.
 This way you can let your `apache` or `nginx` server handle the SSL layer.
 
 #### Reverse proxy on https://your.tld/quassel
-If you run behind `/quassel` location on your webserver, do not forget to edit `settings-user.js` file
+If you run behind `/quassel` location on your webserver, do not forget to edit `settings-user.cjs` file
 ```json
 ...
 prefixpath: '/quassel',
@@ -183,7 +183,7 @@ or to proxy to a unix domain socket:
 ### Troubleshooting
 #### Slow buffer display after some time
 This is a [known issue](https://github.com/magne4000/quassel-webserver/issues/83) but there is a workaround:
- * go to the `General Configuration` and check `Trim buffer when switching to another buffer`. This is also configurable in `settings-user.js` file (see `settings.js`)
+ * go to the `General Configuration` and check `Trim buffer when switching to another buffer`. This is also configurable in `settings-user.cjs` file (see `settings.cjs`)
 
 #### In socket mode : Error: listen EADDRINUSE
 It means that quassel-webserver has been killed prematurely. You just have to manually delete `<path/to/qws.run>` file.
