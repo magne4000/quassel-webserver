@@ -25,9 +25,9 @@ const __dirname = path.dirname(__filename);
 
 export class QuasselWebserverApp {
     constructor() {
-        this.opts = new Command();
-        this.opts.version(pjson.version);
-        this.opts
+        const program = new Command();
+        program.version(pjson.version);
+        program
             .option('-c, --config <value>', 'Path to configuration file', undefined)
             .option('-s, --socket <path>', 'listen on local socket. If this option is set, --listen, --port and --mode are ignored', undefined)
             .option('-l, --listen <value>', 'listening address [0.0.0.0]', undefined)
@@ -35,6 +35,7 @@ export class QuasselWebserverApp {
             .option('-m, --mode <value>', 'http mode (http|https) [https]', undefined)
             .parse(process.argv);
 
+        this.opts = program.opts()
 
         this.settings = new Settings();
         this.settings.init(true, this.opts.config).then(() => {
